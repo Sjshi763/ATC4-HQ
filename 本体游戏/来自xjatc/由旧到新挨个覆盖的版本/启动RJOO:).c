@@ -13,6 +13,9 @@
 #include <iostream>
 #include <unistd.h>
 #include <limits.h>
+#include <locate> //不知道为啥要这个头文件
+//听说是因为要输出中文
+#include <string>
 char A;
 /*定义一个变量为A它可以存储字母和数字*/
 char A = 'sb'
@@ -20,7 +23,7 @@ char A = 'sb'
 char B
 //和前面差不多，为了存点东西所以搞了个变量，并且他现在是SB
 char B = 'sb'
-/*分界线*/
+/*警告⚠️ 分界线*/
 /*孩子
 后面的代码我自己还在思考是什么
 ai写的
@@ -41,12 +44,10 @@ int main() {
                                                                 GetModuleFileNameW(NULL, dynamicFilename, result);
                                                                         std::wcout << L"程序位置（动态分配）：" << dynamicFilename << std::endl;
                                                                                 delete[] dynamicFilename;
-                                                                                        return 1;
+                                                                       return 1;
                                                                                             } else {
                                                                                                     std::wcout << L"程序位置：" << filename << std::endl;
                                                                                                         }
 
                                                                                                             return 0;
                                                                                                             }
-char C
-char C = 'sb'
