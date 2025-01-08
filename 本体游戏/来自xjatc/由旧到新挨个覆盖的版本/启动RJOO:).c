@@ -7,3 +7,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <limits.h>
+char A;
+/*定义一个变量为A它可以存储字母和数字*/
+char A = 'sb'
+//这个变量我把它初始化了，他现在是
