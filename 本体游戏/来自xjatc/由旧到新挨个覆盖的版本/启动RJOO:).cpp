@@ -24,6 +24,16 @@ but看起来不错
 我会先学习下面的代码是什么意思
 然后变成自己的东西*/
 int main() {
+    cout << ''孩子，我是作者虽然但是，我现在要获取这个程序在哪里，但是我不知道这会不会侵犯你的隐私，所以我想听一听你的意见'' <<endl
+    cout << ''输入0告诉本高级玩家你不接受我找到你的程序在哪里（在这样的情况下你要自己输入我的位置）''<< endl
+    cout << ''输入1告诉夜你同意力'' << endl
+//后面这里是为了判断是否同意，然后搞两套程序 判断用的bool变量为A 同时为了分辨
+//我们用int变量B看看用户会不会输入一些奇奇怪怪的东西
+//让int判断用户输入 bool判断该咋做
+//不过我发现int就够了没必要再搞个bool
+    int A ;
+    cin >> A
+    if (A = 1) {
     wchar_t filename[MAX_PATH]; // 定义一个足够大的缓冲区
         DWORD result = GetModuleFileNameW(NULL, filename, MAX_PATH); // 获取当前程序路径
 
@@ -41,9 +51,16 @@ int main() {
                                                                                             } else {
                                                                                                     std::wcout << L"程序位置：" << filename << std::endl;
                                                                                                         }
+    }
+    else if (A = 0) {
 
-                                                                                                            return 0;
-                                                                                                            }
+    }
+    else{
+        cout<<''不是哥们你输入''<<A <<''干什么？byd爷报错了！这下好了吧？滚去重启！''
+        return 0
+    }
+    return 0
+}
 /*现在文件位置应该在缓冲区
 那么我们要把缓冲区的路径给放到一个变量里让第二个东西调用
 发现它会输出到控制台
