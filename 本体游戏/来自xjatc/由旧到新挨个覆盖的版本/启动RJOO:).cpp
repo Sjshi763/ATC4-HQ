@@ -13,7 +13,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <limits.h>
-#include <locate> //不知道为啥要这个头文件
+//#include <locate> //不知道为啥要这个头文件
 //听说是因为要输出中文
 #include <string>
 /*警告⚠️ 分界线*/
@@ -31,6 +31,7 @@ int main() {
 //我们用int变量B看看用户会不会输入一些奇奇怪怪的东西
 //让int判断用户输入 bool判断该咋做
 //不过我发现int就够了没必要再搞个bool
+//那就直接int A吧！
     int A ;
     cin >> A
     if (A = 1) {
@@ -50,10 +51,11 @@ int main() {
                                                                        return 1;
                                                                                             } else {
                                                                                                     std::wcout << L"程序位置：" << filename << std::endl;
+                                                                                                    return 0
                                                                                                         }
     }
     else if (A = 0) {
-
+   return 0
     }
     else{
         cout<<''不是哥们你输入''<<A <<''干什么？byd爷报错了！这下好了吧？滚去重启！''
