@@ -17,5 +17,5 @@ namespace master {
 }
 int main() {
     using namespace std;
-    cout << master::A;
+    cout <<'欢迎使用ATC4启动RJOO辅助程序'<<endl;
 }
