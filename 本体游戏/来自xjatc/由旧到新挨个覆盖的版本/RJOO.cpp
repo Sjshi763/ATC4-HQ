@@ -11,11 +11,15 @@
 //4.复制到根目录
 #include <iostream>
 //个人没看过这个文件不知道干啥的，后人如果知道请补一下谢谢
+#include <windows.h>
+//这个头文件是为了输出中文字符
 #include <stdio.h>
 namespace master {
     int A = 0;
 }
 int main() {
+    SetConsoleOutputCP(65001);
     using namespace std;
     cout <<'欢迎使用ATC4启动RJOO辅助程序'<<endl;
+    return 0;
 }
