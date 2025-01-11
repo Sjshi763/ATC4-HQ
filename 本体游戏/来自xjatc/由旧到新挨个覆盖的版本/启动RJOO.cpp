@@ -8,4 +8,7 @@
 //4.复制到根目录
 #include <iostream>
 //个人没看过这个文件不知道干啥的，后人如果知道请补一下谢谢
-#include ''master.h''
+#include <master.h>
+int main() {
+    using namespace master;
+}
