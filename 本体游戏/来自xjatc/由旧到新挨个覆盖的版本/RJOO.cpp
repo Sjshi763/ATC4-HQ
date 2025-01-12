@@ -20,6 +20,6 @@ namespace master {
 int main() {
     SetConsoleOutputCP(65001);
     using namespace std;
-    cout <<'欢迎使用ATC4启动RJOO辅助程序'<<endl;
+    cout << "欢迎使用ATC4启动RJOO辅助程序" << endl;
     return 0;
 }
