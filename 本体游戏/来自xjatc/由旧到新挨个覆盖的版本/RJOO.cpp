@@ -14,12 +14,29 @@
 #include <windows.h>
 //这个头文件是为了输出中文字符
 #include <stdio.h>
+//这个和前面一样不知道
 namespace master {
     int A = 0;
 }
+//这是一个命名空间master是项目主人的
+//后人要是要来那就再搞一个命名空间再加入吧！
 int main() {
     SetConsoleOutputCP(65001);
-    using namespace std;
-    cout << "欢迎使用ATC4启动RJOO辅助程序" << endl;
+    //这是为了输出中文 所以改cmd的编码格式为utf8
+    std::cout << "欢迎使用ATC4启动RJOO辅助程序" << std::endl;
+    std::cout << "爷会获取你的目录，就是这个程序在哪里" << std::endl;
+    std::cout << "不过你看到也来不及力" << std::endl;
+    std::cout << "不过你要是介意直接关掉它吧" << std::endl;
+    std::cout << "我们不会存储你的信息，我也没钱存" << std::endl;
+    using namespace master
+    TCHAR B [MAX_PATH];
+    //定义TCHAR的缓冲区 B
+    DWORD length = GetModuleFileName(NULL, B ,MAX_PATH);
+    if (length > 0) {
+        std::wcout << L"w"<< B << std::endl;
+    }
+    else {
+        std::cerr << L"不对啊，应该成功的啊" << std: endl;
+    }
     return 0;
 }
