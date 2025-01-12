@@ -26,17 +26,15 @@ int main() {
     std::cout << "欢迎使用ATC4启动RJOO辅助程序" << std::endl;
     std::cout << "爷会获取你的目录，就是这个程序在哪里" << std::endl;
     std::cout << "不过你看到也来不及力" << std::endl;
-    std::cout << "不过你要是介意直接关掉它吧" << std::endl;
     std::cout << "我们不会存储你的信息，我也没钱存" << std::endl;
-    using namespace master
-    TCHAR B [MAX_PATH];
+    TCHAR B[MAX_PATH];
     //定义TCHAR的缓冲区 B
     DWORD length = GetModuleFileName(NULL, B ,MAX_PATH);
     if (length > 0) {
         std::wcout << L"w"<< B << std::endl;
     }
     else {
-        std::cerr << L"不对啊，应该成功的啊" << std: endl;
+        std::cerr << L"不对啊，应该成功的啊" << std::endl;
     }
     return 0;
 }
