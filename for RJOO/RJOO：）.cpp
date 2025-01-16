@@ -23,6 +23,7 @@ namespace master {
 int main() {
     SetConsoleOutputCP(65001);
     //这是为了输出中文 所以改cmd的编码格式为utf8
+    using namespace master;
     std::cout << "欢迎使用ATC4启动RJOO辅助程序" << std::endl;
     std::cout << "爷会获取你的目录，就是这个程序在哪里" << std::endl;
     std::cout << "不过你看到也来不及力" << std::endl;
