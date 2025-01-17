@@ -16,7 +16,8 @@
 #include <stdio.h>
 //这个和前面一样不知道
 namespace master {
-    int A = 0;
+    int* A = NULL;
+    //定义一个空指针A用来在不对劲的时候把自己干崩
 }
 //这是一个命名空间master是项目主人的
 //后人要是要来那就再搞一个命名空间再加入吧！
@@ -37,7 +38,8 @@ int main() {
     }
     else {
         std::cerr << L"不对啊，应该成功的啊" << std::endl;
-        return 0;
+        std::cout << "不管了！先报错！爷要崩溃乐！" <<std::endl;
+        std::cout << *A << std::endl;
     }
     return 0;
 }
