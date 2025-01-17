@@ -16,7 +16,7 @@
 #include <stdio.h>
 //这个和前面一样不知道
 namespace master {
-    int* A = NULL;
+    int *A = NULL;
     //定义一个空指针A用来在不对劲的时候把自己干崩
 }
 //这是一个命名空间master是项目主人的
