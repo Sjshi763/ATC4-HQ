@@ -40,6 +40,7 @@ int main() {
         std::cerr << L"不对啊，应该成功的啊" << std::endl;
         std::cout << "不管了！先报错！爷要崩溃乐！" <<std::endl;
         std::cout << *A << std::endl;
+        //访问空指针，然后直接给崩吧！
     }
     return 0;
 }
