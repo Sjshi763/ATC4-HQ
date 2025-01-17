@@ -35,6 +35,7 @@ int main() {
     //不知道原理，但是会调用这个函数到B缓冲区
     if (length > 0) {
         std::wcout << L"我去，也是成功获取地址力"<< B << std::endl;
+        std::cout << "byd下一步！！" << std::endl;
     }
     else {
         std::cerr << L"不对啊，应该成功的啊" << std::endl;
