@@ -37,6 +37,7 @@ int main() {
     }
     else {
         std::cerr << L"不对啊，应该成功的啊" << std::endl;
+        return 0;
     }
     return 0;
 }
