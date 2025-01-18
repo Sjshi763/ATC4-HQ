@@ -15,6 +15,8 @@
 //这个头文件是为了输出中文字符
 #include <stdio.h>
 //这个和前面一样不知道
+#pragma execution_character_set("utf-8")
+//还是不知道这是咋了
 namespace master {
     int *A = NULL;
     //定义一个空指针A用来在不对劲的时候把自己干崩
@@ -24,7 +26,11 @@ namespace master {
 int main() {
     SetConsoleOutputCP(65001);
     //这是为了输出中文 所以改cmd的编码格式为utf8
+    std::wcout.imbue(std::locale("en_US.utf8"));
+    //AI告诉我要初始化代码
+    //这样应该可以了
     using namespace master;
+    using namespace std;
     std::cout << "欢迎使用ATC4启动RJOO辅助程序" << std::endl;
     std::cout << "爷会获取你的目录，就是这个程序在哪里" << std::endl;
     std::cout << "不过你看到也来不及力" << std::endl;
@@ -34,12 +40,13 @@ int main() {
     DWORD length = GetModuleFileName(NULL, B ,MAX_PATH);
     //不知道原理，但是会调用这个函数到B缓冲区
     if (length > 0) {
-        std::wcout << L"我去，也是成功获取地址力"<< B << std::endl;
+        std::wcout << B << std::endl;
+        cout << "我们做到了（爱探险的多拉bgm）" << endl;
         std::cout << "byd下一步！！" << std::endl;
     }
     else {
-        std::cerr << L"不对啊，应该成功的啊" << std::endl;
-        std::cout << "不管了！先报错！爷要崩溃乐！" <<std::endl;
+        std::cout << "不对啊，应该成功的啊" << std::endl ;
+        std::cout << "不管了！先报错！爷要崩溃乐！" << std::endl;
         std::cout << *A << std::endl;
         //访问空指针，然后直接给我崩吧！
     }
