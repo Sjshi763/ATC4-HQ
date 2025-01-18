@@ -16,7 +16,7 @@
 #include <stdio.h>
 //这个和前面一样不知道
 #pragma execution_character_set("utf-8")
-//还是不知道这是咋了
+//还是不知道这是干啥的
 namespace master {
     int *A = NULL;
     //定义一个空指针A用来在不对劲的时候把自己干崩
