@@ -30,7 +30,6 @@ int main() {
     //AI告诉我要初始化代码
     //这样应该可以了
     using namespace master;
-    using namespace std;
     std::cout << "欢迎使用ATC4启动RJOO辅助程序" << std::endl;
     std::cout << "爷会获取你的目录，就是这个程序在哪里" << std::endl;
     std::cout << "不过你看到也来不及力" << std::endl;
@@ -41,7 +40,7 @@ int main() {
     //不知道原理，但是会调用这个函数到B缓冲区
     if (length > 0) {
         std::wcout << B << std::endl;
-        cout << "我们做到了（爱探险的多拉bgm）" << endl;
+        std::cout << "我们做到了（爱探险的多拉bgm）" << std::endl;
         std::cout << "byd下一步！！" << std::endl;
     }
     else {
