@@ -13,8 +13,6 @@
 //个人没看过这个文件不知道干啥的，后人如果知道请补一下谢谢
 #include <windows.h>
 //这个头文件是为了输出中文字符
-#include 
-//这个和前面一样不知道
 #pragma execution_character_set("utf-8")
 //还是不知道这是干啥的
 namespace master {
