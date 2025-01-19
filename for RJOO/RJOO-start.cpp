@@ -13,8 +13,6 @@
 //个人没看过这个文件不知道干啥的，后人如果知道请补一下谢谢
 #include <windows.h>
 //这个头文件是为了输出中文字符
-#pragma execution_character_set("utf-8")
-//还是不知道这是干啥的
 namespace master {
     int *A = NULL;
     //定义一个空指针A用来在不对劲的时候把自己干崩
@@ -24,8 +22,6 @@ namespace master {
 int main() {
     SetConsoleOutputCP(65001);
     //这是为了输出中文 所以改cmd的编码格式为utf8
-    std::wcout.imbue(std::locale("en_US.utf8"));
-    //AI告诉我要初始化代码
     //这样应该可以了
     using namespace master;
     std::cout << "欢迎使用ATC4启动RJOO辅助程序" << std::endl;
