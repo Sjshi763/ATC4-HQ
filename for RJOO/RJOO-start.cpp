@@ -13,10 +13,12 @@
 //个人没看过这个文件不知道干啥的，后人如果知道请补一下谢谢
 #include <windows.h>
 //这个头文件是为了输出中文字符
+#include <filesystem>
+//这AI告诉我要这个头文件来获取文件目录
 namespace master {
-    int *A = NULL;
+    int *B = NULL;
     //定义一个空指针A用来在不对劲的时候把自己干崩
-}
+}    
 //这是一个命名空间master是项目主人的
 //后人要是要来那就再搞一个命名空间再加入吧！
 int main() {
@@ -28,20 +30,23 @@ int main() {
     std::cout << "爷会获取你的目录，就是这个程序在哪里" << std::endl;
     std::cout << "不过你看到也来不及力" << std::endl;
     std::cout << "我们不会存储你的信息，我也没钱存" << std::endl;
-    TCHAR B[MAX_PATH];
-    //定义TCHAR的缓冲区 B
-    DWORD length = GetModuleFileName(NULL, B ,MAX_PATH);
+    TCHAR A[MAX_PATH];
+    //定义TCHAR的缓冲区 A
+    DWORD length = GetModuleFileName(NULL, A ,MAX_PATH);
     //不知道原理，但是会调用这个函数到B缓冲区
     if (length > 0) {
-        std::wcout << B << std::endl;
+        std::wcout << L"原来我们在"<< A << std::endl;
         std::cout << "我们做到了（爱探险的多拉bgm）" << std::endl;
         std::cout << "byd下一步！！" << std::endl;
     }
     else {
         std::cout << "不对啊，应该成功的啊" << std::endl ;
         std::cout << "不管了！先报错！爷要崩溃乐！" << std::endl;
-        std::cout << *A << std::endl;
+        std::cout << *B << std::endl;
         //访问空指针，然后直接给我崩吧！
     }
+    std::cout << "good" << std::endl;
+    std::cout << "好！继续！" << std::endl ;
+    
     return 0;
 }
