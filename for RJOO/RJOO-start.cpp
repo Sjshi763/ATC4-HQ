@@ -1,52 +1,74 @@
-//他妈的第一次开发在手机上也是神力
-//第三次重来了
-//努力
-//首先来让我们熟悉要求
-//首先这个程序是用来帮助一款叫ATC4的游戏更好游玩而生
-//并且默认它在游戏更目录
-//我们的要求是
-//1.找到自己的目录
-//2.复制备用目录的RJOO.dll到缓存目录
-//3.改名为XPACK.dll
-//4.复制到根目录
+//第四次重写
+//终于还是用上电脑开发了
+//vs2022都用过了
+//c++太难了！！！
+//ok依然是开始知道一下我们这个项目的任务
+//1、我们需要把文件RJOO.dll从“文件”目录复制到“暂存”
+//2、把他改名为XPACK.dll
+//3、我们把“XPACK.dll”复制到更目录人后删掉“暂存”里的内容
+//4、我们需要知道当前文件目录
+//5、我们用命令行使用Locale Emulatorv启动ATC4
+//ATC4的程序名为AXA.exe，在此文件的同级目录
+//Locale Emulatorv在C:\LE\LEProc.exe
 #include <iostream>
-//个人没看过这个文件不知道干啥的，后人如果知道请补一下谢谢
 #include <windows.h>
-//这个头文件是为了输出中文字符
 #include <filesystem>
-//这AI告诉我要这个头文件来获取文件目录
-namespace master {
-    int *B = NULL;
-    //定义一个空指针A用来在不对劲的时候把自己干崩
-}    
-//这是一个命名空间master是项目主人的
-//后人要是要来那就再搞一个命名空间再加入吧！
+#include <string>
+//这些头文件是用来干活的，也不知道为啥要他们
+using namespace std;
+namespace fs = std::filesystem;
+
 int main() {
-    SetConsoleOutputCP(65001);
-    //这是为了输出中文 所以改cmd的编码格式为utf8
-    //这样应该可以了
-    using namespace master;
-    std::cout << "欢迎使用ATC4启动RJOO辅助程序" << std::endl;
-    std::cout << "爷会获取你的目录，就是这个程序在哪里" << std::endl;
-    std::cout << "不过你看到也来不及力" << std::endl;
-    std::cout << "我们不会存储你的信息，我也没钱存" << std::endl;
+    // 定义源文件路径和目标文件路径
+    fs::path source = "文件/RJOO.dll";
+    fs::path destination = "暂存/XPACK.dll";
+    fs::path final_destination = "XPACK.dll";
+
+    try {
+        // 复制文件
+        fs::copy_file(source, destination, fs::copy_options::overwrite_existing);
+        cout << "文件复制成功！" << endl;
+
+        // 重命名文件
+        fs::rename(destination, final_destination);
+        cout << "文件重命名成功！" << endl;
+    } catch (fs::filesystem_error& e) {
+        cout << "操作失败: " << e.what() << endl;
+    }
+
+    try {
+        // 删除暂存目录中的文件
+        fs::remove(destination);
+        cout << "暂存目录中的文件删除成功！" << endl;
+    } catch (fs::filesystem_error& e) {
+        cout << "操作失败: " << e.what() << endl;
+    }
+
+    // 获取文件目录
     TCHAR A[MAX_PATH];
-    //定义TCHAR的缓冲区 A
-    DWORD length = GetModuleFileName(NULL, A ,MAX_PATH);
-    //不知道原理，但是会调用这个函数到B缓冲区
+    DWORD length = GetModuleFileName(NULL, A, MAX_PATH);
     if (length > 0) {
-        std::wcout << L"原来我们在"<< A << std::endl;
-        std::cout << "我们做到了（爱探险的多拉bgm）" << std::endl;
-        std::cout << "byd下一步！！" << std::endl;
+        basic_string<TCHAR> filePath(A, length);
+        #ifdef UNICODE
+            wcout << L"原来我们在 " << filePath << endl;
+        #else
+            cout << "原来我们在 " << filePath << endl;
+        #endif
+    } else {
+        cout << "获取文件目录失败！" << endl;
     }
-    else {
-        std::cout << "不对啊，应该成功的啊" << std::endl ;
-        std::cout << "不管了！先报错！爷要崩溃乐！" << std::endl;
-        std::cout << *B << std::endl;
-        //访问空指针，然后直接给我崩吧！
+
+    // 调用命令行启动 Locale Emulator 和 ATC4
+    STARTUPINFOW si = { sizeof(si) };
+    PROCESS_INFORMATION pi;
+    wstring command = L"C:\\LE\\LEProc.exe -run AXA.exe";
+
+    if (CreateProcessW(NULL, &command[0], NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+        wcout << L"ATC4 启动成功！" << endl;
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
+    } else {
+        wcout << L"ATC4 启动失败，错误代码: " << GetLastError() << endl;
     }
-    std::cout << "good" << std::endl;
-    std::cout << "好！继续！" << std::endl ;
-    
     return 0;
 }
