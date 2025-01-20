@@ -17,7 +17,7 @@
 //这些头文件是用来干活的，也不知道为啥要他们
 using namespace std;
 namespace fs = std::filesystem;
-
+int *A = NULL;
 int main() {
     // 定义源文件路径和目标文件路径
     fs::path source = "文件/RJOO.dll";
@@ -34,6 +34,7 @@ int main() {
         cout << "文件重命名成功！" << endl;
     } catch (fs::filesystem_error& e) {
         cout << "操作失败: " << e.what() << endl;
+        cout << *A << endl;
     }
 
     try {
@@ -42,8 +43,9 @@ int main() {
         cout << "暂存目录中的文件删除成功！" << endl;
     } catch (fs::filesystem_error& e) {
         cout << "操作失败: " << e.what() << endl;
+        cout << *A << endl;
     }
-
+    int *B = NULL;
     // 获取文件目录
     TCHAR A[MAX_PATH];
     DWORD length = GetModuleFileName(NULL, A, MAX_PATH);
@@ -56,6 +58,7 @@ int main() {
         #endif
     } else {
         cout << "获取文件目录失败！" << endl;
+        cout << *B << endl;
     }
 
     // 调用命令行启动 Locale Emulator 和 ATC4
@@ -69,6 +72,7 @@ int main() {
         CloseHandle(pi.hThread);
     } else {
         wcout << L"ATC4 启动失败，错误代码: " << GetLastError() << endl;
+        cout << *A << endl;
     }
     return 0;
 }
