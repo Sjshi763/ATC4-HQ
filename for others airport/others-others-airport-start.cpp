@@ -19,25 +19,25 @@ int main() {
     try {
         // 复制文件
         fs::copy_file(source, destination, fs::copy_options::overwrite_existing);
-        cout << "文件复制成功！" << endl;
+        std::cout << "文件复制成功！" << endl;
 
         // 重命名文件
         fs::rename(destination, final_destination);
-        cout << "文件重命名成功！" << endl;
+        std::cout << "文件重命名成功！" << endl;
     } catch (fs::filesystem_error& e) {
-        cout << "操作失败: " << e.what() << endl;
-        cout << "错误码: " << e.code() << endl;
-        cout << "错误信息: " << e.path1() << endl;
-        cout << *A << endl;
+        std::cout << "操作失败: " << e.what() << endl;
+        std::cout << "错误码: " << e.code() << endl;
+        std::cout << "错误信息: " << e.path1() << endl;
+        std::cout << *A << endl;
     }
 
     try {
         // 删除暂存目录中的文件
         fs::remove(destination);
-        cout << "暂存目录中的文件删除成功！" << endl;
+        std::cout << "暂存目录中的文件删除成功！" << endl;
     } catch (fs::filesystem_error& e) {
-        cout << "操作失败: " << e.what() << endl;
-        cout << *A << endl;
+        std::cout << "操作失败: " << e.what() << endl;
+        std::cout << *A << endl;
     }
 
     // 获取文件目录
@@ -51,8 +51,8 @@ int main() {
             cout << "原来我们在 " << filePath << endl;
         #endif
     } else {
-        cout << "获取文件目录失败！" << endl;
-        cout << *A << endl;
+        std::cout << "获取文件目录失败！" << endl;
+        std::cout << *A << endl;
     }
 int *b = NULL;
     // 调用命令行启动 Locale Emulator 和 ATC4
@@ -66,7 +66,7 @@ int *b = NULL;
         CloseHandle(pi.hThread);
     } else {
         wcout << L"ATC4 启动失败，错误代码: " << GetLastError() << endl;
-        cout << *b << endl;
+        std::cout << *b << endl;
     }
     return 0;
 }
