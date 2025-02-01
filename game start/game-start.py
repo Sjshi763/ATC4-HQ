@@ -6,6 +6,13 @@ C=10
 D=1
 F=200
 E= F-(C*10+0)
+G = '华康翩翩体W5-A'
+H = '宋体'
+#检查用户是否有华康翩翩体W5-A字体
+if G in tk.font.families():
+    I = G
+else:
+    I = H
 # 创建主窗口
 root = tk.Tk()
 root.title("游戏启动器的启动器")
@@ -21,13 +28,13 @@ def A():
     subprocess.Popen(["RJOO-start.exe"]) 
     root.quit()
 # 创建一个标签
-label = tk.Label(root, text="选择你的机场！", font=("华康翩翩体W5-A", 24),width=20, height=2)
+label = tk.Label(root, text="选择你的机场！", font=(I, 24),width=20, height=2)
 label.pack(pady=20)
 # 创建一个按钮
-button = tk.Button(root, text="其他的", font=("华康翩翩体W5-A", 14),command=B,width=C, height=D)
+button = tk.Button(root, text="其他的", font=(I, 14),command=B,width=C, height=D)
 button.place(x=F, y=F)
 #创建另一个按钮
-button = tk.Button(root, text="RJOO", font=("华康翩翩体W5-A", 14),command=A,width=C, height=D)
+button = tk.Button(root, text="RJOO", font=(I, 14),command=A,width=C, height=D)
 button.place(x=E, y=F)
 # 运行主循环
 root.mainloop()
