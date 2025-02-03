@@ -1,20 +1,22 @@
 #这个程序的目标是启动！游戏时让玩家选择启动方式，然后加载游戏。
 import tkinter as tk
 import subprocess
+from tkinter import font
 #变量们
+root = tk.Tk()
+
 C=10
 D=1
 F=200
 E= F-(C*10+0)
 G = '华康翩翩体W5-A'
 H = '宋体'
+I = H
+s = font.families()
 #检查用户是否有华康翩翩体W5-A字体
-if G in tk.font.families():
+if G in s:
     I = G
-else:
-    I = H
-# 创建主窗口
-root = tk.Tk()
+
 root.title("游戏启动器的启动器")
 # 设置窗口大小
 root.geometry("400x300")
