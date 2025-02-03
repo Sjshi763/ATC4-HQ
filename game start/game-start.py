@@ -4,7 +4,6 @@ import subprocess
 from tkinter import font
 #变量们
 root = tk.Tk()
-
 C=10
 D=1
 F=200
@@ -16,7 +15,6 @@ s = font.families()
 #检查用户是否有华康翩翩体W5-A字体
 if G in s:
     I = G
-
 root.title("游戏启动器的启动器")
 # 设置窗口大小
 root.geometry("400x300")
