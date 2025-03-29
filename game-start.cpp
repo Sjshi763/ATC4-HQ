@@ -28,7 +28,7 @@ int main() {
     outtextxy(btnX + 10, btnY + 15, _T(""));
 	while ( bool x = true)
 	{
-		
+		std::cout << "请点击按钮" << std::endl;
 	}
 	closegraph();
 	return 0;
