@@ -13,6 +13,7 @@ int main() {
 	IMAGE img;
 	loadimage(&img, "ATC4.ico" , b,b,false); //加载图片
 	putimage(0,0 , &img); //在屏幕上显示图片
+	
 	closegraph();
 	return 0;
 }
