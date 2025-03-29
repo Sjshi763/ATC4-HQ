@@ -11,9 +11,9 @@ int main() {
 	SetConsoleOutputCP(CP_UTF8); //设置控制台输出编码为UTF-8
 	initgraph(b,b,EX_SHOWCONSOLE);
 	IMAGE img;
-	loadimage(&img, "ATC4.ico" , b,b,false); //加载图片
+	loadimage(&img, "ATC4.ico" , b , b ,false); //加载图片
 	putimage(0,0 , &img); //在屏幕上显示图片
-	
+
 	closegraph();
 	return 0;
 }
