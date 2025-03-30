@@ -54,9 +54,11 @@ int main() {
         std::cout << "获取文件目录失败！" << endl;
         std::cout << *A << endl;
     }
-int *b = NULL;
+    int *b = NULL;
     // 调用命令行启动 Locale Emulator 和 ATC4
-    STARTUPINFOW si = { sizeof(si) };
+    STARTUPINFOW si;
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
     PROCESS_INFORMATION pi;
     wstring command = L"C:\\LE\\LEProc.exe -run AXA.exe";
 

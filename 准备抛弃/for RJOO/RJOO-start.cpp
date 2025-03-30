@@ -21,7 +21,7 @@ int *A = NULL;
 int main() {
     // 定义源文件路径和目标文件路径
     fs::path source = "文件/RJOO.dll";
-    fs::path destination = "暂存/XPACK.dll";
+    fs::path source = "文件/RJOO.dll";
     fs::path final_destination = "XPACK.dll";
 
     try {
