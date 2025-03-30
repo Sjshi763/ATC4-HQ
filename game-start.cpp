@@ -3,32 +3,45 @@
 #include <iostream>
 #include <windows.h>
 namespace master {
-	int a = GetSystemMetrics(SM_CXSCREEN); //è¿™ä¸ªå˜é‡int aæ˜¯ç”¨æˆ·æ˜¾ç¤ºå±é«˜
+	int a = GetSystemMetrics(SM_CXSCREEN); //Õâ¸ö±äÁ¿int aÊÇÓÃ»§ÏÔÊ¾ÆÁ¸ß
 	int b = a /4;
-	// æ£€æŸ¥é¼ æ ‡æ˜¯å¦åœ¨æŒ‰é’®åŒºåŸŸå†…
+	// ¼ì²éÊó±êÊÇ·ñÔÚ°´Å¥ÇøÓòÄÚ
     bool c (int x, int y, int btnX, int btnY, int btnWidth, int btnHeight) {
     return x >= btnX && x <= btnX + btnWidth && y >= btnY && y <= btnY + btnHeight;
 	}
-	//å¦‚æžœé¼ æ ‡åœ¨æŒ‰é’®åŒºåŸŸå†…ï¼Œè¿”å›žå¸ƒå°”å€¼c trueï¼Œå¦åˆ™è¿”å›žfalse
+	//Èç¹ûÊó±êÔÚ°´Å¥ÇøÓòÄÚ£¬·µ»Ø²¼¶ûÖµc true£¬·ñÔò·µ»Øfalse
 }
 
 int main() {
 	using namespace master;
-	SetConsoleOutputCP(CP_UTF8); //è®¾ç½®æŽ§åˆ¶å°è¾“å‡ºç¼–ç ä¸ºUTF-8
+	SetConsoleOutputCP(936); //ÉèÖÃ¿ØÖÆÌ¨Êä³ö±àÂëÎªGBK
 	initgraph(b,b);
-	IMAGE img; //å®šä¹‰ä¸€ä¸ªå›¾ç‰‡å˜é‡
-	loadimage(&img , "ATC4.ico" , b , b ,false); //åŠ è½½å›¾ç‰‡
-	putimage(0,0 , &img ); //åœ¨å±å¹•ä¸Šæ˜¾ç¤ºå›¾ç‰‡
-	// æŒ‰é’®ä½ç½®å’Œå¤§å°
+	IMAGE img; //¶¨ÒåÒ»¸öÍ¼Æ¬±äÁ¿
+	loadimage(&img , "ATC4.ico" , b , b ,false); //¼ÓÔØÍ¼Æ¬
+	putimage(0,0 , &img ); //ÔÚÆÁÄ»ÉÏÏÔÊ¾Í¼Æ¬
+	// °´Å¥Î»ÖÃºÍ´óÐ¡
     int btnX = 200, btnY = 200, btnWidth = 100, btnHeight = 50;
-	// ç»˜åˆ¶æŒ‰é’®
+	// »æÖÆ°´Å¥
     setfillcolor(LIGHTGRAY);
     solidrectangle(btnX, btnY, btnX + btnWidth, btnY + btnHeight);
-    settextstyle(20, 0, _T("ä»¿å®‹"));
-    outtextxy(btnX + 10, btnY + 15, _T(""));
+    settextstyle(20, 0, _T("·ÂËÎ"));
+    outtextxy(btnX + 10, btnY + 15, _T("Èý°Ù"));
 	while ( bool x = true)
 	{
-		std::cout << "è¯·ç‚¹å‡»æŒ‰é’®" << std::endl;
+		
+		while (true) {
+			// ¼ì²éÊó±êµã»÷
+			if (MouseHit()) {
+				MOUSEMSG msg = GetMouseMsg();
+				if (msg.uMsg == WM_LBUTTONDOWN) {
+					if (c(msg.x, msg.y, btnX, btnY, btnWidth, btnHeight)) {
+						// °´Å¥±»µã»÷
+						outtextxy(10, 10, _T("°´Å¥±»µã»÷ÁË£¡"));
+						break;
+					}
+				}
+			}
+		}
 	}
 	closegraph();
 	return 0;
