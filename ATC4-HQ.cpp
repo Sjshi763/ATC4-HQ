@@ -12,15 +12,23 @@ namespace master {
 	//如果鼠标在按钮区域内，返回布尔值c true，否则返回false
 	int qidongyouxianniudeX = b / 3 - 50; //按钮的X坐标
 	int qidongyouxianniudeY = b / 3 * 2; //按钮的Y坐标
+	void clearButton(int x, int y, int width, int height) {
+		setfillcolor(WHITE); // 设置填充颜色为白色
+		solidrectangle(x, y, x + width, y + height); // 用白色填充按钮区域
+	}
+	void chongzhipingmu() {
+		setfillcolor(WHITE); // 设置填充颜色为白色
+		solidrectangle(0, 0, b, b); // 用白色填充整个屏幕
+		IMAGE img; //定义一个图片对象
+		loadimage(&img , "ATC4.ico" , b , b ,false); //加载图片
+		putimage(0,0 , &img ); //在屏幕上显示图片
+	}
 }
-
 int main() {
 	using namespace master;
 	SetConsoleOutputCP(936); //设置控制台输出编码为GBK
-	initgraph(b,b);
-	IMAGE img; //定义一个图片变量
-	loadimage(&img , "ATC4.ico" , b , b ,false); //加载图片
-	putimage(0,0 , &img ); //在屏幕上显示图片
+	initgraph(b,b); //初始化图形窗口
+	chongzhipingmu(); //清屏
 	// 按钮位置和大小
     int btnX =   qidongyouxianniudeX , btnY =  qidongyouxianniudeY , btnWidth = 100, btnHeight = 50;
 	// 绘制按钮
@@ -38,13 +46,15 @@ int main() {
 				if (msg.uMsg == WM_LBUTTONDOWN) {
 					if (c(msg.x, msg.y, btnX, btnY, btnWidth, btnHeight)) {
 						// 按钮被点击
-						
+						chongzhipingmu(); //清屏
+
 						break;
 					}
 				}
 			}
 		}
 	}
+	std::cout << "b" << std::endl;
 	closegraph();
 	return 0;
 }
