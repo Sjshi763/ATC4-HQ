@@ -5,12 +5,13 @@
 #include <string>
 #include <fstream>
 #include <shlobj.h>
+#include <tchar.h>
 namespace master {
 	std::string fileName = "ATC4-HQ.ini"; // 文件名
-	const char* ziti = "Arial"; //使用字体
+	//const wchar_t* ziti = L"Arial"; //使用字体
+	char ziti[] = "Arial"; //使用字体
 	int a = GetSystemMetrics(SM_CXSCREEN); //这个变量int a是用户显示屏高
 	int b = a /4; //这个变量int b是程序运行时的高和宽
-	bool jianrongmoushi ;
 	bool FileExistsInCurrentDirectory(const std::string& fileName) {
 		WIN32_FIND_DATA findFileData;
 		HANDLE hFind = FindFirstFile(fileName.c_str(), &findFileData);
@@ -23,25 +24,6 @@ namespace master {
 			FindClose(hFind);
 			return true;
 		}
-	}
-	std::string SelectFolder() {
-		char folderPath[MAX_PATH] = {0};
-	
-		// 初始化 BROWSEINFO 结构
-		BROWSEINFO bi = {0};
-		bi.lpszTitle = "请选择一个文件夹："; // 对话框标题
-		bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE; // 仅显示文件夹，使用新样式
-	
-		// 显示文件夹选择对话框
-		LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
-		if (pidl != nullptr) {
-			// 获取选择的文件夹路径
-			SHGetPathFromIDList(pidl, folderPath);
-			CoTaskMemFree(pidl); // 释放内存
-			return std::string(folderPath);
-		}
-	
-		return ""; // 如果未选择文件夹，返回空字符串
 	}
 	/*
 	if (a  < 540) {
@@ -87,10 +69,8 @@ int main() {
 		if (!outFile) {
 			return false; // 文件创建失败
 		}
-		std::string folder = SelectFolder(); // 选择文件夹
-		// 写入内容到文件
 		outFile << "LE 在 {" << std::endl;
-		outFile << folder << std::endl;
+		outFile << "a" << std::endl;
 		outFile << "}" << std::endl;
 
     }
@@ -101,12 +81,12 @@ int main() {
     int btnX =   qidongyouxianniudeX , btnY =  qidongyouxianniudeY , btnWidth = 100, btnHeight = 50;
 	int btnX1 =   qidongqitajichangdeX , btnY1 =  qidongqitajichangdeY + 100 , btnWidth1 = 100, btnHeight1 = 50;
 	//绘制版本号在左上角
-	settextstyle(20, 0, _T(ziti));
+	settextstyle(20, 0, (ziti));
 	outtextxy(10, 10, _T("ATC4-HQ 1.4.0.0.0"));
 	// 绘制按钮
     setfillcolor(LIGHTGRAY);
     solidrectangle(btnX, btnY, btnX + btnWidth, btnY + btnHeight);
-    settextstyle(20, 0, _T(ziti));
+    settextstyle(20, 0, (ziti));
     outtextxy(btnX + 10, btnY + 15, _T("启动游戏"));
 	while (true)
 	{
@@ -125,13 +105,13 @@ int main() {
 	// a绘制按钮
     setfillcolor(LIGHTGRAY);
     solidrectangle(btnX, btnY, btnX + btnWidth, btnY + btnHeight);
-    settextstyle(20, 0, _T(ziti));
+    settextstyle(20, 0, (ziti));
     outtextxy(btnX + 10, btnY + 15, _T("启动RJOO"));
 	// b绘制按钮
     setfillcolor(LIGHTGRAY);
 	btnWidth1 += 50;
     solidrectangle(btnX1, btnY, btnX1 + btnWidth1, btnY + btnHeight1);
-    settextstyle(20, 0, _T(ziti));
+    settextstyle(20, 0, (ziti));
     outtextxy(btnX1 + 10, btnY + 15, _T("启动其他机场"));
 	while (true) {
 		// 检查鼠标点击
