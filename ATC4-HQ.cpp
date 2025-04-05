@@ -26,6 +26,7 @@ namespace master {
 		}
 	}
 	/*
+	bool jianrongmoushi
 	if (a  < 540) {
 		bool jianrongmoushi = true; //如果应用宽度小于540，则设置为true
 	} if else  (b > 540) {
@@ -35,6 +36,24 @@ namespace master {
 		bool jianrongmoushi = false; //如果应用宽度大于540，则设置为false
 	}
 	*/
+	void overwriteSecondLine(const std::string& filePath, const std::string& newContent) {
+		std::fstream file(filePath, std::ios::in | std::ios::out); // 打开文件进行读写
+		if (!file) {
+			std::cerr << "无法打开文件！" << std::endl;
+			return;
+		}
+	
+		// 定位到第二行的起始位置
+		std::string line;
+		std::getline(file, line); // 跳过第一行
+		std::streampos secondLinePos = file.tellg(); // 获取第二行的起始位置
+	
+		// 写入新的内容到第二行
+		file.seekp(secondLinePos); // 定位到第二行
+		file << newContent; // 写入新的内容
+	
+		file.close();
+	}
 	// 检查鼠标是否在按钮区域内
     bool c (int x, int y, int btnX, int btnY, int btnWidth, int btnHeight) {
     return x >= btnX && x <= btnX + btnWidth && y >= btnY && y <= btnY + btnHeight;
@@ -72,7 +91,6 @@ int main() {
 		outFile << "LE 在 {" << std::endl;
 		outFile << "a" << std::endl;
 		outFile << "}" << std::endl;
-
     }
 	initgraph(b,b ,EX_SHOWCONSOLE); //初始化图形窗口
 	SetConsoleOutputCP(936); //设置控制台输出编码为GBK
@@ -124,21 +142,58 @@ int main() {
 					const char* the = "XPACK.dll" ;
 					if (CopyFileA(world, the, FALSE)) {
 						// 文件复制成功
-    					std::wstring command = L"C:\\LE\\LEProc.exe -run AXA.exe";
-						STARTUPINFOW si = { sizeof(si) };
-    					PROCESS_INFORMATION pi;
-						CreateProcessW(
-							NULL,                   // 应用程序名称
-							&command[0],            // 命令行
-							NULL,                   // 进程安全属性
-							NULL,                   // 线程安全属性
-							FALSE,                  // 是否继承句柄
-							0,                      // 创建标志
-							NULL,                   // 环境变量
-							NULL,                   // 当前目录
-							&si,                    // 启动信息
-							&pi                     // 进程信息
-						);
+						std::ifstream inputFile("ATC4-HQ.ini"); // 打开文件
+						if (!inputFile) {
+							return false; // 文件打开失败
+						}
+						std::string line;
+						// 读取第一行（跳过）
+						if (std::getline(inputFile, line)) {
+							// 读取第二行
+							if (std::getline(inputFile, line)) {
+								//有第二行
+								std::wstring LEdizhi(line.begin(), line.end()); // 将第二行转换为wstring
+								std::wstring command = LEdizhi + L"\\LEProc.exe" + L" " + L"-run AXA.exe";
+								STARTUPINFOW si = { sizeof(si) };
+								PROCESS_INFORMATION pi;
+								CreateProcessW(
+									NULL,                   // 应用程序名称
+									&command[0],            // 命令行
+									NULL,                   // 进程安全属性
+									NULL,                   // 线程安全属性
+									FALSE,                  // 是否继承句柄
+									0,                      // 创建标志
+									NULL,                   // 环境变量
+									NULL,                   // 当前目录
+									&si,                    // 启动信息
+									&pi                     // 进程信息
+								);
+							} else {
+								//没有第二行
+								TCHAR szBuffer[MAX_PATH] = {0}; // 存放选择文件夹的路径
+								BROWSEINFO bi;
+								ZeroMemory(&bi, sizeof(BROWSEINFO));
+								bi.hwndOwner = NULL;
+								bi.pszDisplayName = szBuffer;
+								bi.lpszTitle = _T("请选择一个文件夹:"); // 对话框标题
+								bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE; // 仅返回文件系统目录，并使用新对话框样式
+								LPITEMIDLIST idl = SHBrowseForFolder(&bi); // 显示选择文件夹对话框
+								if (NULL == idl)
+								{
+								return false;
+								}
+								SHGetPathFromIDList(idl, szBuffer); // 获取选择的文件夹路径
+								std::string filePath = "ATC4-HQ.ini";
+								wchar_t wideBuffer[260];
+								mbstowcs(wideBuffer, szBuffer, 260); // 将多字节字符串转换为宽字符
+								std::wstring wideStr = wideBuffer;  // 转换为 std::wstring
+								std::wstring newContent = wideBuffer;
+								// 将新内容写入第二行
+							}
+						} else {
+							return false; // 文件读取失败
+						}
+						inputFile.close(); // 关闭文件
 					} else {	
 						// 文件复制失败
 						return false;
