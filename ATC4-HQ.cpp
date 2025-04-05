@@ -3,9 +3,47 @@
 #include <iostream>
 #include <windows.h>
 #include <string>
+#include <fstream>
+#include <shlobj.h>
 namespace master {
+	std::string fileName = "ATC4-HQ.ini"; // 文件名
+	const char* ziti = "Arial"; //使用字体
 	int a = GetSystemMetrics(SM_CXSCREEN); //这个变量int a是用户显示屏高
 	int b = a /4; //这个变量int b是程序运行时的高和宽
+	bool jianrongmoushi ;
+	bool FileExistsInCurrentDirectory(const std::string& fileName) {
+		WIN32_FIND_DATA findFileData;
+		HANDLE hFind = FindFirstFile(fileName.c_str(), &findFileData);
+	
+		if (hFind == INVALID_HANDLE_VALUE) {
+			// 文件未找到
+			return false;
+		} else {
+			// 文件找到，关闭句柄
+			FindClose(hFind);
+			return true;
+		}
+	}
+	std::string SelectFolder() {
+		char folderPath[MAX_PATH] = {0};
+	
+		// 初始化 BROWSEINFO 结构
+		BROWSEINFO bi = {0};
+		bi.lpszTitle = "请选择一个文件夹："; // 对话框标题
+		bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE; // 仅显示文件夹，使用新样式
+	
+		// 显示文件夹选择对话框
+		LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
+		if (pidl != nullptr) {
+			// 获取选择的文件夹路径
+			SHGetPathFromIDList(pidl, folderPath);
+			CoTaskMemFree(pidl); // 释放内存
+			return std::string(folderPath);
+		}
+	
+		return ""; // 如果未选择文件夹，返回空字符串
+	}
+	/*
 	if (a  < 540) {
 		bool jianrongmoushi = true; //如果应用宽度小于540，则设置为true
 	} if else  (b > 540) {
@@ -14,7 +52,7 @@ namespace master {
 	} else {
 		bool jianrongmoushi = false; //如果应用宽度大于540，则设置为false
 	}
-		
+	*/
 	// 检查鼠标是否在按钮区域内
     bool c (int x, int y, int btnX, int btnY, int btnWidth, int btnHeight) {
     return x >= btnX && x <= btnX + btnWidth && y >= btnY && y <= btnY + btnHeight;
@@ -43,16 +81,32 @@ namespace master {
 int main() {
     // if () {
 	using namespace master;
+	std::ofstream outFile("ATC4-HQ.ini", std::ios::app); // 打开文件以追加模式
+	if (FileExistsInCurrentDirectory(fileName) == false) {
+        std::ofstream outFile("ATC4-HQ.ini"); // 创建文件
+		if (!outFile) {
+			return false; // 文件创建失败
+		}
+		std::string folder = SelectFolder(); // 选择文件夹
+		// 写入内容到文件
+		outFile << "LE 在 {" << std::endl;
+		outFile << folder << std::endl;
+		outFile << "}" << std::endl;
+
+    }
 	initgraph(b,b ,EX_SHOWCONSOLE); //初始化图形窗口
 	SetConsoleOutputCP(936); //设置控制台输出编码为GBK
 	chongzhipingmu(); //清屏
 	// 按钮位置和大小
     int btnX =   qidongyouxianniudeX , btnY =  qidongyouxianniudeY , btnWidth = 100, btnHeight = 50;
 	int btnX1 =   qidongqitajichangdeX , btnY1 =  qidongqitajichangdeY + 100 , btnWidth1 = 100, btnHeight1 = 50;
+	//绘制版本号在左上角
+	settextstyle(20, 0, _T(ziti));
+	outtextxy(10, 10, _T("ATC4-HQ 1.4.0.0.0"));
 	// 绘制按钮
     setfillcolor(LIGHTGRAY);
     solidrectangle(btnX, btnY, btnX + btnWidth, btnY + btnHeight);
-    settextstyle(20, 0, _T("仿宋"));
+    settextstyle(20, 0, _T(ziti));
     outtextxy(btnX + 10, btnY + 15, _T("启动游戏"));
 	while (true)
 	{
@@ -71,13 +125,13 @@ int main() {
 	// a绘制按钮
     setfillcolor(LIGHTGRAY);
     solidrectangle(btnX, btnY, btnX + btnWidth, btnY + btnHeight);
-    settextstyle(20, 0, _T("仿宋"));
+    settextstyle(20, 0, _T(ziti));
     outtextxy(btnX + 10, btnY + 15, _T("启动RJOO"));
 	// b绘制按钮
     setfillcolor(LIGHTGRAY);
-	btnWidth1 + 50;
+	btnWidth1 += 50;
     solidrectangle(btnX1, btnY, btnX1 + btnWidth1, btnY + btnHeight1);
-    settextstyle(20, 0, _T("仿宋"));
+    settextstyle(20, 0, _T(ziti));
     outtextxy(btnX1 + 10, btnY + 15, _T("启动其他机场"));
 	while (true) {
 		// 检查鼠标点击
