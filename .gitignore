@@ -1,3 +1,4 @@
 *.exe
 .vscode/
 ATC4-HQ.ini
+.idea/
