@@ -15,7 +15,6 @@ namespace master {
 	bool FileExistsInCurrentDirectory(const std::string& fileName) {
 		WIN32_FIND_DATA findFileData;
 		HANDLE hFind = FindFirstFile(fileName.c_str(), &findFileData);
-	
 		if (hFind == INVALID_HANDLE_VALUE) {
 			// 文件未找到
 			return false;
@@ -42,16 +41,13 @@ namespace master {
 			std::cerr << "无法打开文件！" << std::endl;
 			return;
 		}
-	
 		// 定位到第二行的起始位置
 		std::string line;
 		std::getline(file, line); // 跳过第一行
 		std::streampos secondLinePos = file.tellg(); // 获取第二行的起始位置
-	
 		// 写入新的内容到第二行
 		file.seekp(secondLinePos); // 定位到第二行
 		file << newContent; // 写入新的内容
-	
 		file.close();
 	}
 	// 检查鼠标是否在按钮区域内
@@ -89,7 +85,10 @@ int main() {
 			return false; // 文件创建失败
 		}
 		outFile << "LE 在 {" << std::endl;
-		outFile << "a" << std::endl;
+		outFile << std::endl;
+		outFile << "}" << std::endl;
+		outFile << "版本 {" << std::endl;
+		outFile << "pre-Aplea 1.4.0.0.0" << std::endl;
 		outFile << "}" << std::endl;
     }
 	initgraph(b,b ,EX_SHOWCONSOLE); //初始化图形窗口
