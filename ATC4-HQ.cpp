@@ -6,6 +6,7 @@
 #include <fstream>
 #include <shlobj.h>
 #include <tchar.h>
+#include <direct.h> // Windows 平台使用 _getcwd
 namespace master {
 	std::string fileName = "ATC4-HQ.ini"; // 文件名
 	//const wchar_t* ziti = L"Arial"; //使用字体
@@ -68,8 +69,14 @@ namespace master {
 		setfillcolor(WHITE); // 设置填充颜色为白色
 		solidrectangle(0, 0, b, b); // 用白色填充整个屏幕
 		IMAGE img; //定义一个图片对象
-		const char * a91 = "ATC4.ico"; //图片路径
-		loadimage(&img , a91 , b , b ,false); //加载图片
+		loadimage(&img , "ATC4.ico" , b , b ,false); //加载图片
+		if ( = 0) {
+			char cwd[1024]; // 用于存储当前工作目录
+			_getcwd(cwd, sizeof(cwd));
+			char a91a [260] = /ATC4.ico;
+			char a92b [260] = cwd + a91a;
+			loadimage(&img , a92b , b , b ,false);
+		}
 		putimage(0,0 , &img ); //在屏幕上显示图片
 	}
 	int qidongqitajichangdeX = b / 3 * 2 - 50; //a和b按钮的X坐标
