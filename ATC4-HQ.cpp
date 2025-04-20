@@ -186,8 +186,10 @@ int main() {
 								wchar_t wideBuffer[260];
 								mbstowcs(wideBuffer, szBuffer, 260); // 将多字节字符串转换为宽字符
 								std::wstring wideStr = wideBuffer;  // 转换为 std::wstring
-								std::wstring newContent = wideBuffer;
-								// 将新内容写入第二行
+								std::wstring newContent = wideBuffer;   // 将新内容写入第二行
+                                chongzhipingmu()n
+					            settextstyle(200 , 0 (ziti));
+								outtxtxy(10 ,10 , _T("请重启此程序"));
 							}
 						} else {
 							return false; // 文件读取失败
