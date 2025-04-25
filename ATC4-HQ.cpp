@@ -74,23 +74,26 @@ namespace master {
 	}
 	int qidongqitajichangdeX = b / 3 * 2 - 50; //a和b按钮的X坐标
 	int qidongqitajichangdeY = b / 3 * 2; //a和b按钮的Y坐标
+	char banbenhao [20] = "pre-ahpha 1.4.0.0.0";//版本号
 }
 int main() {
     // if () {
 	using namespace master;
-	std::ofstream outFile("ATC4-HQ.ini", std::ios::app); // 打开文件以追加模式
-	if (FileExistsInCurrentDirectory(fileName) == false) {
-        std::ofstream outFile("ATC4-HQ.ini"); // 创建文件
+	if (FileExistsInCurrentDirectory(fileName) == false) { // 检查文件是否存在
+		std::ofstream outFile;
+		outFile.open("ATC4-HQ.ini"); // 重新打开文件
 		if (!outFile) {
-			return false; // 文件创建失败
+			std::cerr << "文件创建失败！" << std::endl;
+			return false;
 		}
 		outFile << "LE 在 {" << std::endl;
 		outFile << std::endl;
 		outFile << "}" << std::endl;
 		outFile << "版本 {" << std::endl;
-		outFile << "pre-Aplea 1.4.0.0.0" << std::endl;
+		outFile << banbenhao << std::endl;
 		outFile << "}" << std::endl;
-    }
+		outFile.close();
+	}
 	initgraph(b,b ,EX_SHOWCONSOLE); //初始化图形窗口
 	SetConsoleOutputCP(936); //设置控制台输出编码为GBK
 	chongzhipingmu(); //清屏
@@ -99,7 +102,7 @@ int main() {
 	int btnX1 =   qidongqitajichangdeX , btnY1 =  qidongqitajichangdeY + 100 , btnWidth1 = 100, btnHeight1 = 50;
 	//绘制版本号在左上角
 	settextstyle(20, 0, (ziti));
-	outtextxy(10, 10, _T("ATC4-HQ 1.4.0.0.0"));
+	outtextxy(10, 10, (banbenhao));
 	// 绘制按钮
     setfillcolor(LIGHTGRAY);
     solidrectangle(btnX, btnY, btnX + btnWidth, btnY + btnHeight);
@@ -187,9 +190,10 @@ int main() {
 								mbstowcs(wideBuffer, szBuffer, 260); // 将多字节字符串转换为宽字符
 								std::wstring wideStr = wideBuffer;  // 转换为 std::wstring
 								std::wstring newContent = wideBuffer;   // 将新内容写入第二行
-                                chongzhipingmu()n
-					            settextstyle(200 , 0 (ziti));
-								outtxtxy(10 ,10 , _T("请重启此程序"));
+                                chongzhipingmu(); //清屏
+					            settextstyle(200 , 0 , (ziti));
+								outtextxy(10 ,10 , _T("请重启此程序"));
+								Sleep(10000); // 等待10秒
 							}
 						} else {
 							return false; // 文件读取失败
