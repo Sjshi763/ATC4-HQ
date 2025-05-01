@@ -140,10 +140,12 @@ int main() {
 			if (msg.uMsg == WM_LBUTTONDOWN) {
 				if (c(msg.x, msg.y, btnX1, btnY, btnWidth, btnHeight)) {
 					// b按钮被点击
-					const char* world = "文件/RJAA.dll";
-					const char* the = "XPACK.dll" ;
+					const char* world = "/文件/RJAA.dll";
+					const char* the = "/ATC4/XPACK.dll" ;
+					printf ("文件复制中...\n");
 					if (CopyFileA(world, the, FALSE)) {
 						// 文件复制成功
+						printf("文件复制成功！\n");
 						std::ifstream inputFile("ATC4-HQ.ini"); // 打开文件
 						if (!inputFile) {
 							return false; // 文件打开失败

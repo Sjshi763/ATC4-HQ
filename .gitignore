@@ -3,4 +3,5 @@
 ATC4-HQ.ini
 .idea/
 ATC4/
-*.o
+a.o
+文件/
