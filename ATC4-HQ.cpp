@@ -6,6 +6,7 @@
 #include <fstream>
 #include <shlobj.h>
 #include <tchar.h>
+#include <shellapi.h>
 namespace master {
 	std::string fileName = "ATC4-HQ.ini"; // 文件名
 	//const wchar_t* ziti = L"Arial"; //使用字体
@@ -140,8 +141,8 @@ int main() {
 			if (msg.uMsg == WM_LBUTTONDOWN) {
 				if (c(msg.x, msg.y, btnX1, btnY, btnWidth, btnHeight)) {
 					// b按钮被点击
-					const char* world = "/文件/RJAA.dll";
-					const char* the = "/ATC4/XPACK.dll" ;
+					const char* world = "\\文件\\RJAA.dll";
+					const char* the = "\\ATC4\\XPACK.dll" ;
 					printf ("文件复制中...\n");
 					if (CopyFileA(world, the, FALSE)) {
 						// 文件复制成功
@@ -157,7 +158,7 @@ int main() {
 							if (std::getline(inputFile, line)) {
 								//有第二行
 								std::wstring LEdizhi(line.begin(), line.end()); // 将第二行转换为wstring
-								std::wstring command = LEdizhi + L"\\LEProc.exe" + L" " + L"-run AXA.exe";
+								std::wstring command = LEdizhi + L"\\LEProc.exe" + L" " + L"-run ATC4\\AXA.exe";
 								STARTUPINFOW si = { sizeof(si) };
 								PROCESS_INFORMATION pi;
 								CreateProcessW(
@@ -198,10 +199,14 @@ int main() {
 								Sleep(10000); // 等待10秒
 							}
 						} else {
+							printf("文件读取失败！\n");
 							return false; // 文件读取失败
 						}
 						inputFile.close(); // 关闭文件
 					} else {	
+						printf ("文件复制失败");
+						DWORD error = GetLastError();
+						printf("文件复制失败，错误代码: %lu\n", error);
 						// 文件复制失败
 						return false;
 					}
