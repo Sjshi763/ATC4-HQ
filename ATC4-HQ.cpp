@@ -7,6 +7,7 @@
 #include <shlobj.h>
 #include <tchar.h>
 #include <shellapi.h>
+#include <vector>
 namespace master {
 	void RestartAsAdmin() {
 		char path[MAX_PATH];
@@ -94,22 +95,60 @@ namespace master {
 	int qidongqitajichangdeX = b / 3 * 2 - 50; //a和b按钮的X坐标
 	int qidongqitajichangdeY = b / 3 * 2; //a和b按钮的Y坐标
 	char banbenhao [20] = "pre-ahpha 1.4.0.0.0";//版本号
+	void updateSecondLineInFile(const std::string& filePath, const std::string& newContent) {
+    // 读取文件内容到内存
+    std::ifstream inputFile(filePath);
+    if (!inputFile) {
+        std::cerr << "无法打开文件！" << std::endl;
+        return;
+    }
+
+    std::vector<std::string> lines;
+    std::string line;
+    while (std::getline(inputFile, line)) {
+        lines.push_back(line);
+    }
+    inputFile.close();
+
+    // 修改第二行内容
+    if (lines.size() >= 2) {
+        lines[1] = newContent; // 更新第二行
+    } else {
+        // 如果文件少于两行，填充空行到第二行
+        while (lines.size() < 2) {
+            lines.push_back("");
+        }
+        lines[1] = newContent;
+    }
+
+    // 写回文件
+    std::ofstream outputFile(filePath, std::ios::trunc);
+    if (!outputFile) {
+        std::cerr << "无法写入文件！" << std::endl;
+        return;
+    }
+
+    for (const auto& l : lines) {
+        outputFile << l << std::endl;
+    }
+    outputFile.close();
+}
 }
 int main() {
-    if (!IsUserAnAdmin()) { // 检查是否以管理员身份运行
-		int result = MessageBox(
-			NULL,                           // 父窗口句柄（NULL 表示没有父窗口）
-			"ATC4-HQ需要管理员权限才可以正常使用！！点击是以使用管理员权限重启，或点击否关闭程序",           // 弹窗内容
-			"需要管理员权限运行！！",                     // 弹窗标题
-			MB_YESNO | MB_ICONINFORMATION      // 弹窗样式（是否按钮 + 信息图标）
-		);
-		if (result == IDYES) {
-			master::RestartAsAdmin(); // 以管理员身份重新启动程序
-			return 0; // 退出当前程序
-		} else if (result == IDNO) {
-			return 0; // 用户选择不重启，退出程序
-		}
-	}
+    // if (!IsUserAnAdmin()) { // 检查是否以管理员身份运行
+	// 	int result = MessageBox(
+	// 		NULL,                           // 父窗口句柄（NULL 表示没有父窗口）
+	// 		"ATC4-HQ需要管理员权限才可以正常使用！！点击是以使用管理员权限重启，或点击否关闭程序",           // 弹窗内容
+	// 		"需要管理员权限运行！！",                     // 弹窗标题
+	// 		MB_YESNO | MB_ICONINFORMATION      // 弹窗样式（是否按钮 + 信息图标）
+	// 	);
+	// 	if (result == IDYES) {
+	// 		master::RestartAsAdmin(); // 以管理员身份重新启动程序
+	// 		return 0; // 退出当前程序
+	// 	} else if (result == IDNO) {
+	// 		return 0; // 用户选择不重启，退出程序
+	// 	}
+	// }
 	using namespace master;
 	if (FileExistsInCurrentDirectory(fileName) == false) { // 检查文件是否存在
 		std::ofstream outFile;
@@ -154,6 +193,7 @@ int main() {
 			}
 		}
 	}
+	sb :
 	// a绘制按钮
     setfillcolor(LIGHTGRAY);
     solidrectangle(btnX, btnY, btnX + btnWidth, btnY + btnHeight);
@@ -161,7 +201,7 @@ int main() {
     outtextxy(btnX + 10, btnY + 15, _T("启动RJOO"));
 	// b绘制按钮
     setfillcolor(LIGHTGRAY);
-	btnWidth1 += 50;
+	btnWidth1 = 150;
     solidrectangle(btnX1, btnY, btnX1 + btnWidth1, btnY + btnHeight1);
     settextstyle(20, 0, (ziti));
     outtextxy(btnX1 + 10, btnY + 15, _T("启动其他机场"));
@@ -220,15 +260,13 @@ int main() {
 							return false;
 							}
 							SHGetPathFromIDList(idl, szBuffer); // 获取选择的文件夹路径
-							std::string filePath = "ATC4-HQ.ini";
-							wchar_t wideBuffer[260];
-							mbstowcs(wideBuffer, szBuffer, 260); // 将多字节字符串转换为宽字符
-							std::wstring wideStr = wideBuffer;  // 转换为 std::wstring
-							std::wstring newContent = wideBuffer;   // 将新内容写入第二行
+							std::wstring ws(reinterpret_cast<wchar_t*>(szBuffer));
+							std::string selectedPath(ws.begin(), ws.end()); // 转换为 std::string
+							updateSecondLineInFile("ATC4-HQ.ini", selectedPath); // 更新第二行内容
 							chongzhipingmu(); //清屏
-							settextstyle(200 , 0 , (ziti));
-							outtextxy(10 ,10 , _T("请重启此程序"));
-							Sleep(10000); // 等待10秒
+							settextstyle(100 , 0 , (ziti));
+							chongzhipingmu(); //清屏
+							goto sb ; //跳转到sb标签
 						} 
 						inputFile.close(); // 关闭文件
 					}
