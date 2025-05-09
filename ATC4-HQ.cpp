@@ -102,14 +102,12 @@ namespace master {
         std::cerr << "无法打开文件！" << std::endl;
         return;
     }
-
     std::vector<std::string> lines;
     std::string line;
     while (std::getline(inputFile, line)) {
         lines.push_back(line);
     }
     inputFile.close();
-
     // 修改第二行内容
     if (lines.size() >= 2) {
         lines[1] = newContent; // 更新第二行
@@ -120,7 +118,6 @@ namespace master {
         }
         lines[1] = newContent;
     }
-
     // 写回文件
     std::ofstream outputFile(filePath, std::ios::trunc);
     if (!outputFile) {
@@ -135,6 +132,8 @@ namespace master {
 }
 }
 int main() {
+	using namespace master;
+	b = 540 ;
     // if (!IsUserAnAdmin()) { // 检查是否以管理员身份运行
 	// 	int result = MessageBox(
 	// 		NULL,                           // 父窗口句柄（NULL 表示没有父窗口）
@@ -149,7 +148,6 @@ int main() {
 	// 		return 0; // 用户选择不重启，退出程序
 	// 	}
 	// }
-	using namespace master;
 	if (FileExistsInCurrentDirectory(fileName) == false) { // 检查文件是否存在
 		std::ofstream outFile;
 		outFile.open("ATC4-HQ.ini"); // 重新打开文件
@@ -165,7 +163,8 @@ int main() {
 		outFile << "}" << std::endl;
 		outFile.close();
 	}
-	initgraph(b,b ,EX_SHOWCONSOLE); //初始化图形窗口
+	initgraph(b,b ); //初始化图形窗口
+	//byd下次打包别忘了删掉上面那一行的“EX_SHOWCONSOLE”
 	SetConsoleOutputCP(936); //设置控制台输出编码为GBK
 	chongzhipingmu(); //清屏
 	// 按钮位置和大小
@@ -226,7 +225,6 @@ int main() {
 						// 读取第二行
 						if (std::getline(inputFile, line) && !line.empty()) {
 							printf("有第二行\n");
-							Sleep(11111);
 							//有第二行
 							std::wstring LEdizhi(line.begin(), line.end()); // 将第二行转换为wstring
 							std::wstring command = LEdizhi + L"\\LEProc.exe" + L" " + L"-run .\\ATC4\\AXA.exe";
@@ -247,22 +245,25 @@ int main() {
 						} else {
 							printf("没有第二行\n");
 							//没有第二行
-							TCHAR szBuffer[MAX_PATH] = {0}; // 存放选择文件夹的路径
-							BROWSEINFO bi;
-							ZeroMemory(&bi, sizeof(BROWSEINFO));
-							bi.hwndOwner = NULL;
-							bi.pszDisplayName = szBuffer;
-							bi.lpszTitle = _T("请选择一个文件夹:"); // 对话框标题
-							bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE; // 仅返回文件系统目录，并使用新对话框样式
+							TCHAR szBuffer[MAX_PATH] = {0};
+							BROWSEINFO bi = { 0 }; // 初始化BROWSEINFO结构
+							bi.lpszTitle = _T("请选择一个文件夹:"); // 设置对话框标题
+							bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE; // 设置对话框样式
 							LPITEMIDLIST idl = SHBrowseForFolder(&bi); // 显示选择文件夹对话框
-							if (NULL == idl)
-							{
-							return false;
+							if (idl == NULL) {
+								std::cerr << "未选择文件夹！" << std::endl;
+								return false;
 							}
 							SHGetPathFromIDList(idl, szBuffer); // 获取选择的文件夹路径
-							std::wstring ws(reinterpret_cast<wchar_t*>(szBuffer));
-							std::string selectedPath(ws.begin(), ws.end()); // 转换为 std::string
-							updateSecondLineInFile("ATC4-HQ.ini", selectedPath); // 更新第二行内容
+							// 转换为 std::string
+							std::string selectedPath;
+							#ifdef UNICODE
+							std::wstring ws(szBuffer); // 转换为宽字符串
+							selectedPath = std::string(ws.begin(), ws.end()); // 转换为多字节字符串
+							#else
+							selectedPath = std::string(szBuffer); // 直接转换为字符串
+							#endif				
+							updateSecondLineInFile("ATC4-HQ.ini", szBuffer); // 更新第二行内容
 							chongzhipingmu(); //清屏
 							settextstyle(100 , 0 , (ziti));
 							chongzhipingmu(); //清屏
@@ -279,29 +280,64 @@ int main() {
 			if (msg.uMsg == WM_LBUTTONDOWN) {
 				if (sa(msg.x, msg.y, btnX, btnY, btnWidth, btnHeight)) {
 					// a按钮被点击
-					const char* world = "文件/RJOO.dll";
-					const char* the = "XPACK.dll" ;
-					if (CopyFileA(world, the, FALSE)) {
-						// 文件复制成功
-						Sleep(1000); // 等待1秒
-    					std::wstring command = L"B:\\Locale-Emulator-2.5.0.1\\LEProc.exe -run AXA.exe";
-						STARTUPINFOW si = { sizeof(si) };
-    					PROCESS_INFORMATION pi;
-						CreateProcessW(
-							NULL,                   // 应用程序名称
-							&command[0],            // 命令行
-							NULL,                   // 进程安全属性
-							NULL,                   // 线程安全属性
-							FALSE,                  // 是否继承句柄
-							0,                      // 创建标志
-							NULL,                   // 环境变量
-							NULL,                   // 当前目录
-							&si,                    // 启动信息
-							&pi                     // 进程信息
-						);
-					} else {	
-						// 文件复制失败
-						return false;
+					system("copy .\\文件\\RJOO.dll .\\ATC4\\XPACK.dll"); // 复制文件
+					// 文件复制成功
+					std::ifstream inputFile("ATC4-HQ.ini"); // 打开文件);
+					if (!inputFile) {
+						std::cerr << "文件打开失败！" << std::endl;
+						return false; // 文件打开失败
+					}
+					// 读取文件内容
+					std::string line;
+					// 读取第一行（跳过）
+					if (std::getline(inputFile, line)) {
+						// 读取第二行
+						if (std::getline(inputFile, line) && !line.empty()) {
+							//有第二行
+							std::wstring LEdizhi(line.begin(), line.end()); // 将第二行转换为wstring
+							std::wstring command = LEdizhi + L"\\LEProc.exe" + L" " + L"-run .\\ATC4\\AXA.exe";
+							STARTUPINFOW si = { sizeof(si) };
+							PROCESS_INFORMATION pi;
+							CreateProcessW(
+								NULL,                   // 应用程序名称
+								&command[0],            // 命令行
+								NULL,                   // 进程安全属性
+								NULL,                   // 线程安全属性
+								FALSE,                  // 是否继承句柄
+								0,                      // 创建标志
+								NULL,                   // 环境变量
+								NULL,                   // 当前目录
+								&si,                    // 启动信息
+								&pi                     // 进程信息
+							);
+						} else {
+							printf("没有第二行\n");
+							//没有第二行
+							TCHAR szBuffer[MAX_PATH] = {0};
+							BROWSEINFO bi = { 0 }; // 初始化BROWSEINFO结构
+							bi.lpszTitle = _T("请选择一个文件夹:"); // 设置对话框标题
+							bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE; // 设置对话框样式
+							LPITEMIDLIST idl = SHBrowseForFolder(&bi); // 显示选择文件夹对话框
+							if (idl == NULL) {
+								std::cerr << "未选择文件夹！" << std::endl;
+								return false;
+							}
+							SHGetPathFromIDList(idl, szBuffer); // 获取选择的文件夹路径
+							// 转换为 std::string
+							std::string selectedPath;
+							#ifdef UNICODE
+							std::wstring ws(szBuffer); // 转换为宽字符串
+							selectedPath = std::string(ws.begin(), ws.end()); // 转换为多字节字符串
+							#else
+							selectedPath = std::string(szBuffer); // 直接转换为字符串
+							#endif				
+							updateSecondLineInFile("ATC4-HQ.ini", szBuffer); // 更新第二行内容
+							chongzhipingmu(); //清屏
+							settextstyle(100 , 0 , (ziti));
+							chongzhipingmu(); //清屏
+							goto sb ; //跳转到sb标签
+						} 
+						inputFile.close(); // 关闭文件
 					}
 					break;
 				}
