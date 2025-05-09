@@ -8,6 +8,24 @@
 #include <tchar.h>
 #include <shellapi.h>
 namespace master {
+	void RestartAsAdmin() {
+		char path[MAX_PATH];
+		GetModuleFileNameA(NULL, path, MAX_PATH);
+	
+		SHELLEXECUTEINFOA sei = { sizeof(SHELLEXECUTEINFOA) };
+		sei.lpVerb = "runas"; // 请求管理员权限
+		sei.lpFile = path;    // 当前程序路径
+		sei.nShow = SW_NORMAL; // 窗口显示方式
+	
+		if (!ShellExecuteExA(&sei)) {
+			DWORD error = GetLastError(); // 获取错误代码
+			if (error == ERROR_CANCELLED) { // 用户取消了管理员权限请求
+				std::cerr << "用户取消了管理员权限请求。" << std::endl;
+			} else {
+				std::cerr << "无法请求管理员权限，错误代码: " << error << std::endl;
+			}
+		}
+	}
 	std::string fileName = "ATC4-HQ.ini"; // 文件名
 	//const wchar_t* ziti = L"Arial"; //使用字体
 	char ziti[] = "Arial"; //使用字体
@@ -78,7 +96,20 @@ namespace master {
 	char banbenhao [20] = "pre-ahpha 1.4.0.0.0";//版本号
 }
 int main() {
-    // if () {
+    if (!isRestarted && !IsUserAnAdmin()) { // 检查是否以管理员身份运行
+		int result = MessageBox(
+			NULL,                           // 父窗口句柄（NULL 表示没有父窗口）
+			"ATC4-HQ需要管理员权限才可以正常使用！！点击是以使用管理员权限重启，或点击否关闭程序",           // 弹窗内容
+			"需要管理员权限运行！！",                     // 弹窗标题
+			MB_YESNO | MB_ICONINFORMATION      // 弹窗样式（是否按钮 + 信息图标）
+		);
+		if (result == IDYES) {
+			master::RestartAsAdmin(); // 以管理员身份重新启动程序
+			return 0; // 退出当前程序
+		} else if (result == IDNO) {
+			return 0; // 用户选择不重启，退出程序
+		}
+	}
 	using namespace master;
 	if (FileExistsInCurrentDirectory(fileName) == false) { // 检查文件是否存在
 		std::ofstream outFile;
@@ -147,6 +178,7 @@ int main() {
 					if (CopyFileA(world, the, FALSE)) {
 						// 文件复制成功
 						printf("文件复制成功！\n");
+						Sleep(1000); // 等待1秒
 						std::ifstream inputFile("ATC4-HQ.ini"); // 打开文件
 						if (!inputFile) {
 							return false; // 文件打开失败
