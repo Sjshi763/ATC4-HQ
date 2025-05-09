@@ -174,20 +174,22 @@ int main() {
 					// b按钮被点击
 					system("copy .\\文件\\RJAA.dll .\\ATC4\\XPACK.dll"); // 复制文件
 					// 文件复制成功
-					Sleep(1000); // 等待1秒
-					std::ifstream inputFile("ATC4-HQ.ini"); // 打开文件
+					std::ifstream inputFile("ATC4-HQ.ini"); // 打开文件);
 					if (!inputFile) {
 						std::cerr << "文件打开失败！" << std::endl;
 						return false; // 文件打开失败
 					}
+					// 读取文件内容
 					std::string line;
 					// 读取第一行（跳过）
 					if (std::getline(inputFile, line)) {
 						// 读取第二行
-						if (std::getline(inputFile, line)) {
+						if (std::getline(inputFile, line) && !line.empty()) {
+							printf("有第二行\n");
+							Sleep(11111);
 							//有第二行
 							std::wstring LEdizhi(line.begin(), line.end()); // 将第二行转换为wstring
-							std::wstring command = LEdizhi + L"\\LEProc.exe" + L" " + L"-run ATC4\\AXA.exe";
+							std::wstring command = LEdizhi + L"\\LEProc.exe" + L" " + L"-run .\\ATC4\\AXA.exe";
 							STARTUPINFOW si = { sizeof(si) };
 							PROCESS_INFORMATION pi;
 							CreateProcessW(
@@ -203,6 +205,7 @@ int main() {
 								&pi                     // 进程信息
 							);
 						} else {
+							printf("没有第二行\n");
 							//没有第二行
 							TCHAR szBuffer[MAX_PATH] = {0}; // 存放选择文件夹的路径
 							BROWSEINFO bi;
