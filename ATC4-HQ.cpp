@@ -9,6 +9,7 @@
 #include <shellapi.h>
 #include <vector>
 namespace master {
+	char ats [100] = {0};
 	void RestartAsAdmin() {
 		char path[MAX_PATH];
 		GetModuleFileNameA(NULL, path, MAX_PATH);
@@ -94,7 +95,7 @@ namespace master {
 	}
 	int qidongqitajichangdeX = b / 3 * 2 - 50; //a和b按钮的X坐标
 	int qidongqitajichangdeY = b / 3 * 2; //a和b按钮的Y坐标
-	char banbenhao [20] = "pre-ahpha 1.4.0.0.0";//版本号
+	char banbenhao [20] = "pre-ahpha 1.4.1.0.0";//版本号
 	void updateSecondLineInFile(const std::string& filePath, const std::string& newContent) {
     // 读取文件内容到内存
     std::ifstream inputFile(filePath);
@@ -132,6 +133,7 @@ namespace master {
 }
 }
 int main() {
+	mainstart :
 	using namespace master;
 	b = 540 ;
     // if (!IsUserAnAdmin()) { // 检查是否以管理员身份运行
@@ -156,12 +158,39 @@ int main() {
 			return false;
 		}
 		outFile << "LE 在 {" << std::endl;
-		outFile << std::endl;
+		if (ats [0] != '\0' ) {
+			outFile << ats <<std::endl;
+		} else {
+			outFile << std::endl;
+		}
 		outFile << "}" << std::endl;
 		outFile << "版本 {" << std::endl;
 		outFile << banbenhao << std::endl;
-		outFile << "}" << std::endl;
+		outFile << "}" << std::endl
+		<< "初めて run {" << std::endl
+		<< std::endl <<
+		"}"<< std::endl ;
 		outFile.close();
+	} else {
+		std::ifstream inputFile("ATC4-HQ.ini"); // 打开文件
+		if (!inputFile) {
+			std::cerr << "文件打开失败！" << std::endl;
+			return false; // 文件打开失败
+		}
+		std::string line;
+		for (
+			auto x = 1;
+			x <= 5;
+			x = x + 1
+		) {
+			std::getline(inputFile,line);
+			if (! (line == banbenhao)) { //检查配置文件版本
+				strncpy(ats, line.c_str(), sizeof(ats) - 1); // 拷贝内容，防止越界
+				inputFile.close();
+				system("del ATC4-HQ.ini");
+			}
+		}
+		goto mainstart;
 	}
 	initgraph(b,b ); //初始化图形窗口
 	//byd下次打包别忘了删掉上面那一行的“EX_SHOWCONSOLE”
