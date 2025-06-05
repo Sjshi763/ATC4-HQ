@@ -17,7 +17,6 @@ namespace master {
     }
     return result;
 	}
-	char ats [100] = {0};
 	void RestartAsAdmin() {
 		char path[MAX_PATH];
 		GetModuleFileNameA(NULL, path, MAX_PATH);
@@ -173,11 +172,7 @@ int main() {
 			return false;
 		}
 		outFile << "LE 在 {" << std::endl; //1
-		if (ats [0] != '\0' ) {
-			outFile << ats <<std::endl;
-		} else {
-			outFile << std::endl;
-		}								   //2
+										   //2
 		outFile << "}" << std::endl;       //3
 		outFile << "版本 {" << std::endl;  //4
 		outFile << banbenhao << std::endl; //5
@@ -200,7 +195,7 @@ int main() {
 		) {
 			std::getline(inputFile,line);
 			if (! (line == banbenhao)) { //检查配置文件版本
-				strncpy(ats, line.c_str(), sizeof(ats) - 1); // 拷贝内容，防止越界
+				
 				inputFile.close();
 				system("del ATC4-HQ.ini");
 			}
