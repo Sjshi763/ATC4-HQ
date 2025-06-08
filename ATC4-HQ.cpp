@@ -17,7 +17,6 @@ namespace master {
     }
     return result;
 	}
-	char ats [100] = {0};
 	void RestartAsAdmin() {
 		char path[MAX_PATH];
 		GetModuleFileNameA(NULL, path, MAX_PATH);
@@ -140,9 +139,7 @@ namespace master {
 	*/
 }
 int main() {
-	mainstart :
 	using namespace master;
-	
     // if (!IsUserAnAdmin()) { // 检查是否以管理员身份运行
 	// 	int result = MessageBox(
 	// 		NULL,                           // 父窗口句柄（NULL 表示没有父窗口）
@@ -173,11 +170,7 @@ int main() {
 			return false;
 		}
 		outFile << "LE 在 {" << std::endl; //1
-		if (ats [0] != '\0' ) {
-			outFile << ats <<std::endl;
-		} else {
-			outFile << std::endl;
-		}								   //2
+										   //2
 		outFile << "}" << std::endl;       //3
 		outFile << "版本 {" << std::endl;  //4
 		outFile << banbenhao << std::endl; //5
@@ -200,12 +193,22 @@ int main() {
 		) {
 			std::getline(inputFile,line);
 			if (! (line == banbenhao)) { //检查配置文件版本
-				strncpy(ats, line.c_str(), sizeof(ats) - 1); // 拷贝内容，防止越界
+				std::vector<std::string> lines;
+				std::string line;
+				std::ifstream inputFile("ATC4-HQ.ini");
+				while (std::getline(inputFile, line)) {
+					lines.push_back(line); // 每读一行就加到数组末尾
+				}
+				// 修改第2行
 				inputFile.close();
+				lines[4 /*这里是前面的数更改的行数*/ - 1] = banbenhao; // 更新第二行内容";
+				// 写回
+				std::ofstream outputFile("ATC4-HQ.ini", std::ios::trunc);
+				for (const auto& l : lines) outputFile << l << std::endl;
+				outputFile.close();
 				system("del ATC4-HQ.ini");
 			}
 		}
-		goto mainstart;
 	}
 	initgraph(b,b ); //初始化图形窗口
 	//byd下次打包别忘了删掉上面那一行的“EX_SHOWCONSOLE”
