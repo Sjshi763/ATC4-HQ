@@ -8,8 +8,15 @@
 #include <tchar.h>
 #include <shellapi.h>
 #include <vector>
+#include <time.h>
 namespace master {
-	char ats [100] = {0};
+	std::string xorEncrypt(const std::string& data, char key) {
+    std::string result = data;
+    for (auto& c : result) {
+        c ^= key;
+    }
+    return result;
+	}
 	void RestartAsAdmin() {
 		char path[MAX_PATH];
 		GetModuleFileNameA(NULL, path, MAX_PATH);
@@ -45,17 +52,6 @@ namespace master {
 			return true;
 		}
 	}
-	/*
-	bool jianrongmoushi
-	if (a  < 540) {
-		bool jianrongmoushi = true; //如果应用宽度小于540，则设置为true
-	} if else  (b > 540) {
-		bool jianrongmoushi = false; //如果应用宽度大于540，则设置为false
-		b = 540; //将应用高度设置为540
-	} else {
-		bool jianrongmoushi = false; //如果应用宽度大于540，则设置为false
-	}
-	*/
 	void overwriteSecondLine(const std::string& filePath, const std::string& newContent) {
 		std::fstream file(filePath, std::ios::in | std::ios::out); // 打开文件进行读写
 		if (!file) {
@@ -96,46 +92,54 @@ namespace master {
 	int qidongqitajichangdeX = b / 3 * 2 - 50; //a和b按钮的X坐标
 	int qidongqitajichangdeY = b / 3 * 2; //a和b按钮的Y坐标
 	char banbenhao [20] = "pre-ahpha 1.4.1.0.0";//版本号
-	void updateSecondLineInFile(const std::string& filePath, const std::string& newContent) {
-    // 读取文件内容到内存
-    std::ifstream inputFile(filePath);
-    if (!inputFile) {
-        std::cerr << "无法打开文件！" << std::endl;
-        return;
-    }
-    std::vector<std::string> lines;
-    std::string line;
-    while (std::getline(inputFile, line)) {
-        lines.push_back(line);
-    }
-    inputFile.close();
-    // 修改第二行内容
-    if (lines.size() >= 2) {
-        lines[1] = newContent; // 更新第二行
-    } else {
-        // 如果文件少于两行，填充空行到第二行
-        while (lines.size() < 2) {
-            lines.push_back("");
-        }
-        lines[1] = newContent;
-    }
-    // 写回文件
-    std::ofstream outputFile(filePath, std::ios::trunc);
-    if (!outputFile) {
-        std::cerr << "无法写入文件！" << std::endl;
-        return;
-    }
-
-    for (const auto& l : lines) {
-        outputFile << l << std::endl;
-    }
-    outputFile.close();
-}
+		void updateSecondLineInFile(const std::string& filePath, const std::string& newContent , int hang) {
+		// 读取文件内容到内存
+		std::ifstream inputFile(filePath);
+		if (!inputFile) {
+			std::cerr << "无法打开文件！" << std::endl;
+			return;
+		}
+		std::vector<std::string> lines;
+		std::string line;
+		while (std::getline(inputFile, line)) {
+			lines.push_back(line);
+		}
+		inputFile.close();
+		// 修改第二行内容
+		if (lines.size() >= hang) {
+			lines[1] = newContent; // 更新第(=hang)行
+		} else {
+			// 如果文件少于两行，填充空行到第(=hang)行
+			while (lines.size() < hang) {
+				lines.push_back("");
+			}
+			lines[1] = newContent;
+		}
+		// 写回文件
+		std::ofstream outputFile(filePath, std::ios::trunc);
+		if (!outputFile) {
+			std::cerr << "无法写入文件！" << std::endl;
+			return;
+		}
+		for (const auto& l : lines) {
+			outputFile << l << std::endl;
+		}
+		outputFile.close();
+	}
+	/*
+	bool jianrongmoushi
+	if (a  < 540) {
+		bool jianrongmoushi = true; //如果应用宽度小于540，则设置为true
+	} if else  (b > 540) {
+		bool jianrongmoushi = false; //如果应用宽度大于540，则设置为false
+		b = 540; //将应用高度设置为540
+	} else {
+		bool jianrongmoushi = false; //如果应用宽度大于540，则设置为false
+	}
+	*/
 }
 int main() {
-	mainstart :
 	using namespace master;
-	b = 540 ;
     // if (!IsUserAnAdmin()) { // 检查是否以管理员身份运行
 	// 	int result = MessageBox(
 	// 		NULL,                           // 父窗口句柄（NULL 表示没有父窗口）
@@ -150,6 +154,14 @@ int main() {
 	// 		return 0; // 用户选择不重启，退出程序
 	// 	}
 	// }
+	time_t now = time(0); // 获取当前时间戳
+    tm* localtm = localtime(&now); // 转换为本地时间结构体
+    char buf[64];
+    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", localtm); // 格式化时间
+	std::string timeStr(buf); // 将时间转换为字符串
+	std::string selectedPath = buf ;
+	std::string encryptedPath = xorEncrypt(selectedPath, 0x5A); // 0x5A是密钥
+	//创建配置文件
 	if (FileExistsInCurrentDirectory(fileName) == false) { // 检查文件是否存在
 		std::ofstream outFile;
 		outFile.open("ATC4-HQ.ini"); // 重新打开文件
@@ -157,19 +169,15 @@ int main() {
 			std::cerr << "文件创建失败！" << std::endl;
 			return false;
 		}
-		outFile << "LE 在 {" << std::endl;
-		if (ats [0] != '\0' ) {
-			outFile << ats <<std::endl;
-		} else {
-			outFile << std::endl;
-		}
-		outFile << "}" << std::endl;
-		outFile << "版本 {" << std::endl;
-		outFile << banbenhao << std::endl;
-		outFile << "}" << std::endl
-		<< "初めて run {" << std::endl
-		<< std::endl <<
-		"}"<< std::endl ;
+		outFile << "LE 在 {" << std::endl; //1
+										   //2
+		outFile << "}" << std::endl;       //3
+		outFile << "版本 {" << std::endl;  //4
+		outFile << banbenhao << std::endl; //5
+		outFile << "}" << std::endl        //6
+		<< "初めて run {" << std::endl     //7
+		<< encryptedPath << std::endl <<   //8
+		"}"<< std::endl ;                  //9
 		outFile.close();
 	} else {
 		std::ifstream inputFile("ATC4-HQ.ini"); // 打开文件
@@ -185,12 +193,22 @@ int main() {
 		) {
 			std::getline(inputFile,line);
 			if (! (line == banbenhao)) { //检查配置文件版本
-				strncpy(ats, line.c_str(), sizeof(ats) - 1); // 拷贝内容，防止越界
+				std::vector<std::string> lines;
+				std::string line;
+				std::ifstream inputFile("ATC4-HQ.ini");
+				while (std::getline(inputFile, line)) {
+					lines.push_back(line); // 每读一行就加到数组末尾
+				}
+				// 修改第2行
 				inputFile.close();
+				lines[4 /*这里是前面的数更改的行数*/ - 1] = banbenhao; // 更新第二行内容";
+				// 写回
+				std::ofstream outputFile("ATC4-HQ.ini", std::ios::trunc);
+				for (const auto& l : lines) outputFile << l << std::endl;
+				outputFile.close();
 				system("del ATC4-HQ.ini");
 			}
 		}
-		goto mainstart;
 	}
 	initgraph(b,b ); //初始化图形窗口
 	//byd下次打包别忘了删掉上面那一行的“EX_SHOWCONSOLE”
@@ -291,8 +309,8 @@ int main() {
 							selectedPath = std::string(ws.begin(), ws.end()); // 转换为多字节字符串
 							#else
 							selectedPath = std::string(szBuffer); // 直接转换为字符串
-							#endif				
-							updateSecondLineInFile("ATC4-HQ.ini", szBuffer); // 更新第二行内容
+							#endif
+							updateSecondLineInFile("ATC4-HQ.ini", szBuffer , 2); // 更新第二行内容
 							chongzhipingmu(); //清屏
 							settextstyle(100 , 0 , (ziti));
 							chongzhipingmu(); //清屏
@@ -360,7 +378,7 @@ int main() {
 							#else
 							selectedPath = std::string(szBuffer); // 直接转换为字符串
 							#endif				
-							updateSecondLineInFile("ATC4-HQ.ini", szBuffer); // 更新第二行内容
+							updateSecondLineInFile("ATC4-HQ.ini", szBuffer , 2); // 更新第二行内容
 							chongzhipingmu(); //清屏
 							settextstyle(100 , 0 , (ziti));
 							chongzhipingmu(); //清屏
