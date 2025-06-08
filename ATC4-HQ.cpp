@@ -91,7 +91,7 @@ namespace master {
 	}
 	int qidongqitajichangdeX = b / 3 * 2 - 50; //a和b按钮的X坐标
 	int qidongqitajichangdeY = b / 3 * 2; //a和b按钮的Y坐标
-	char banbenhao [20] = "1.4.1.0.0";//版本号
+	char banbenhao [20] = "pre-ahpha 1.4.1.1.0";//版本号
 		void updateSecondLineInFile(const std::string& filePath, const std::string& newContent , int hang) {
 		// 读取文件内容到内存
 		std::ifstream inputFile(filePath);
