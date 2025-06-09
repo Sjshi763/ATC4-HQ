@@ -31,8 +31,8 @@ int main() {
 			std::cerr << "文件创建失败！" << std::endl;
 			return false;
 		}
-		outFile << "LE 在 {" << std::endl; //1
-										   //2
+		outFile << "LE 在 {" << std::endl  //1
+		<< std::endl;					   //2
 		outFile << "}" << std::endl;       //3
 		outFile << "版本 {" << std::endl;  //4
 		outFile << banbenhao << std::endl; //5
