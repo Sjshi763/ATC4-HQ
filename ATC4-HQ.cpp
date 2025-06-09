@@ -1,143 +1,5 @@
-#include <graphics.h>
-#include <conio.h>
-#include <iostream>
-#include <windows.h>
-#include <string>
-#include <fstream>
-#include <shlobj.h>
-#include <tchar.h>
-#include <shellapi.h>
-#include <vector>
-#include <time.h>
-namespace master {
-	std::string xorEncrypt(const std::string& data, char key) {
-    std::string result = data;
-    for (auto& c : result) {
-        c ^= key;
-    }
-    return result;
-	}
-	void RestartAsAdmin() {
-		char path[MAX_PATH];
-		GetModuleFileNameA(NULL, path, MAX_PATH);
-	
-		SHELLEXECUTEINFOA sei = { sizeof(SHELLEXECUTEINFOA) };
-		sei.lpVerb = "runas"; // 请求管理员权限
-		sei.lpFile = path;    // 当前程序路径
-		sei.nShow = SW_NORMAL; // 窗口显示方式
-	
-		if (!ShellExecuteExA(&sei)) {
-			DWORD error = GetLastError(); // 获取错误代码
-			if (error == ERROR_CANCELLED) { // 用户取消了管理员权限请求
-				std::cerr << "用户取消了管理员权限请求。" << std::endl;
-			} else {
-				std::cerr << "无法请求管理员权限，错误代码: " << error << std::endl;
-			}
-		}
-	}
-	std::string fileName = "ATC4-HQ.ini"; // 文件名
-	//const wchar_t* ziti = L"Arial"; //使用字体
-	char ziti[] = "Arial"; //使用字体
-	int a = GetSystemMetrics(SM_CXSCREEN); //这个变量int a是用户显示屏高
-	int b = a /4; //这个变量int b是程序运行时的高和宽
-	bool FileExistsInCurrentDirectory(const std::string& fileName) {
-		WIN32_FIND_DATA findFileData;
-		HANDLE hFind = FindFirstFile(fileName.c_str(), &findFileData);
-		if (hFind == INVALID_HANDLE_VALUE) {
-			// 文件未找到
-			return false;
-		} else {
-			// 文件找到，关闭句柄
-			FindClose(hFind);
-			return true;
-		}
-	}
-	void overwriteSecondLine(const std::string& filePath, const std::string& newContent) {
-		std::fstream file(filePath, std::ios::in | std::ios::out); // 打开文件进行读写
-		if (!file) {
-			std::cerr << "无法打开文件！" << std::endl;
-			return;
-		}
-		// 定位到第二行的起始位置
-		std::string line;
-		std::getline(file, line); // 跳过第一行
-		std::streampos secondLinePos = file.tellg(); // 获取第二行的起始位置
-		// 写入新的内容到第二行
-		file.seekp(secondLinePos); // 定位到第二行
-		file << newContent; // 写入新的内容
-		file.close();
-	}
-	// 检查鼠标是否在按钮区域内
-    bool c (int x, int y, int btnX, int btnY, int btnWidth, int btnHeight) {
-    return x >= btnX && x <= btnX + btnWidth && y >= btnY && y <= btnY + btnHeight;
-	}
-	bool sa (int x, int y, int btnX1, int btnY, int btnWidth, int btnHeight) {
-		return x >= btnX1 && x <= btnX1 + btnWidth && y >= btnY && y <= btnY + btnHeight;
-		}
-	//如果鼠标在按钮区域内，返回布尔值c true，否则返回false
-	int qidongyouxianniudeX = b / 3 - 50; //a和b按钮的X坐标
-	int qidongyouxianniudeY = b / 3 * 2; //a和b按钮的Y坐标
-	void clearButton(int x, int y, int width, int height) {
-		setfillcolor(WHITE); // 设置填充颜色为白色
-		solidrectangle(x, y, x + width, y + height); // 用白色填充按钮区域
-	}
-	void chongzhipingmu() {
-		setfillcolor(WHITE); // 设置填充颜色为白色
-		solidrectangle(0, 0, b, b); // 用白色填充整个屏幕
-		IMAGE img; //定义一个图片对象
-		const char * a91 = "ATC4.ico"; //图片路径
-		loadimage(&img , a91 , b , b ,false); //加载图片
-		putimage(0,0 , &img ); //在屏幕上显示图片
-	}
-	int qidongqitajichangdeX = b / 3 * 2 - 50; //a和b按钮的X坐标
-	int qidongqitajichangdeY = b / 3 * 2; //a和b按钮的Y坐标
-	char banbenhao [20] = "pre-ahpha 1.4.1.1.0";//版本号
-		void updateSecondLineInFile(const std::string& filePath, const std::string& newContent , int hang) {
-		// 读取文件内容到内存
-		std::ifstream inputFile(filePath);
-		if (!inputFile) {
-			std::cerr << "无法打开文件！" << std::endl;
-			return;
-		}
-		std::vector<std::string> lines;
-		std::string line;
-		while (std::getline(inputFile, line)) {
-			lines.push_back(line);
-		}
-		inputFile.close();
-		// 修改第二行内容
-		if (lines.size() >= hang) {
-			lines[1] = newContent; // 更新第(=hang)行
-		} else {
-			// 如果文件少于两行，填充空行到第(=hang)行
-			while (lines.size() < hang) {
-				lines.push_back("");
-			}
-			lines[1] = newContent;
-		}
-		// 写回文件
-		std::ofstream outputFile(filePath, std::ios::trunc);
-		if (!outputFile) {
-			std::cerr << "无法写入文件！" << std::endl;
-			return;
-		}
-		for (const auto& l : lines) {
-			outputFile << l << std::endl;
-		}
-		outputFile.close();
-	}
-	/*
-	bool jianrongmoushi
-	if (a  < 540) {
-		bool jianrongmoushi = true; //如果应用宽度小于540，则设置为true
-	} if else  (b > 540) {
-		bool jianrongmoushi = false; //如果应用宽度大于540，则设置为false
-		b = 540; //将应用高度设置为540
-	} else {
-		bool jianrongmoushi = false; //如果应用宽度大于540，则设置为false
-	}
-	*/
-}
+#include "namespace-master-gui.cpp"
+#include "namespace-master-nogui.cpp"
 int main() {
 	using namespace master;
     // if (!IsUserAnAdmin()) { // 检查是否以管理员身份运行
@@ -209,6 +71,10 @@ int main() {
 				system("del ATC4-HQ.ini");
 			}
 		}
+	}
+	if (b < 540) {
+		qidong(L"Compatibility-mod.exe -114514");
+		return 0; 
 	}
 	initgraph(b,b ); //初始化图形窗口
 	//byd下次打包别忘了删掉上面那一行的“EX_SHOWCONSOLE”
