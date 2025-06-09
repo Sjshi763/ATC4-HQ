@@ -62,7 +62,7 @@ namespace master {
 		file << newContent; // 写入新的内容
 		file.close();
 	}
-    char banbenhao [20] = "1.4.2.1.0";//版本号
+    char banbenhao [20] = "pre-ahpha 1.5.0.0.0";//版本号
     void updateSecondLineInFile(const std::string& filePath, const std::string& newContent , int hang) {
 		// 读取文件内容到内存
 		std::ifstream inputFile(filePath);
