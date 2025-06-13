@@ -12,12 +12,10 @@ namespace master {
     void RestartAsAdmin() {
 		char path[MAX_PATH];
 		GetModuleFileNameA(NULL, path, MAX_PATH);
-	
 		SHELLEXECUTEINFOA sei = { sizeof(SHELLEXECUTEINFOA) };
 		sei.lpVerb = "runas"; // 请求管理员权限
 		sei.lpFile = path;    // 当前程序路径
 		sei.nShow = SW_NORMAL; // 窗口显示方式
-	
 		if (!ShellExecuteExA(&sei)) {
 			DWORD error = GetLastError(); // 获取错误代码
 			if (error == ERROR_CANCELLED) { // 用户取消了管理员权限请求
