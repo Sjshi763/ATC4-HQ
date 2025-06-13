@@ -8,3 +8,6 @@ a.o
 *.rar
 *.ps1
 打包/
+/ATC4-HQ-UI/ATC4-HQ-UI/obj/
+/ATC4-HQ-UI/ATC4-HQ-UI/bin/
+/ATC4-HQ-UI/obj/
