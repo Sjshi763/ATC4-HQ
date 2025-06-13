@@ -75,6 +75,8 @@ int main() {
 	if (a < 540) {
 		qidong(L"Compatibility-mod.exe 114514");
 		return 0; 
+	} else if (b < 540) {
+		b = 540; // 如果b小于540，则将b设置为540
 	}
 	initgraph(b,b ); //初始化图形窗口
 	//byd下次打包别忘了删掉上面那一行的“EX_SHOWCONSOLE”
