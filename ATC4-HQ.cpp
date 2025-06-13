@@ -73,7 +73,7 @@ int main() {
 	}
 	std::cout << "a" << std::endl;
 	if (b < 540) {
-		qidong(L"Compatibility-mod.exe -114514");
+		qidong(L"Compatibility-mod.exe 114514");
 		return 0; 
 	}
 	initgraph(b,b ); //初始化图形窗口
