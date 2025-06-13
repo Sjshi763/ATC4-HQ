@@ -72,7 +72,7 @@ int main() {
 		}
 	}
 	std::cout << "a" << std::endl;
-	if (b < 540) {
+	if (a < 540) {
 		qidong(L"Compatibility-mod.exe 114514");
 		return 0; 
 	}
