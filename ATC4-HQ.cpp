@@ -63,7 +63,7 @@ int main() {
 				}
 				// 修改第2行
 				inputFile.close();
-				lines[4 /*这里是前面的数更改的行数*/ /*- 1*/] = banbenhao; // 更新第二行内容";
+				lines[4 /*这里是前面的数更改的行数*/] = banbenhao; // 更新第二行内容";
 				// 写回
 				std::ofstream outputFile("ATC4-HQ.ini", std::ios::trunc);
 				for (const auto& l : lines) outputFile << l << std::endl;
