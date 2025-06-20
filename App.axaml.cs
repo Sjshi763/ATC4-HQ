@@ -1,47 +1,51 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
-using Avalonia.Data.Core.Plugins;
-using System.Linq;
 using Avalonia.Markup.Xaml;
-using ATC4_HQ.ViewModels;
+using Avalonia.Controls;
 using ATC4_HQ.Views;
+using System.Linq;
 
-namespace ATC4_HQ;
-
-public partial class App : Application
+namespace ATC4_HQ
 {
-    public override void Initialize()
+    public partial class App : Application
     {
-        AvaloniaXamlLoader.Load(this);
-    }
+        // 定义屏幕分辨率大小
+        public static int ScreenWidth ; 
+        public static int ScreenHeight ;
+        // 定义窗口大小变量
+        public static double WindowWidth { get; set; } = ScreenWidth / 4;
+        public static double WindowHeight { get; set; } = ScreenHeight / 4;
 
-    public override void OnFrameworkInitializationCompleted()
-    {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        public override void Initialize()
         {
-            // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
-            // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
-            DisableAvaloniaDataAnnotationValidation();
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = new MainWindowViewModel(),
-            };
+            AvaloniaXamlLoader.Load(this);
         }
 
-        base.OnFrameworkInitializationCompleted();
-    }
-
-    private void DisableAvaloniaDataAnnotationValidation()
-    {
-        // Get an array of plugins to remove
-        var dataValidationPluginsToRemove =
-            BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
-
-        // remove each entry found
-        foreach (var plugin in dataValidationPluginsToRemove)
+        public override void OnFrameworkInitializationCompleted()
         {
-            BindingPlugins.DataValidators.Remove(plugin);
+            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                var mainWindow = new MainWindow();
+                // 通过 mainWindow.Screens 获取屏幕信息
+                var screens = mainWindow.Screens;
+                var primaryScreen = screens?.All.OrderByDescending(s => s.IsPrimary).FirstOrDefault();
+                if (primaryScreen != null)
+                {
+                    WindowWidth = primaryScreen.WorkingArea.Width / 4.0;
+                    WindowHeight = primaryScreen.WorkingArea.Height / 4.0;
+                }
+                else
+                {
+                    WindowWidth = 900;
+                    WindowHeight = 600;
+                }
+
+                mainWindow.Width = WindowWidth;
+                mainWindow.Height = WindowHeight;
+                desktop.MainWindow = mainWindow;
+            }
+
+            base.OnFrameworkInitializationCompleted();
         }
     }
 }
