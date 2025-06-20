@@ -1,51 +1,165 @@
-#include "namespace-master-gui.cpp"
-#include "namespace-master-nogui.cpp"
+#include <conio.h>
+#include <iostream>
+#include <windows.h>
+#include <string>
+#include <fstream>
+#include <shlobj.h>
+#include <tchar.h>
+#include <shellapi.h>
+#include <vector>
+#include <time.h>
+namespace master {
+    void RestartAsAdmin() {
+		char path[MAX_PATH];
+		GetModuleFileNameA(NULL, path, MAX_PATH);
+		SHELLEXECUTEINFOA sei = { sizeof(SHELLEXECUTEINFOA) };
+		sei.lpVerb = "runas"; // è¯·æ±‚ç®¡ç†å‘˜æƒé™
+		sei.lpFile = path;    // å½“å‰ç¨‹åºè·¯å¾„
+		sei.nShow = SW_NORMAL; // çª—å£æ˜¾ç¤ºæ–¹å¼
+		if (!ShellExecuteExA(&sei)) {
+			DWORD error = GetLastError(); // è·å–é”™è¯¯ä»£ç 
+			if (error == ERROR_CANCELLED) { // ç”¨æˆ·å–æ¶ˆäº†ç®¡ç†å‘˜æƒé™è¯·æ±‚
+				std::cerr << "ç”¨æˆ·å–æ¶ˆäº†ç®¡ç†å‘˜æƒé™è¯·æ±‚ã€‚" << std::endl;
+			} else {
+				std::cerr << "æ— æ³•è¯·æ±‚ç®¡ç†å‘˜æƒé™ï¼Œé”™è¯¯ä»£ç : " << error << std::endl;
+			}
+		}
+	}
+	
+    std::string xorEncrypt(const std::string& data, char key) {
+    std::string result = data;
+    for (auto& c : result) {
+        c ^= key;
+    }
+    return result;
+	}
+	std::string fileName = "ATC4-HQ.ini"; // æ–‡ä»¶å
+    bool FileExistsInCurrentDirectory(const std::string& fileName) {
+		WIN32_FIND_DATA findFileData;
+		HANDLE hFind = FindFirstFile(fileName.c_str(), &findFileData);
+		if (hFind == INVALID_HANDLE_VALUE) {
+			// æ–‡ä»¶æœªæ‰¾åˆ°
+			return false;
+		} else {
+			// æ–‡ä»¶æ‰¾åˆ°ï¼Œå…³é—­å¥æŸ„
+			FindClose(hFind);
+			return true;
+		}
+	}
+    void overwriteSecondLine(const std::string& filePath, const std::string& newContent) {
+		std::fstream file(filePath, std::ios::in | std::ios::out); // æ‰“å¼€æ–‡ä»¶è¿›è¡Œè¯»å†™
+		if (!file) {
+			std::cerr << "æ— æ³•æ‰“å¼€æ–‡ä»¶ï¼" << std::endl;
+			return;
+		}
+		// å®šä½åˆ°ç¬¬äºŒè¡Œçš„èµ·å§‹ä½ç½®
+		std::string line;
+		std::getline(file, line); // è·³è¿‡ç¬¬ä¸€è¡Œ
+		std::streampos secondLinePos = file.tellg(); // è·å–ç¬¬äºŒè¡Œçš„èµ·å§‹ä½ç½®
+		// å†™å…¥æ–°çš„å†…å®¹åˆ°ç¬¬äºŒè¡Œ
+		file.seekp(secondLinePos); // å®šä½åˆ°ç¬¬äºŒè¡Œ
+		file << newContent; // å†™å…¥æ–°çš„å†…å®¹
+		file.close();
+	}
+    char banbenhao [20] = "pre-ahpha 1.5.0.0.0";//ç‰ˆæœ¬å·
+    void updateSecondLineInFile(const std::string& filePath, const std::string& newContent , int hang) {
+		// è¯»å–æ–‡ä»¶å†…å®¹åˆ°å†…å­˜
+		std::ifstream inputFile(filePath);
+		if (!inputFile) {
+			std::cerr << "æ— æ³•æ‰“å¼€æ–‡ä»¶ï¼" << std::endl;
+			return;
+		}
+		std::vector<std::string> lines;
+		std::string line;
+		while (std::getline(inputFile, line)) {
+			lines.push_back(line);
+		}
+		inputFile.close();
+		// ä¿®æ”¹ç¬¬äºŒè¡Œå†…å®¹
+		if (lines.size() >= hang) {
+			lines[1] = newContent; // æ›´æ–°ç¬¬(=hang)è¡Œ
+		} else {
+			// å¦‚æœæ–‡ä»¶å°‘äºä¸¤è¡Œï¼Œå¡«å……ç©ºè¡Œåˆ°ç¬¬(=hang)è¡Œ
+			while (lines.size() < hang) {
+				lines.push_back("");
+			}
+			lines[1] = newContent;
+		}
+		// å†™å›æ–‡ä»¶
+		std::ofstream outputFile(filePath, std::ios::trunc);
+		if (!outputFile) {
+			std::cerr << "æ— æ³•å†™å…¥æ–‡ä»¶ï¼" << std::endl;
+			return;
+		}
+		for (const auto& l : lines) {
+			outputFile << l << std::endl;
+		}
+		outputFile.close();
+	}
+    void qidong (std::wstring command) {
+        // std::wstring command = L"Compatibility-mod.exe -114514";
+		STARTUPINFOW si = { sizeof(si) };
+		PROCESS_INFORMATION pi;
+		CreateProcessW(
+			NULL,                   // åº”ç”¨ç¨‹åºåç§°
+			&command[0],            // å‘½ä»¤è¡Œ
+			NULL,                   // è¿›ç¨‹å®‰å…¨å±æ€§
+			NULL,                   // çº¿ç¨‹å®‰å…¨å±æ€§
+			FALSE,                  // æ˜¯å¦ç»§æ‰¿å¥æŸ„
+			0,                      // åˆ›å»ºæ ‡å¿—
+			NULL,                   // ç¯å¢ƒå˜é‡
+			NULL,                   // å½“å‰ç›®å½•
+			&si,                    // å¯åŠ¨ä¿¡æ¯
+			&pi                     // è¿›ç¨‹ä¿¡æ¯
+		);
+	}
+}
 int main() {
 	using namespace master;
-    // if (!IsUserAnAdmin()) { // ¼ì²éÊÇ·ñÒÔ¹ÜÀíÔ±Éí·İÔËĞĞ
+    // if (!IsUserAnAdmin()) { // ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ô¹ï¿½ï¿½ï¿½Ô±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	// 	int result = MessageBox(
-	// 		NULL,                           // ¸¸´°¿Ú¾ä±ú£¨NULL ±íÊ¾Ã»ÓĞ¸¸´°¿Ú£©
-	// 		"ATC4-HQĞèÒª¹ÜÀíÔ±È¨ÏŞ²Å¿ÉÒÔÕı³£Ê¹ÓÃ£¡£¡µã»÷ÊÇÒÔÊ¹ÓÃ¹ÜÀíÔ±È¨ÏŞÖØÆô£¬»òµã»÷·ñ¹Ø±Õ³ÌĞò",           // µ¯´°ÄÚÈİ
-	// 		"ĞèÒª¹ÜÀíÔ±È¨ÏŞÔËĞĞ£¡£¡",                     // µ¯´°±êÌâ
-	// 		MB_YESNO | MB_ICONINFORMATION      // µ¯´°ÑùÊ½£¨ÊÇ·ñ°´Å¥ + ĞÅÏ¢Í¼±ê£©
+	// 		NULL,                           // ï¿½ï¿½ï¿½ï¿½ï¿½Ú¾ï¿½ï¿½ï¿½ï¿½NULL ï¿½ï¿½Ê¾Ã»ï¿½Ğ¸ï¿½ï¿½ï¿½ï¿½Ú£ï¿½
+	// 		"ATC4-HQï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½Ô±È¨ï¿½Ş²Å¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½Ã£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½Ã¹ï¿½ï¿½ï¿½Ô±È¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø±Õ³ï¿½ï¿½ï¿½",           // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	// 		"ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½Ô±È¨ï¿½ï¿½ï¿½ï¿½ï¿½Ğ£ï¿½ï¿½ï¿½",                     // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	// 		MB_YESNO | MB_ICONINFORMATION      // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê½ï¿½ï¿½ï¿½Ç·ï¿½Å¥ + ï¿½ï¿½Ï¢Í¼ï¿½ê£©
 	// 	);
 	// 	if (result == IDYES) {
-	// 		master::RestartAsAdmin(); // ÒÔ¹ÜÀíÔ±Éí·İÖØĞÂÆô¶¯³ÌĞò
-	// 		return 0; // ÍË³öµ±Ç°³ÌĞò
+	// 		master::RestartAsAdmin(); // ï¿½Ô¹ï¿½ï¿½ï¿½Ô±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	// 		return 0; // ï¿½Ë³ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½
 	// 	} else if (result == IDNO) {
-	// 		return 0; // ÓÃ»§Ñ¡Ôñ²»ÖØÆô£¬ÍË³ö³ÌĞò
+	// 		return 0; // ï¿½Ã»ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë³ï¿½ï¿½ï¿½ï¿½ï¿½
 	// 	}
 	// }
-	time_t now = time(0); // »ñÈ¡µ±Ç°Ê±¼ä´Á
-    tm* localtm = localtime(&now); // ×ª»»Îª±¾µØÊ±¼ä½á¹¹Ìå
+	time_t now = time(0); // ï¿½ï¿½È¡ï¿½ï¿½Ç°Ê±ï¿½ï¿½ï¿½
+    tm* localtm = localtime(&now); // ×ªï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½á¹¹ï¿½ï¿½
     char buf[64];
-    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", localtm); // ¸ñÊ½»¯Ê±¼ä
-	std::string timeStr(buf); // ½«Ê±¼ä×ª»»Îª×Ö·û´®
+    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", localtm); // ï¿½ï¿½Ê½ï¿½ï¿½Ê±ï¿½ï¿½
+	std::string timeStr(buf); // ï¿½ï¿½Ê±ï¿½ï¿½×ªï¿½ï¿½Îªï¿½Ö·ï¿½ï¿½ï¿½
 	std::string selectedPath = buf ;
-	std::string encryptedPath = xorEncrypt(selectedPath, 0x5A); // 0x5AÊÇÃÜÔ¿
-	//´´½¨ÅäÖÃÎÄ¼ş
-	if (FileExistsInCurrentDirectory(fileName) == false) { // ¼ì²éÎÄ¼şÊÇ·ñ´æÔÚ
+	std::string encryptedPath = xorEncrypt(selectedPath, 0x5A); // 0x5Aï¿½ï¿½ï¿½ï¿½Ô¿
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½
+	if (FileExistsInCurrentDirectory(fileName) == false) { // ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½
 		std::ofstream outFile;
-		outFile.open("ATC4-HQ.ini"); // ÖØĞÂ´ò¿ªÎÄ¼ş
+		outFile.open("ATC4-HQ.ini"); // ï¿½ï¿½ï¿½Â´ï¿½ï¿½Ä¼ï¿½
 		if (!outFile) {
-			std::cerr << "ÎÄ¼ş´´½¨Ê§°Ü£¡" << std::endl;
+			std::cerr << "ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½Ê§ï¿½Ü£ï¿½" << std::endl;
 			return false;
 		}
-		outFile << "LE ÔÚ {" << std::endl  //1
+		outFile << "LE ï¿½ï¿½ {" << std::endl  //1
 		<< std::endl;					   //2
 		outFile << "}" << std::endl;       //3
-		outFile << "°æ±¾ {" << std::endl;  //4
+		outFile << "ï¿½æ±¾ {" << std::endl;  //4
 		outFile << banbenhao << std::endl; //5
 		outFile << "}" << std::endl        //6
-		<< "³õ¤á¤Æ run {" << std::endl     //7
+		<< "ï¿½ï¿½ï¿½ï¿½ï¿½ run {" << std::endl     //7
 		<< encryptedPath << std::endl <<   //8
 		"}"<< std::endl ;                  //9
 		outFile.close();
 	} else {
-		std::ifstream inputFile("ATC4-HQ.ini"); // ´ò¿ªÎÄ¼ş
+		std::ifstream inputFile("ATC4-HQ.ini"); // ï¿½ï¿½ï¿½Ä¼ï¿½
 		if (!inputFile) {
-			std::cerr << "ÎÄ¼ş´ò¿ªÊ§°Ü£¡" << std::endl;
-			return false; // ÎÄ¼ş´ò¿ªÊ§°Ü
+			std::cerr << "ï¿½Ä¼ï¿½ï¿½ï¿½Ê§ï¿½Ü£ï¿½" << std::endl;
+			return false; // ï¿½Ä¼ï¿½ï¿½ï¿½Ê§ï¿½ï¿½
 		}
 		std::string line;
 		for (
@@ -54,17 +168,17 @@ int main() {
 			x = x + 1
 		) {
 			std::getline(inputFile,line);
-			if (! (line == banbenhao)) { //¼ì²éÅäÖÃÎÄ¼ş°æ±¾
+			if (! (line == banbenhao)) { //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½æ±¾
 				std::vector<std::string> lines;
 				std::string line;
 				std::ifstream inputFile("ATC4-HQ.ini");
 				while (std::getline(inputFile, line)) {
-					lines.push_back(line); // Ã¿¶ÁÒ»ĞĞ¾Í¼Óµ½Êı×éÄ©Î²
+					lines.push_back(line); // Ã¿ï¿½ï¿½Ò»ï¿½Ğ¾Í¼Óµï¿½ï¿½ï¿½ï¿½ï¿½Ä©Î²
 				}
-				// ĞŞ¸ÄµÚ2ĞĞ
+				// ï¿½Ş¸Äµï¿½2ï¿½ï¿½
 				inputFile.close();
-				lines[4 /*ÕâÀïÊÇÇ°ÃæµÄÊı¸ü¸ÄµÄĞĞÊı*/] = banbenhao; // ¸üĞÂµÚ¶şĞĞÄÚÈİ";
-				// Ğ´»Ø
+				lines[4 /*ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½ï¿½ï¿½ï¿½ï¿½*/] = banbenhao; // ï¿½ï¿½ï¿½ÂµÚ¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½";
+				// Ğ´ï¿½ï¿½
 				std::ofstream outputFile("ATC4-HQ.ini", std::ios::trunc);
 				for (const auto& l : lines) outputFile << l << std::endl;
 				outputFile.close();
@@ -76,37 +190,37 @@ int main() {
 		qidong(L"Compatibility-mod.exe 114514");
 		return 0; 
 	} else if (b < 540) {
-		b = 540; // Èç¹ûbĞ¡ÓÚ540£¬Ôò½«bÉèÖÃÎª540
+		b = 540; // ï¿½ï¿½ï¿½bĞ¡ï¿½ï¿½540ï¿½ï¿½ï¿½ï¿½bï¿½ï¿½ï¿½ï¿½Îª540
 	}
-	initgraph(b,b ); //³õÊ¼»¯Í¼ĞÎ´°¿Ú
-	//bydÏÂ´Î´ò°ü±ğÍüÁËÉ¾µôÉÏÃæÄÇÒ»ĞĞµÄ¡°EX_SHOWCONSOLE¡±
-	SetConsoleOutputCP(936); //ÉèÖÃ¿ØÖÆÌ¨Êä³ö±àÂëÎªGBK
-	chongzhipingmu(); //ÇåÆÁ
-	// °´Å¥Î»ÖÃºÍ´óĞ¡
+	initgraph(b,b ); //ï¿½ï¿½Ê¼ï¿½ï¿½Í¼ï¿½Î´ï¿½ï¿½ï¿½
+	//bydï¿½Â´Î´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ĞµÄ¡ï¿½EX_SHOWCONSOLEï¿½ï¿½
+	SetConsoleOutputCP(936); //ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½Ì¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÎªGBK
+	chongzhipingmu(); //ï¿½ï¿½ï¿½ï¿½
+	// ï¿½ï¿½Å¥Î»ï¿½ÃºÍ´ï¿½Ğ¡
     int btnX =   qidongyouxianniudeX , btnY =  qidongyouxianniudeY , btnWidth = 100, btnHeight = 50;
 	int btnX1 =   qidongqitajichangdeX , btnY1 =  qidongqitajichangdeY + 100 , btnWidth1 = 100, btnHeight1 = 50;
-	//»æÖÆ°æ±¾ºÅÔÚ×óÉÏ½Ç
+	//ï¿½ï¿½ï¿½Æ°æ±¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï½ï¿½
 	settextstyle(20, 0, (ziti));
 	outtextxy(10, 10, (banbenhao));
-	// »æÖÆ°´Å¥ A
+	// ï¿½ï¿½ï¿½Æ°ï¿½Å¥ A
     setfillcolor(LIGHTGRAY);
     solidrectangle(btnX, btnY, btnX + btnWidth, btnY + btnHeight);
     settextstyle(20, 0, (ziti));
-    outtextxy(btnX + 10, btnY + 15, _T("Æô¶¯ÓÎÏ·"));
-	// »æÖÆ°´Å¥ B
+    outtextxy(btnX + 10, btnY + 15, _T("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï·"));
+	// ï¿½ï¿½ï¿½Æ°ï¿½Å¥ B
     setfillcolor(LIGHTGRAY);
 	btnWidth1 = 150;
     solidrectangle(btnX1, btnY, btnX1 + btnWidth1, btnY + btnHeight1);
     settextstyle(20, 0, (ziti));
-    outtextxy(btnX1 + 10, btnY + 15, _T("°²×°ATC4"));
+    outtextxy(btnX1 + 10, btnY + 15, _T("ï¿½ï¿½×°ATC4"));
 	while (true) {
-		// ¼ì²éÊó±êµã»÷
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		if (MouseHit()) {
 			MOUSEMSG msg = GetMouseMsg();
 			if (msg.uMsg == WM_LBUTTONDOWN) {
 				if (c(msg.x, msg.y, btnX1, btnY, btnWidth, btnHeight)) {
-					chongzhipingmu(); //ÇåÆÁ
-					// a»æÖÆ°´Å¥
+					chongzhipingmu(); //ï¿½ï¿½ï¿½ï¿½
+					// aï¿½ï¿½ï¿½Æ°ï¿½Å¥
 					setfillcolor(LIGHTGRAY);
 					solidrectangle(btnX, btnY, btnX + btnWidth, btnY + btnHeight);
 					settextstyle(20, 0, (ziti));
@@ -114,91 +228,91 @@ int main() {
 				}
 			}
 		}	
-		// ¼ì²éÊó±êµã»÷
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		if (MouseHit()) {
 			MOUSEMSG msg = GetMouseMsg();
 			if (msg.uMsg == WM_LBUTTONDOWN) {
 				if (c(msg.x, msg.y, btnX, btnY, btnWidth, btnHeight)) {
-					// °´Å¥±»µã»÷
-					chongzhipingmu(); //ÇåÆÁ
+					// ï¿½ï¿½Å¥ï¿½ï¿½ï¿½ï¿½ï¿½
+					chongzhipingmu(); //ï¿½ï¿½ï¿½ï¿½
 					sb :
-					// a»æÖÆ°´Å¥
+					// aï¿½ï¿½ï¿½Æ°ï¿½Å¥
 					setfillcolor(LIGHTGRAY);
 					solidrectangle(btnX, btnY, btnX + btnWidth, btnY + btnHeight);
 					settextstyle(20, 0, (ziti));
-					outtextxy(btnX + 10, btnY + 15, _T("Æô¶¯RJOO"));
-					// b»æÖÆ°´Å¥
+					outtextxy(btnX + 10, btnY + 15, _T("ï¿½ï¿½ï¿½ï¿½RJOO"));
+					// bï¿½ï¿½ï¿½Æ°ï¿½Å¥
 					setfillcolor(LIGHTGRAY);
 					btnWidth1 = 150;
 					solidrectangle(btnX1, btnY, btnX1 + btnWidth1, btnY + btnHeight1);
 					settextstyle(20, 0, (ziti));
-					outtextxy(btnX1 + 10, btnY + 15, _T("Æô¶¯ÆäËû»ú³¡"));
+					outtextxy(btnX1 + 10, btnY + 15, _T("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"));
 					while (true) {
-						// ¼ì²éÊó±êµã»÷
+						// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 						if (MouseHit()) {
 							MOUSEMSG msg = GetMouseMsg();
 							if (msg.uMsg == WM_LBUTTONDOWN) {
 								if (c(msg.x, msg.y, btnX1, btnY, btnWidth, btnHeight)) {
-									// b°´Å¥±»µã»÷
-									system("copy .\\ÎÄ¼ş\\RJAA.dll .\\ATC4\\XPACK.dll"); // ¸´ÖÆÎÄ¼ş
-									// ÎÄ¼ş¸´ÖÆ³É¹¦
-									std::ifstream inputFile("ATC4-HQ.ini"); // ´ò¿ªÎÄ¼ş);
+									// bï¿½ï¿½Å¥ï¿½ï¿½ï¿½ï¿½ï¿½
+									system("copy .\\ï¿½Ä¼ï¿½\\RJAA.dll .\\ATC4\\XPACK.dll"); // ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½
+									// ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½Æ³É¹ï¿½
+									std::ifstream inputFile("ATC4-HQ.ini"); // ï¿½ï¿½ï¿½Ä¼ï¿½);
 									if (!inputFile) {
-										std::cerr << "ÎÄ¼ş´ò¿ªÊ§°Ü£¡" << std::endl;
-										return false; // ÎÄ¼ş´ò¿ªÊ§°Ü
+										std::cerr << "ï¿½Ä¼ï¿½ï¿½ï¿½Ê§ï¿½Ü£ï¿½" << std::endl;
+										return false; // ï¿½Ä¼ï¿½ï¿½ï¿½Ê§ï¿½ï¿½
 									}
-									// ¶ÁÈ¡ÎÄ¼şÄÚÈİ
+									// ï¿½ï¿½È¡ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½
 									std::string line;
-									// ¶ÁÈ¡µÚÒ»ĞĞ£¨Ìø¹ı£©
+									// ï¿½ï¿½È¡ï¿½ï¿½Ò»ï¿½Ğ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 									if (std::getline(inputFile, line)) {
-										// ¶ÁÈ¡µÚ¶şĞĞ
+										// ï¿½ï¿½È¡ï¿½Ú¶ï¿½ï¿½ï¿½
 										if (std::getline(inputFile, line) && !line.empty()) {
-											printf("ÓĞµÚ¶şĞĞ\n");
-											//ÓĞµÚ¶şĞĞ
-											std::wstring LEdizhi(line.begin(), line.end()); // ½«µÚ¶şĞĞ×ª»»Îªwstring
+											printf("ï¿½ĞµÚ¶ï¿½ï¿½ï¿½\n");
+											//ï¿½ĞµÚ¶ï¿½ï¿½ï¿½
+											std::wstring LEdizhi(line.begin(), line.end()); // ï¿½ï¿½ï¿½Ú¶ï¿½ï¿½ï¿½×ªï¿½ï¿½Îªwstring
 											std::wstring command = LEdizhi + L"\\LEProc.exe" + L" " + L"-run .\\ATC4\\AXA.exe";
 											STARTUPINFOW si = { sizeof(si) };
 											PROCESS_INFORMATION pi;
 											CreateProcessW(
-												NULL,                   // Ó¦ÓÃ³ÌĞòÃû³Æ
-												&command[0],            // ÃüÁîĞĞ
-												NULL,                   // ½ø³Ì°²È«ÊôĞÔ
-												NULL,                   // Ïß³Ì°²È«ÊôĞÔ
-												FALSE,                  // ÊÇ·ñ¼Ì³Ğ¾ä±ú
-												0,                      // ´´½¨±êÖ¾
-												NULL,                   // »·¾³±äÁ¿
-												NULL,                   // µ±Ç°Ä¿Â¼
-												&si,                    // Æô¶¯ĞÅÏ¢
-												&pi                     // ½ø³ÌĞÅÏ¢
+												NULL,                   // Ó¦ï¿½Ã³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+												&command[0],            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+												NULL,                   // ï¿½ï¿½ï¿½Ì°ï¿½È«ï¿½ï¿½ï¿½ï¿½
+												NULL,                   // ï¿½ß³Ì°ï¿½È«ï¿½ï¿½ï¿½ï¿½
+												FALSE,                  // ï¿½Ç·ï¿½Ì³Ğ¾ï¿½ï¿½
+												0,                      // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾
+												NULL,                   // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+												NULL,                   // ï¿½ï¿½Ç°Ä¿Â¼
+												&si,                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+												&pi                     // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 											);
 										} else {
-											printf("Ã»ÓĞµÚ¶şĞĞ\n");
-											//Ã»ÓĞµÚ¶şĞĞ
+											printf("Ã»ï¿½ĞµÚ¶ï¿½ï¿½ï¿½\n");
+											//Ã»ï¿½ĞµÚ¶ï¿½ï¿½ï¿½
 											TCHAR szBuffer[MAX_PATH] = {0};
-											BROWSEINFO bi = { 0 }; // ³õÊ¼»¯BROWSEINFO½á¹¹
-											bi.lpszTitle = _T("ÇëÑ¡ÔñÒ»¸öÎÄ¼ş¼Ğ:"); // ÉèÖÃ¶Ô»°¿ò±êÌâ
-											bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE; // ÉèÖÃ¶Ô»°¿òÑùÊ½
-											LPITEMIDLIST idl = SHBrowseForFolder(&bi); // ÏÔÊ¾Ñ¡ÔñÎÄ¼ş¼Ğ¶Ô»°¿ò
+											BROWSEINFO bi = { 0 }; // ï¿½ï¿½Ê¼ï¿½ï¿½BROWSEINFOï¿½á¹¹
+											bi.lpszTitle = _T("ï¿½ï¿½Ñ¡ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½:"); // ï¿½ï¿½ï¿½Ã¶Ô»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+											bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE; // ï¿½ï¿½ï¿½Ã¶Ô»ï¿½ï¿½ï¿½ï¿½ï¿½Ê½
+											LPITEMIDLIST idl = SHBrowseForFolder(&bi); // ï¿½ï¿½Ê¾Ñ¡ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½Ğ¶Ô»ï¿½ï¿½ï¿½
 											if (idl == NULL) {
-												std::cerr << "Î´Ñ¡ÔñÎÄ¼ş¼Ğ£¡" << std::endl;
+												std::cerr << "Î´Ñ¡ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½Ğ£ï¿½" << std::endl;
 												return false;
 											}
-											SHGetPathFromIDList(idl, szBuffer); // »ñÈ¡Ñ¡ÔñµÄÎÄ¼ş¼ĞÂ·¾¶
-											// ×ª»»Îª std::string
+											SHGetPathFromIDList(idl, szBuffer); // ï¿½ï¿½È¡Ñ¡ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½Â·ï¿½ï¿½
+											// ×ªï¿½ï¿½Îª std::string
 											std::string selectedPath;
 											#ifdef UNICODE
-											std::wstring ws(szBuffer); // ×ª»»Îª¿í×Ö·û´®
-											selectedPath = std::string(ws.begin(), ws.end()); // ×ª»»Îª¶à×Ö½Ú×Ö·û´®
+											std::wstring ws(szBuffer); // ×ªï¿½ï¿½Îªï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½
+											selectedPath = std::string(ws.begin(), ws.end()); // ×ªï¿½ï¿½Îªï¿½ï¿½ï¿½Ö½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½
 											#else
-											selectedPath = std::string(szBuffer); // Ö±½Ó×ª»»Îª×Ö·û´®
+											selectedPath = std::string(szBuffer); // Ö±ï¿½ï¿½×ªï¿½ï¿½Îªï¿½Ö·ï¿½ï¿½ï¿½
 											#endif
-											updateSecondLineInFile("ATC4-HQ.ini", szBuffer , 2); // ¸üĞÂµÚ¶şĞĞÄÚÈİ
-											chongzhipingmu(); //ÇåÆÁ
+											updateSecondLineInFile("ATC4-HQ.ini", szBuffer , 2); // ï¿½ï¿½ï¿½ÂµÚ¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+											chongzhipingmu(); //ï¿½ï¿½ï¿½ï¿½
 											settextstyle(100 , 0 , (ziti));
-											chongzhipingmu(); //ÇåÆÁ
-											goto sb ; //Ìø×ªµ½sb±êÇ©
+											chongzhipingmu(); //ï¿½ï¿½ï¿½ï¿½
+											goto sb ; //ï¿½ï¿½×ªï¿½ï¿½sbï¿½ï¿½Ç©
 										} 
-										inputFile.close(); // ¹Ø±ÕÎÄ¼ş
+										inputFile.close(); // ï¿½Ø±ï¿½ï¿½Ä¼ï¿½
 									}
 									break;
 								}
@@ -208,65 +322,65 @@ int main() {
 							MOUSEMSG msg = GetMouseMsg();
 							if (msg.uMsg == WM_LBUTTONDOWN) {
 								if (sa(msg.x, msg.y, btnX, btnY, btnWidth, btnHeight)) {
-									// a°´Å¥±»µã»÷
-									system("copy .\\ÎÄ¼ş\\RJOO.dll .\\ATC4\\XPACK.dll"); // ¸´ÖÆÎÄ¼ş
-									// ÎÄ¼ş¸´ÖÆ³É¹¦
-									std::ifstream inputFile("ATC4-HQ.ini"); // ´ò¿ªÎÄ¼ş);
+									// aï¿½ï¿½Å¥ï¿½ï¿½ï¿½ï¿½ï¿½
+									system("copy .\\ï¿½Ä¼ï¿½\\RJOO.dll .\\ATC4\\XPACK.dll"); // ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½
+									// ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½Æ³É¹ï¿½
+									std::ifstream inputFile("ATC4-HQ.ini"); // ï¿½ï¿½ï¿½Ä¼ï¿½);
 									if (!inputFile) {
-										std::cerr << "ÎÄ¼ş´ò¿ªÊ§°Ü£¡" << std::endl;
-										return false; // ÎÄ¼ş´ò¿ªÊ§°Ü
+										std::cerr << "ï¿½Ä¼ï¿½ï¿½ï¿½Ê§ï¿½Ü£ï¿½" << std::endl;
+										return false; // ï¿½Ä¼ï¿½ï¿½ï¿½Ê§ï¿½ï¿½
 									}
-									// ¶ÁÈ¡ÎÄ¼şÄÚÈİ
+									// ï¿½ï¿½È¡ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½
 									std::string line;
-									// ¶ÁÈ¡µÚÒ»ĞĞ£¨Ìø¹ı£©
+									// ï¿½ï¿½È¡ï¿½ï¿½Ò»ï¿½Ğ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 									if (std::getline(inputFile, line)) {
-										// ¶ÁÈ¡µÚ¶şĞĞ
+										// ï¿½ï¿½È¡ï¿½Ú¶ï¿½ï¿½ï¿½
 										if (std::getline(inputFile, line) && !line.empty()) {
-											//ÓĞµÚ¶şĞĞ
-											std::wstring LEdizhi(line.begin(), line.end()); // ½«µÚ¶şĞĞ×ª»»Îªwstring
+											//ï¿½ĞµÚ¶ï¿½ï¿½ï¿½
+											std::wstring LEdizhi(line.begin(), line.end()); // ï¿½ï¿½ï¿½Ú¶ï¿½ï¿½ï¿½×ªï¿½ï¿½Îªwstring
 											std::wstring command = LEdizhi + L"\\LEProc.exe" + L" " + L"-run .\\ATC4\\AXA.exe";
 											STARTUPINFOW si = { sizeof(si) };
 											PROCESS_INFORMATION pi;
 											CreateProcessW(
-												NULL,                   // Ó¦ÓÃ³ÌĞòÃû³Æ
-												&command[0],            // ÃüÁîĞĞ
-												NULL,                   // ½ø³Ì°²È«ÊôĞÔ
-												NULL,                   // Ïß³Ì°²È«ÊôĞÔ
-												FALSE,                  // ÊÇ·ñ¼Ì³Ğ¾ä±ú
-												0,                      // ´´½¨±êÖ¾
-												NULL,                   // »·¾³±äÁ¿
-												NULL,                   // µ±Ç°Ä¿Â¼
-												&si,                    // Æô¶¯ĞÅÏ¢
-												&pi                     // ½ø³ÌĞÅÏ¢
+												NULL,                   // Ó¦ï¿½Ã³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+												&command[0],            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+												NULL,                   // ï¿½ï¿½ï¿½Ì°ï¿½È«ï¿½ï¿½ï¿½ï¿½
+												NULL,                   // ï¿½ß³Ì°ï¿½È«ï¿½ï¿½ï¿½ï¿½
+												FALSE,                  // ï¿½Ç·ï¿½Ì³Ğ¾ï¿½ï¿½
+												0,                      // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾
+												NULL,                   // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+												NULL,                   // ï¿½ï¿½Ç°Ä¿Â¼
+												&si,                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+												&pi                     // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 											);
 										} else {
-											printf("Ã»ÓĞµÚ¶şĞĞ\n");
-											//Ã»ÓĞµÚ¶şĞĞ
+											printf("Ã»ï¿½ĞµÚ¶ï¿½ï¿½ï¿½\n");
+											//Ã»ï¿½ĞµÚ¶ï¿½ï¿½ï¿½
 											TCHAR szBuffer[MAX_PATH] = {0};
-											BROWSEINFO bi = { 0 }; // ³õÊ¼»¯BROWSEINFO½á¹¹
-											bi.lpszTitle = _T("ÇëÑ¡ÔñÒ»¸öÎÄ¼ş¼Ğ:"); // ÉèÖÃ¶Ô»°¿ò±êÌâ
-											bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE; // ÉèÖÃ¶Ô»°¿òÑùÊ½
-											LPITEMIDLIST idl = SHBrowseForFolder(&bi); // ÏÔÊ¾Ñ¡ÔñÎÄ¼ş¼Ğ¶Ô»°¿ò
+											BROWSEINFO bi = { 0 }; // ï¿½ï¿½Ê¼ï¿½ï¿½BROWSEINFOï¿½á¹¹
+											bi.lpszTitle = _T("ï¿½ï¿½Ñ¡ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½:"); // ï¿½ï¿½ï¿½Ã¶Ô»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+											bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE; // ï¿½ï¿½ï¿½Ã¶Ô»ï¿½ï¿½ï¿½ï¿½ï¿½Ê½
+											LPITEMIDLIST idl = SHBrowseForFolder(&bi); // ï¿½ï¿½Ê¾Ñ¡ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½Ğ¶Ô»ï¿½ï¿½ï¿½
 											if (idl == NULL) {
-												std::cerr << "Î´Ñ¡ÔñÎÄ¼ş¼Ğ£¡" << std::endl;
+												std::cerr << "Î´Ñ¡ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½Ğ£ï¿½" << std::endl;
 												return false;
 											}
-											SHGetPathFromIDList(idl, szBuffer); // »ñÈ¡Ñ¡ÔñµÄÎÄ¼ş¼ĞÂ·¾¶
-											// ×ª»»Îª std::string
+											SHGetPathFromIDList(idl, szBuffer); // ï¿½ï¿½È¡Ñ¡ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½Â·ï¿½ï¿½
+											// ×ªï¿½ï¿½Îª std::string
 											std::string selectedPath;
 											#ifdef UNICODE
-											std::wstring ws(szBuffer); // ×ª»»Îª¿í×Ö·û´®
-											selectedPath = std::string(ws.begin(), ws.end()); // ×ª»»Îª¶à×Ö½Ú×Ö·û´®
+											std::wstring ws(szBuffer); // ×ªï¿½ï¿½Îªï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½
+											selectedPath = std::string(ws.begin(), ws.end()); // ×ªï¿½ï¿½Îªï¿½ï¿½ï¿½Ö½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½
 											#else
-											selectedPath = std::string(szBuffer); // Ö±½Ó×ª»»Îª×Ö·û´®
+											selectedPath = std::string(szBuffer); // Ö±ï¿½ï¿½×ªï¿½ï¿½Îªï¿½Ö·ï¿½ï¿½ï¿½
 											#endif				
-											updateSecondLineInFile("ATC4-HQ.ini", szBuffer , 2); // ¸üĞÂµÚ¶şĞĞÄÚÈİ
-											chongzhipingmu(); //ÇåÆÁ
+											updateSecondLineInFile("ATC4-HQ.ini", szBuffer , 2); // ï¿½ï¿½ï¿½ÂµÚ¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+											chongzhipingmu(); //ï¿½ï¿½ï¿½ï¿½
 											settextstyle(100 , 0 , (ziti));
-											chongzhipingmu(); //ÇåÆÁ
-											goto sb ; //Ìø×ªµ½sb±êÇ©
+											chongzhipingmu(); //ï¿½ï¿½ï¿½ï¿½
+											goto sb ; //ï¿½ï¿½×ªï¿½ï¿½sbï¿½ï¿½Ç©
 										} 
-										inputFile.close(); // ¹Ø±ÕÎÄ¼ş
+										inputFile.close(); // ï¿½Ø±ï¿½ï¿½Ä¼ï¿½
 									}
 									break;
 								}
