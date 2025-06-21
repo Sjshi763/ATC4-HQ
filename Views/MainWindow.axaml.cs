@@ -21,7 +21,7 @@ namespace ATC4_HQ.Views
 
         private void InstallGame_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            PageHost.Content = new InstallGame(); // 切换到设置页面
+            PageHost.Content = new InstallGame(); // 切换到安装页面
         }
     }
 }
