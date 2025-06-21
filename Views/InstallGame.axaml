@@ -1,8 +1,14 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="ATC4_HQ.Views.InstallGame">
-    
-        <Grid Background="White">
-            <TextBlock Text="这是安装页面" FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <Grid ColumnDefinitions="*,*"
+        Margin="0,10,0,10">
+        <Button Grid.Column="0"
+                    Content="安装ATC4 XJATC版本"
+                    Click="InstallGame_Click"
+                    Width="120"
+                    Height="40"
+                    HorizontalAlignment="Center"
+                    Margin="20,0,0,0"/>
         </Grid>
 </UserControl>
