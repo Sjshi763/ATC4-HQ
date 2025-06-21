@@ -113,8 +113,56 @@ namespace master {
 		);
 	}
 }
-int main() {
+int main(int argc , char* argv[]) {
 	using namespace master;
+	SetConsoleCP(CP_UTF8);         // 设置输入为UTF-8
+	SetConsoleOutputCP(CP_UTF8);   // 设置输出为UTF-8
+	if (argc < 2) {
+        std::cout 
+		<< "请选择功能" << std::endl
+		<< "生成配置文件 -new-config" << std::endl
+		<< "启动游戏 -run" << std::endl
+		<< "配置参数 -set-config" << std::endl;
+		// << "以管理员权限运行" << std::endl
+        return 1;
+    }
+	if (argv[1] == "-new-config") {
+		time_t now = time(0); // 获取当前时间戳
+		tm* localtm = localtime(&now); // 转换为本地时间结构体
+		char buf[64];
+		strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", localtm); // 格式化时间
+		std::string timeStr(buf); // 将时间转换为字符串
+		std::string selectedPath = buf ;
+		std::string encryptedPath = xorEncrypt(selectedPath, 0x5A); // 0x5A是密钥
+		//创建配置文件
+		if (FileExistsInCurrentDirectory(fileName) == false) { // 检查文件是否存在
+			std::ofstream outFile;
+			outFile.open("ATC4-HQ.ini"); // 重新打开文件
+			if (!outFile) {
+				std::cerr << "文件创建失败！" << std::endl;
+				return false;
+			}
+			outFile << "LE 在 {" << std::endl  //1
+			<< std::endl;					   //2
+			outFile << "}" << std::endl;       //3
+			outFile << "版本 {" << std::endl;  //4
+			outFile << banbenhao << std::endl; //5
+			outFile << "}" << std::endl        //6
+			<< "初めて run {" << std::endl     //7
+			<< encryptedPath << std::endl <<   //8
+			"}"<< std::endl ;                  //9
+			outFile.close();
+		} 
+	} else if (argv[1] == "-run") {
+		if (argc < 3) {
+			
+		} else if (argc == 2) {
+			std::cout << "记得在-run 后面加 -<游戏>" << std::endl;
+			return 1;
+		}
+	} else {
+		std::cout << "写错了！" << std::endl;
+	}
     // if (!IsUserAnAdmin()) { // 检查是否以管理员身份运行
 	// 	int result = MessageBox(
 	// 		NULL,                           // 父窗口句柄（NULL 表示没有父窗口）
@@ -129,6 +177,8 @@ int main() {
 	// 		return 0; // 用户选择不重启，退出程序
 	// 	}
 	// }
+
+	/*
 	time_t now = time(0); // 获取当前时间戳
     tm* localtm = localtime(&now); // 转换为本地时间结构体
     char buf[64];
@@ -176,7 +226,7 @@ int main() {
 				}
 				// 修改第2行
 				inputFile.close();
-				lines[4 /*这里是前面的数更改的行数*/] = banbenhao; // 更新第二行内容";
+				lines[4 /*这里是前面的数更改的行数*] = banbenhao; // 更新第二行内容";
 				// 写回
 				std::ofstream outputFile("ATC4-HQ.ini", std::ios::trunc);
 				for (const auto& l : lines) outputFile << l << std::endl;
@@ -184,7 +234,6 @@ int main() {
 			}
 		}
 	}
-	// 							// b按钮被点击
 	system("copy .\\文件\\RJAA.dll .\\ATC4\\XPACK.dll"); // 复制文件
 	// 文件复制成功
 	std::ifstream inputFile("ATC4-HQ.ini"); // 打开文件);
@@ -307,5 +356,6 @@ int main() {
 		} 
 		inputFile.close(); // 关闭文件
 	}
+	*/
 	return 0;
 }
