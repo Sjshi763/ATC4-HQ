@@ -1,0 +1,48 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ATC4_HQ.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="540" d:DesignHeight="540"
+        x:Class="ATC4_HQ.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/ATC4.ico"
+        Title="ATC4_HQ">
+        <!-- <Window.Background>
+            <ImageBrush Source="/Assets/ATC4.ico" />
+        </Window.Background> -->
+    <StackPanel>
+        <Border Margin="5" CornerRadius="10" Background="LightBlue">
+            <TextBlock Margin="5"
+                       FontSize="24" 
+                       HorizontalAlignment="Center"
+                       Text="ATC4-HQ"/>
+        </Border>
+        <Grid ColumnDefinitions="*,*,*"
+        Margin="0,10,0,10">
+            <Button Grid.Column="0"
+                    Content="启动游戏"
+                    Click="StartGame_Click"
+                    Width="120"
+                    Height="40"
+                    HorizontalAlignment="Left"
+                    Margin="20,0,0,0"/>
+            <Button Grid.Column="1"
+                    Content="安装游戏"
+                    Click="InstallGame_Click"
+                    Width="120"
+                    Height="40"
+                    HorizontalAlignment="Left"
+                    Margin="20,0,0,0"/>
+            <Button Grid.Column="2"
+                    Content="设置"
+                    Click="Setting_Click"
+                    Width="120"
+                    Height="40"
+                    HorizontalAlignment="Right"
+                    Margin="0,0,20,0"/>
+            
+        </Grid>
+        <ContentControl x:Name="PageHost"/>
+    </StackPanel>
+</Window>

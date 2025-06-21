@@ -8,3 +8,5 @@ a.o
 *.rar
 *.ps1
 打包/
+/obj/
+/bin/

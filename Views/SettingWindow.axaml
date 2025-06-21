@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="ATC4_HQ.Views.SettingWindow">
+    <StackPanel>
+        <Grid Background="White">
+            <TextBlock Text="这是设置页面" FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Grid>
+        <Border Margin="5" CornerRadius="10" Background="LightBlue">
+            <TextBlock Margin="5"
+                       FontSize="24" 
+                       HorizontalAlignment="Center"
+                       Text="LE目录"/>
+        </Border>
+        <Grid ShowGridLines="True" Margin="5" 
+            ColumnDefinitions="120, 100"
+            RowDefinitions="Auto, Auto">
+            <Label Grid.Row="0" Grid.Column="0" Margin="10">LE目录</Label>
+            <TextBox Grid.Row="0" Grid.Column="1" Margin="0 5" Text="0"/>
+        </Grid>
+        <Button Grid.Row="1" Grid.Column="1">保存</Button>
+    </StackPanel>
+</UserControl>
