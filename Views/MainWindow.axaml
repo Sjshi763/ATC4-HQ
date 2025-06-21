@@ -8,13 +8,17 @@
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/ATC4.ico"
         Title="ATC4_HQ">
-
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
-
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-    
+    <StackPanel>
+        <Border Margin="5" CornerRadius="10" Background="LightBlue">
+            <TextBlock Margin="5"
+                       FontSize="24" 
+                       HorizontalAlignment="Center"
+                       Text="ATC4-HQ"/>
+        </Border>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Content="启动游戏" Click="StartGame_Click"/>
+            <Button Content="设置" Click="Setting_Click"/>
+        </StackPanel>
+        <ContentControl x:Name="PageHost"/>
+    </StackPanel>
 </Window>
