@@ -7,7 +7,6 @@ namespace ATC4_HQ.Views
         public MainWindow()
         {
             InitializeComponent();
-            // PageHost.Content = new MainWindow(); // 默认显示主页
         }
 
         private void StartGame_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -18,6 +17,11 @@ namespace ATC4_HQ.Views
         private void Setting_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             PageHost.Content = new SettingWindow(); // 切换到设置页面
+        }
+
+        private void InstallGame_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            PageHost.Content = new InstallGame(); // 切换到设置页面
         }
     }
 }
