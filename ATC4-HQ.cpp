@@ -13,19 +13,18 @@ namespace master {
 		char path[MAX_PATH];
 		GetModuleFileNameA(NULL, path, MAX_PATH);
 		SHELLEXECUTEINFOA sei = { sizeof(SHELLEXECUTEINFOA) };
-		sei.lpVerb = "runas"; // 请求管理员权限
-		sei.lpFile = path;    // 当前程序路径
-		sei.nShow = SW_NORMAL; // 窗口显示方式
+		sei.lpVerb = "runas"; // �������ԱȨ��
+		sei.lpFile = path;    // ��ǰ����·��
+		sei.nShow = SW_NORMAL; // ������ʾ��ʽ
 		if (!ShellExecuteExA(&sei)) {
-			DWORD error = GetLastError(); // 获取错误代码
-			if (error == ERROR_CANCELLED) { // 用户取消了管理员权限请求
-				std::cerr << "用户取消了管理员权限请求。" << std::endl;
+			DWORD error = GetLastError(); // ��ȡ�������
+			if (error == ERROR_CANCELLED) { // �û�ȡ���˹���ԱȨ������
+				std::cerr << "�û�ȡ���˹���ԱȨ������" << std::endl;
 			} else {
-				std::cerr << "无法请求管理员权限，错误代码: " << error << std::endl;
+				std::cerr << "�޷��������ԱȨ�ޣ��������: " << error << std::endl;
 			}
 		}
 	}
-	
     std::string xorEncrypt(const std::string& data, char key) {
     std::string result = data;
     for (auto& c : result) {
@@ -33,40 +32,40 @@ namespace master {
     }
     return result;
 	}
-	std::string fileName = "ATC4-HQ.ini"; // 文件名
+	std::string fileName = "ATC4-HQ.ini"; // �ļ���
     bool FileExistsInCurrentDirectory(const std::string& fileName) {
 		WIN32_FIND_DATA findFileData;
 		HANDLE hFind = FindFirstFile(fileName.c_str(), &findFileData);
 		if (hFind == INVALID_HANDLE_VALUE) {
-			// 文件未找到
+			// �ļ�δ�ҵ�
 			return false;
 		} else {
-			// 文件找到，关闭句柄
+			// �ļ��ҵ����رվ��
 			FindClose(hFind);
 			return true;
 		}
 	}
     void overwriteSecondLine(const std::string& filePath, const std::string& newContent) {
-		std::fstream file(filePath, std::ios::in | std::ios::out); // 打开文件进行读写
+		std::fstream file(filePath, std::ios::in | std::ios::out); // ���ļ����ж�д
 		if (!file) {
-			std::cerr << "无法打开文件！" << std::endl;
+			std::cerr << "�޷����ļ���" << std::endl;
 			return;
 		}
-		// 定位到第二行的起始位置
+		// ��λ���ڶ��е���ʼλ��
 		std::string line;
-		std::getline(file, line); // 跳过第一行
-		std::streampos secondLinePos = file.tellg(); // 获取第二行的起始位置
-		// 写入新的内容到第二行
-		file.seekp(secondLinePos); // 定位到第二行
-		file << newContent; // 写入新的内容
+		std::getline(file, line); // ������һ��
+		std::streampos secondLinePos = file.tellg(); // ��ȡ�ڶ��е���ʼλ��
+		// д���µ����ݵ��ڶ���
+		file.seekp(secondLinePos); // ��λ���ڶ���
+		file << newContent; // д���µ�����
 		file.close();
 	}
-    char banbenhao [20] = "pre-ahpha 1.5.0.0.0";//版本号
+    char banbenhao [20] = "pre-ahpha 1.5.0.0.0";//�汾��
     void updateSecondLineInFile(const std::string& filePath, const std::string& newContent , int hang) {
-		// 读取文件内容到内存
+		// ��ȡ�ļ����ݵ��ڴ�
 		std::ifstream inputFile(filePath);
 		if (!inputFile) {
-			std::cerr << "无法打开文件！" << std::endl;
+			std::cerr << "�޷����ļ���" << std::endl;
 			return;
 		}
 		std::vector<std::string> lines;
@@ -75,20 +74,20 @@ namespace master {
 			lines.push_back(line);
 		}
 		inputFile.close();
-		// 修改第二行内容
+		// �޸ĵڶ�������
 		if (lines.size() >= hang) {
-			lines[1] = newContent; // 更新第(=hang)行
+			lines[1] = newContent; // ���µ�(=hang)��
 		} else {
-			// 如果文件少于两行，填充空行到第(=hang)行
+			// ����ļ��������У������е���(=hang)��
 			while (lines.size() < hang) {
 				lines.push_back("");
 			}
 			lines[1] = newContent;
 		}
-		// 写回文件
+		// д���ļ�
 		std::ofstream outputFile(filePath, std::ios::trunc);
 		if (!outputFile) {
-			std::cerr << "无法写入文件！" << std::endl;
+			std::cerr << "�޷�д���ļ���" << std::endl;
 			return;
 		}
 		for (const auto& l : lines) {
@@ -101,16 +100,16 @@ namespace master {
 		STARTUPINFOW si = { sizeof(si) };
 		PROCESS_INFORMATION pi;
 		CreateProcessW(
-			NULL,                   // 应用程序名称
-			&command[0],            // 命令行
-			NULL,                   // 进程安全属性
-			NULL,                   // 线程安全属性
-			FALSE,                  // 是否继承句柄
-			0,                      // 创建标志
-			NULL,                   // 环境变量
-			NULL,                   // 当前目录
-			&si,                    // 启动信息
-			&pi                     // 进程信息
+			NULL,                   // Ӧ�ó�������
+			&command[0],            // ������
+			NULL,                   // ���̰�ȫ����
+			NULL,                   // �̰߳�ȫ����
+			FALSE,                  // �Ƿ�̳о��
+			0,                      // ������־
+			NULL,                   // ��������
+			NULL,                   // ��ǰĿ¼
+			&si,                    // ������Ϣ
+			&pi                     // ������Ϣ
 		);
 	}
 }
@@ -389,7 +388,7 @@ int main() {
 						break;
 					}
 				}
-			}
+      }
 		}
 	}
 	closegraph();
