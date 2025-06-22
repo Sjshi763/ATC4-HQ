@@ -12,7 +12,7 @@ namespace ATC4_HQ.Views
 
         private void InstallGame_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-
+            
         }
     }
 }

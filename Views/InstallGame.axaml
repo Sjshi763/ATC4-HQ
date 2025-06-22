@@ -6,7 +6,7 @@
         <Button Grid.Column="0"
                     Content="安装ATC4 XJATC版本"
                     Click="InstallGame_Click"
-                    Width="120"
+                    Width="160"
                     Height="40"
                     HorizontalAlignment="Center"
                     Margin="20,0,0,0"/>

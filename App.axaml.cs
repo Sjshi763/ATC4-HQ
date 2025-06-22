@@ -40,8 +40,10 @@ namespace ATC4_HQ
                     WindowHeight = 600;
                 }
 
-                mainWindow.Width = WindowHeight;
-                mainWindow.Height = WindowHeight;
+                // mainWindow.Width = WindowHeight;
+                // mainWindow.Height = WindowHeight;
+                mainWindow.Width = 540;
+                mainWindow.Height = 540;
                 desktop.MainWindow = mainWindow;
             }
 
