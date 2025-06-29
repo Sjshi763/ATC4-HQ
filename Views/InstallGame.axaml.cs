@@ -11,9 +11,10 @@ namespace ATC4_HQ.Views
             InitializeComponent();
         }
 
-        private async void InstallGame_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private void InstallGame_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-           PageHost.Content = new InstallGameData();
+            var window = new InstallGameDataWindow();
+            window.Show();
         }
 
         private async Task SendPipeMessageAsync(string msg)

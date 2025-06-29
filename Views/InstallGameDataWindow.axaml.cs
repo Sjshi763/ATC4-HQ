@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace ATC4_HQ.Views
 {
-    public partial class InstallGameData : UserControl
+    public partial class InstallGameDataWindow : Window
     {
-        public InstallGameData()
+        public InstallGameDataWindow()
         {
             InitializeComponent();
         }
