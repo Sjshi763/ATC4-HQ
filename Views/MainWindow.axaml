@@ -10,6 +10,10 @@
         Title="ATC4_HQ">
         <!-- <Window.Background>
             <ImageBrush Source="/Assets/ATC4.ico" />
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="LightBlue" Offset="0"/>
+                <GradientStop Color="White" Offset="1"/>
+            </LinearGradientBrush>
         </Window.Background> -->
     <StackPanel>
         <Border Margin="5" CornerRadius="10" Background="LightBlue">

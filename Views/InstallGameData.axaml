@@ -1,0 +1,15 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="ATC4_HQ.Views.InstallGameData">
+    <Grid RowDefinitions="Auto,*">
+        <Grid Grid.Row="1" ColumnDefinitions="*,*" Margin="0,10,0,10">
+                <Button Grid.Column="0"
+                        Click="InstallGameData_Click"
+                        Content="Install Game Data"
+                        Width="160"
+                        Height="40"
+                        HorizontalAlignment="Center"
+                        Margin="20,0,0,0"/>
+        </Grid>
+    </Grid>
+</UserControl>
