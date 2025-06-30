@@ -7,7 +7,9 @@
         x:Class="ATC4_HQ.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/ATC4.ico"
-        Title="ATC4_HQ">
+        Title="ATC4_HQ"
+        Width="540"
+        Height="540">
         <!-- <Window.Background>
             <ImageBrush Source="/Assets/ATC4.ico" />
             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">

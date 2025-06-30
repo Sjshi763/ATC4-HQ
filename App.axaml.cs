@@ -1,53 +1,47 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Markup.Xaml;
-using Avalonia.Controls;
-using ATC4_HQ.Views;
+using Avalonia.Data.Core;
+using Avalonia.Data.Core.Plugins;
 using System.Linq;
+using Avalonia.Markup.Xaml;
+using ATC4_HQ.ViewModels;
+using ATC4_HQ.Views;
 
-namespace ATC4_HQ
+namespace ATC4_HQ;
+
+public partial class App : Application
 {
-    public partial class App : Application
+    public override void Initialize()
     {
-        // 定义屏幕分辨率大小
-        public static int ScreenWidth ; 
-        public static int ScreenHeight ;
-        // 定义窗口大小变量
-        public static double WindowWidth { get; set; } = ScreenWidth / 4;
-        public static double WindowHeight { get; set; } = ScreenHeight / 4;
+        AvaloniaXamlLoader.Load(this);
+    }
 
-        public override void Initialize()
+    public override void OnFrameworkInitializationCompleted()
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            AvaloniaXamlLoader.Load(this);
+            // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
+            // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
+            DisableAvaloniaDataAnnotationValidation();
+            desktop.MainWindow = new MainWindow
+            {
+                DataContext = new MainWindowViewModel(),
+            };
         }
 
-        public override void OnFrameworkInitializationCompleted()
+        base.OnFrameworkInitializationCompleted();
+    }
+
+    private void DisableAvaloniaDataAnnotationValidation()
+    {
+        // Get an array of plugins to remove
+        var dataValidationPluginsToRemove =
+            BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
+
+        // remove each entry found
+        foreach (var plugin in dataValidationPluginsToRemove)
         {
-            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            {
-                var mainWindow = new MainWindow();
-                // 通过 mainWindow.Screens 获取屏幕信息
-                var screens = mainWindow.Screens;
-                var primaryScreen = screens?.All.OrderByDescending(s => s.IsPrimary).FirstOrDefault();
-                if (primaryScreen != null)
-                {
-                    WindowWidth = primaryScreen.WorkingArea.Width / 4.0;
-                    WindowHeight = primaryScreen.WorkingArea.Height / 4.0;
-                }
-                else
-                {
-                    WindowWidth = 900;
-                    WindowHeight = 600;
-                }
-
-                // mainWindow.Width = WindowHeight;
-                // mainWindow.Height = WindowHeight;
-                mainWindow.Width = 540;
-                mainWindow.Height = 540;
-                desktop.MainWindow = mainWindow;
-            }
-
-            base.OnFrameworkInitializationCompleted();
+            BindingPlugins.DataValidators.Remove(plugin);
         }
     }
 }
