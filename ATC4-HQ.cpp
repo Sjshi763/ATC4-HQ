@@ -5,7 +5,7 @@ int main() {
     SetConsoleOutputCP(CP_UTF8);   // 设置输出为UTF-8
     SetConsoleCP(CP_UTF8);         // 设置输入为UTF-8
     
-    const char* pipeName = R"(\\.\pipe\ATC4Pipe)";
+    const char* pipeName = R"(LinkWithMainPipe)";
     HANDLE hPipe = CreateNamedPipeA(
         pipeName,
         PIPE_ACCESS_DUPLEX,
