@@ -5,10 +5,10 @@ int main() {
     SetConsoleOutputCP(CP_UTF8);   // 设置输出为UTF-8
     SetConsoleCP(CP_UTF8);         // 设置输入为UTF-8
     
-    const char* pipeName = R"(LinkWithMainPipe)";
+    const char* pipeName = "\\\\.\\pipe\\ATC4Pipe";
     HANDLE hPipe = CreateNamedPipeA(
         pipeName,
-        PIPE_ACCESS_DUPLEX,
+        PIPE_ACCESS_INBOUND, 
         PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
         1,              // 最大实例数
         256, 256,       // 输出/输入缓冲区大小
@@ -43,7 +43,7 @@ int main() {
         std::cerr << "读取失败。" << std::endl;
     }
 
-    
+    Sleep(10000); // 等待1秒钟，确保客户端能接收到回复
 
     CloseHandle(hPipe);
     return 0;
