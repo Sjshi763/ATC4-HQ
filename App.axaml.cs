@@ -1,47 +1,34 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
-using Avalonia.Data.Core.Plugins;
-using System.Linq;
 using Avalonia.Markup.Xaml;
-using ATC4_HQ.ViewModels;
-using ATC4_HQ.Views;
+using ATC4_HQ.ViewModels; // 引用您的 ViewModel 命名空间
+using ATC4_HQ.Views;     // 引用您的 View 命名空间
 
-namespace ATC4_HQ;
-
-public partial class App : Application
+namespace ATC4_HQ
 {
-    public override void Initialize()
+    public partial class App : Application
     {
-        AvaloniaXamlLoader.Load(this);
-    }
-
-    public override void OnFrameworkInitializationCompleted()
-    {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        public override void Initialize()
         {
-            // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
-            // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
-            DisableAvaloniaDataAnnotationValidation();
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = new MainWindowViewModel(),
-            };
+            AvaloniaXamlLoader.Load(this);
         }
 
-        base.OnFrameworkInitializationCompleted();
-    }
-
-    private void DisableAvaloniaDataAnnotationValidation()
-    {
-        // Get an array of plugins to remove
-        var dataValidationPluginsToRemove =
-            BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
-
-        // remove each entry found
-        foreach (var plugin in dataValidationPluginsToRemove)
+        public override void OnFrameworkInitializationCompleted()
         {
-            BindingPlugins.DataValidators.Remove(plugin);
+            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                desktop.MainWindow = new MainWindow
+                {
+                    // 设置 MainWindow 的 DataContext
+                    // 假设 MainWindowViewModel 会包含 InstallGameViewModel
+                    // 或者 MainWindow 的内容就是 InstallGame UserControl
+                    // 这里我们假设 MainWindow 的 DataContext 是 MainWindowViewModel
+                    // 并且 MainWindowViewModel 会实例化 InstallGameViewModel
+                    DataContext = new MainWindowViewModel() 
+                };
+            }
+
+            base.OnFrameworkInitializationCompleted();
         }
     }
 }
