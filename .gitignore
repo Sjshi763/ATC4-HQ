@@ -1,12 +1,19 @@
-*.exe
+# 编辑器生成
 .vscode/
 ATC4-HQ.ini
 .idea/
 ATC4/
+.vs/
+/obj/
+/bin/
+# 编译后的文件
+*.exe
 a.o
+# 日志文件
+pipe_server_log.txt
+# 测试什么的文件
 文件/
 *.rar
 *.ps1
 打包/
-/obj/
-/bin/
+ATC4ALL.zip

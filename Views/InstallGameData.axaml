@@ -1,0 +1,24 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewmodels="clr-namespace:ATC4_HQ.ViewModels"  mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="250"
+             x:Class="ATC4_HQ.Views.InstallGameData"
+             x:DataType="viewmodels:InstallGameDataViewModel"> <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" Margin="20">
+        <TextBlock Grid.ColumnSpan="2" Text="安装游戏数据页面" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24" Margin="0,0,0,30"/>
+
+        <Label Grid.Row="1" Content="游戏数据路径:" VerticalAlignment="Center" Margin="5"/>
+        <StackPanel Grid.Row="1" Grid.Column="1" Spacing="5" Orientation="Horizontal">
+            <TextBox x:Name="WhereIsTheGames" Height="30" Margin="5" Watermark="请输入游戏路径" Width="300"
+                     Text="{Binding GamePath}"/> 
+            
+            <Button x:Name="BrowseButton" Content="浏览" Width="80" Height="30" Margin="5"
+                    Command="{Binding FindFileCommand}"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+            <Button Content="保存" Command="{Binding SaveCommand}" Width="120" Height="40" Margin="0,0,20,0" />
+            <Button Content="取消" Command="{Binding CancelCommand}" Width="120" Height="40" Margin="20,0,0,0" />
+        </StackPanel>
+    </Grid>
+</UserControl>

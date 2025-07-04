@@ -7,9 +7,16 @@
         x:Class="ATC4_HQ.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/ATC4.ico"
-        Title="ATC4_HQ">
+        Title="ATC4_HQ"
+        Width="540"
+        Height="540"
+        CanResize="False">
         <!-- <Window.Background>
             <ImageBrush Source="/Assets/ATC4.ico" />
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="LightBlue" Offset="0"/>
+                <GradientStop Color="White" Offset="1"/>
+            </LinearGradientBrush>
         </Window.Background> -->
     <StackPanel>
         <Border Margin="5" CornerRadius="10" Background="LightBlue">

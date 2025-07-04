@@ -1,0 +1,9 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:ATC4_HQ.Views"
+        x:Class="ATC4_HQ.Views.InstallGameDataWindow"
+        Title="安装游戏数据"
+        Icon="/Assets/ATC4.ico"
+        Width="600" Height="400" CanResize="False">
+    <local:InstallGameData />
+</Window>
