@@ -1,8 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
-using System.IO.Pipes; // 重新添加：用于命名管道
-using System.Text;    // 重新添加：用于文本编码
+using System.IO.Pipes; // 用于命名管道
+using System.Text;     // 用于文本编码
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -49,23 +49,36 @@ namespace ATC4_HQ.ViewModels
         public async Task HandleInstallGamePathAndIpcAsync(string path)
         {
             Console.WriteLine($"MainWindowViewModel 接收到路径并准备执行 IPC: {path}");
-            await SendPathViaIpcAsync(path); // 调用 IPC 逻辑
+            // ⭐️ 修改这里：调用新的通用 IPC 命令发送方法
+            // 现在发送的消息会是 "UNZIP C:\Your\Path\"
+            await SendIpcCommandAsync("UNZIP", path); 
         }
 
-        // IPC 逻辑：现在重新放回 MainWindowViewModel 中
-        private async Task SendPathViaIpcAsync(string path)
+        // ⭐️ 新增：一个通用的公共方法，用于发送带命令和参数的 IPC 消息
+        // 其他功能现在可以调用这个方法来发送不同的命令
+        public async Task SendIpcCommandAsync(string command, string parameter)
         {
-            Console.WriteLine($"尝试通过 IPC 发送路径 (在 ViewModel 中): {path}");
+            // 构造完整的消息字符串，命令和参数之间用空格分隔
+            string fullMessage = $"{command} {parameter}";
+            await SendRawMessageViaIpcAsync(fullMessage);
+        }
+
+        // ⭐️ 重命名并修改为私有：这是实际进行命名管道通信的底层方法
+        // 它现在只负责发送原始消息字节，不再关心消息的格式
+        private async Task SendRawMessageViaIpcAsync(string message)
+        {
+            Console.WriteLine($"尝试通过 IPC 发送原始消息 (在 ViewModel 中): {message}");
             try
             {
                 using var pipeClient = new NamedPipeClientStream(".", "ATC4Pipe", PipeDirection.Out, PipeOptions.Asynchronous);
-                await pipeClient.ConnectAsync(5000); 
+                await pipeClient.ConnectAsync(5000); // 连接超时时间设置为 5 秒
                 
                 if (pipeClient.IsConnected)
                 {
-                    byte[] messageBytes = Encoding.UTF8.GetBytes(path);
+                    // 使用 UTF8 编码发送完整消息（包括命令和参数）
+                    byte[] messageBytes = Encoding.UTF8.GetBytes(message);
                     await pipeClient.WriteAsync(messageBytes, 0, messageBytes.Length);
-                    Console.WriteLine("路径已通过 IPC 发送。");
+                    Console.WriteLine("原始消息已通过 IPC 发送。");
                 }
                 else
                 {
