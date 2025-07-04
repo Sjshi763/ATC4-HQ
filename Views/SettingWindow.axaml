@@ -11,8 +11,8 @@
                        HorizontalAlignment="Center"
                        Text="LE目录"/>
         </Border>
-        <Grid ShowGridLines="True" Margin="5" 
-            ColumnDefinitions="120, 100"
+        <Grid ShowGridLines="False" Margin="5" 
+            ColumnDefinitions="120, *"
             RowDefinitions="Auto, Auto">
             <Label Grid.Row="0" Grid.Column="0" Margin="10">LE目录</Label>
             <TextBox Grid.Row="0" Grid.Column="1" Margin="0 5" Text="0"/>

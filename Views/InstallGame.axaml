@@ -1,14 +1,19 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="ATC4_HQ.Views.InstallGame">
-    <Grid ColumnDefinitions="*,*"
-        Margin="0,10,0,10">
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewmodels="clr-namespace:ATC4_HQ.ViewModels"  mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="100"
+             x:Class="ATC4_HQ.Views.InstallGame"
+             x:DataType="viewmodels:InstallGameViewModel"> <Grid ColumnDefinitions="*,*"
+          Margin="0,10,0,10">
+        <ContentControl x:Name="PageHost"/>
+        
         <Button Grid.Column="0"
-                    Content="安装ATC4 XJATC版本"
-                    Click="InstallGame_Click"
-                    Width="160"
-                    Height="40"
-                    HorizontalAlignment="Center"
-                    Margin="20,0,0,0"/>
-        </Grid>
+                Content="安装ATC4 XJATC版本"
+                Width="160"
+                Height="40"
+                HorizontalAlignment="Center"
+                Margin="20,0,0,0"
+                Command="{Binding InstallGameCommand}"/>
+    </Grid>
 </UserControl>

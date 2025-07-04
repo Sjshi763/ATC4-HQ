@@ -1,21 +1,13 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Avalonia.Controls;
-using ATC4_HQ.Views;
-using System.Linq;
+using ATC4_HQ.ViewModels; // 引用您的 ViewModel 命名空间
+using ATC4_HQ.Views;     // 引用您的 View 命名空间
 
 namespace ATC4_HQ
 {
     public partial class App : Application
     {
-        // 定义屏幕分辨率大小
-        public static int ScreenWidth ; 
-        public static int ScreenHeight ;
-        // 定义窗口大小变量
-        public static double WindowWidth { get; set; } = ScreenWidth / 4;
-        public static double WindowHeight { get; set; } = ScreenHeight / 4;
-
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
@@ -25,26 +17,15 @@ namespace ATC4_HQ
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                var mainWindow = new MainWindow();
-                // 通过 mainWindow.Screens 获取屏幕信息
-                var screens = mainWindow.Screens;
-                var primaryScreen = screens?.All.OrderByDescending(s => s.IsPrimary).FirstOrDefault();
-                if (primaryScreen != null)
+                desktop.MainWindow = new MainWindow
                 {
-                    WindowWidth = primaryScreen.WorkingArea.Width / 4.0;
-                    WindowHeight = primaryScreen.WorkingArea.Height / 4.0;
-                }
-                else
-                {
-                    WindowWidth = 900;
-                    WindowHeight = 600;
-                }
-
-                // mainWindow.Width = WindowHeight;
-                // mainWindow.Height = WindowHeight;
-                mainWindow.Width = 540;
-                mainWindow.Height = 540;
-                desktop.MainWindow = mainWindow;
+                    // 设置 MainWindow 的 DataContext
+                    // 假设 MainWindowViewModel 会包含 InstallGameViewModel
+                    // 或者 MainWindow 的内容就是 InstallGame UserControl
+                    // 这里我们假设 MainWindow 的 DataContext 是 MainWindowViewModel
+                    // 并且 MainWindowViewModel 会实例化 InstallGameViewModel
+                    DataContext = new MainWindowViewModel() 
+                };
             }
 
             base.OnFrameworkInitializationCompleted();
