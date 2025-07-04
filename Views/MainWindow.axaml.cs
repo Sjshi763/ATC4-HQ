@@ -14,11 +14,6 @@ namespace ATC4_HQ.Views
         public MainWindow()
         {
             InitializeComponent();
-            // 在这里设置 MainWindow 的 DataContext
-            // 确保 App.axaml.cs 中也设置了 DataContext = new MainWindowViewModel();
-            // 或者在这里显式设置：
-            // DataContext = new MainWindowViewModel(); 
-
             this.Loaded += MainWindow_Loaded;
         }
 
@@ -32,7 +27,6 @@ namespace ATC4_HQ.Views
         {
             if (DataContext is MainWindowViewModel viewModel)
             {
-                Console.WriteLine("启动游戏按钮被点击了！");
                 viewModel.StartGameCommand.Execute(null); 
             }
         }

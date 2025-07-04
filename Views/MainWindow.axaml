@@ -3,6 +3,7 @@
         xmlns:vm="using:ATC4_HQ.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="using:ATC4_HQ.Views" 
         mc:Ignorable="d" d:DesignWidth="540" d:DesignHeight="540"
         x:Class="ATC4_HQ.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -11,13 +12,13 @@
         Width="540"
         Height="540"
         CanResize="False">
-        <!-- <Window.Background>
-            <ImageBrush Source="/Assets/ATC4.ico" />
-            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="LightBlue" Offset="0"/>
-                <GradientStop Color="White" Offset="1"/>
-            </LinearGradientBrush>
-        </Window.Background> -->
+    <!-- <Window.Background>
+        <ImageBrush Source="/Assets/ATC4.ico" />
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="LightBlue" Offset="0"/>
+            <GradientStop Color="White" Offset="1"/>
+        </GradientBrush>
+    </Window.Background> -->
     <StackPanel>
         <Border Margin="5" CornerRadius="10" Background="LightBlue">
             <TextBlock Margin="5"
@@ -26,7 +27,7 @@
                        Text="ATC4-HQ"/>
         </Border>
         <Grid ColumnDefinitions="*,*,*"
-        Margin="0,10,0,10">
+              Margin="0,10,0,10">
             <Button Grid.Column="0"
                     Content="启动游戏"
                     Click="StartGame_Click"
@@ -50,6 +51,23 @@
                     Margin="0,0,20,0"/>
             
         </Grid>
-        <ContentControl x:Name="PageHost"/>
+        
+        <!-- ⭐️ 修改这里：使用 ContentControl 来显示 CurrentPage 对应的 View -->
+        <!-- 移除 x:Name="PageHost"，因为 ContentControl 会自动根据 DataTemplate 切换内容 -->
+        <ContentControl Content="{Binding CurrentPage}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <ContentControl.DataTemplates>
+                <!-- ⭐️ 为 GameStartOptionsViewModel 定义一个数据模板 -->
+                <DataTemplate DataType="{x:Type vm:GameStartOptionsViewModel}">
+                    <views:GameStartOptionsView />
+                </DataTemplate>
+                
+                <!-- 如果您有其他 ViewModel 绑定到 CurrentPage，也需要在这里添加对应的 DataTemplate -->
+                <!-- 例如，如果 InstallGameDataViewModel 也要通过 CurrentPage 显示，可以这样添加： -->
+                <!-- <DataTemplate DataType="{x:Type vm:InstallGameDataViewModel}">
+                    <views:InstallGameDataView />
+                </DataTemplate> -->
+
+            </ContentControl.DataTemplates>
+        </ContentControl>
     </StackPanel>
 </Window>

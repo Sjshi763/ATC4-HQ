@@ -31,6 +31,9 @@ namespace ATC4_HQ.ViewModels
         {
             Console.WriteLine("ViewModel: 启动游戏逻辑。");
             // 实现启动游戏的业务逻辑
+            // ⭐️ 将 CurrentPage 设置为 GameStartOptionsViewModel 的实例
+            CurrentPage = new GameStartOptionsViewModel();
+            Console.WriteLine("ViewModel: 已切换到游戏启动选项界面。");
         }
 
         private void OnInstallGame()
@@ -49,7 +52,7 @@ namespace ATC4_HQ.ViewModels
         public async Task HandleInstallGamePathAndIpcAsync(string path)
         {
             Console.WriteLine($"MainWindowViewModel 接收到路径并准备执行 IPC: {path}");
-            // ⭐️ 修改这里：调用新的通用 IPC 命令发送方法
+            // ⭐️ 调用新的通用 IPC 命令发送方法
             // 现在发送的消息会是 "UNZIP C:\Your\Path\"
             await SendIpcCommandAsync("UNZIP", path); 
         }
@@ -93,6 +96,32 @@ namespace ATC4_HQ.ViewModels
             {
                 Console.WriteLine($"IPC 发送错误: {ex.Message}");
             }
+        }
+    }
+
+    // ⭐️ 这是 GameStartOptionsViewModel 的定义，它必须在 ATC4_HQ.ViewModels 命名空间内
+    // 确保它存在于您的项目中的某个 .cs 文件里，例如 MainWindowViewModel.cs 或者单独的 GameStartOptionsViewModel.cs
+    public partial class GameStartOptionsViewModel : ViewModelBase
+    {
+        public ICommand Button1Command { get; }
+        public ICommand Button2Command { get; }
+
+        public GameStartOptionsViewModel()
+        {
+            Button1Command = new RelayCommand(OnButton1);
+            Button2Command = new RelayCommand(OnButton2);
+        }
+
+        private void OnButton1()
+        {
+            Console.WriteLine("Game Start Options: 第一个按钮被点击了！");
+            // TODO: 在这里实现上一次游戏的逻辑，例如启动游戏的不同模式
+        }
+
+        private void OnButton2()
+        {
+            Console.WriteLine("Game Start Options: 第二个按钮被点击了！");
+            // TODO: 在这里实现全部游戏的逻辑，例如打开游戏设置或另一个功能
         }
     }
 }
