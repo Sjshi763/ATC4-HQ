@@ -1,25 +1,29 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
-using System.Threading.Tasks; // 尽管文件选择器不在 ViewModel 中，但命令仍可能是异步的
+using System.Text.Json; // 用于 JSON 序列化
+using System.Threading.Tasks;
 using System.Windows.Input;
+using ATC4_HQ.Models; // ⭐️ 引入 GameModel 的命名空间
 
 namespace ATC4_HQ.ViewModels
 {
     public partial class InstallGameDataViewModel : ViewModelBase
     {
         [ObservableProperty]
+        private string _gameName = "未命名游戏"; // ⭐️ 新增：绑定到游戏名称输入框
+
+        [ObservableProperty]
         private string _gamePath = "未选择任何文件夹"; // 绑定到 TextBox
 
         [ObservableProperty]
-        private string? _dialogResultPath; // 用于存储最终要返回的路径
+        private string? _dialogResultData; // ⭐️ 修改：用于存储最终要返回的 JSON 字符串数据
 
         [ObservableProperty]
         private bool _isDialogOk; // 用于指示对话框是“确定”关闭还是“取消”关闭
 
         // 用于触发 View 执行文件选择操作的事件
-        // View 的代码后台将订阅此事件
-        public event EventHandler RequestOpenFilePicker;
+        public event EventHandler? RequestOpenFilePicker; // ⭐️ 标记为可为 null 的事件，解决警告
 
         public ICommand FindFileCommand { get; }
         public ICommand SaveCommand { get; }
@@ -27,7 +31,7 @@ namespace ATC4_HQ.ViewModels
 
         public InstallGameDataViewModel()
         {
-            FindFileCommand = new RelayCommand(OnFindFile); // 改为 RelayCommand，因为实际文件选择器在 View
+            FindFileCommand = new RelayCommand(OnFindFile);
             SaveCommand = new RelayCommand(OnSave);
             CancelCommand = new RelayCommand(OnCancel);
         }
@@ -43,22 +47,37 @@ namespace ATC4_HQ.ViewModels
 
         private void OnSave()
         {
+            // ⭐️ 新增：对 GameName 的验证
+            if (string.IsNullOrWhiteSpace(GameName) || GameName == "未命名游戏")
+            {
+                Console.WriteLine("请为游戏输入一个名称！");
+                // 可以在 UI 上显示错误提示
+                return;
+            }
+
             // 在这里可以添加验证逻辑，确保 GamePath 是有效的
             if (string.IsNullOrWhiteSpace(GamePath) || GamePath == "未选择任何文件夹")
             {
-                // 可以显示一个错误消息或提示用户
                 Console.WriteLine("请选择一个有效的游戏路径！");
                 return;
             }
 
-            DialogResultPath = GamePath; // 设置要返回的结果
-            IsDialogOk = true;           // 设置对话框结果为 OK
+            // ⭐️ 修改：创建 GameModel 对象并序列化为 JSON 字符串
+            var gameData = new ATC4_HQ.Models.GameModel // 明确指定命名空间和类名
+            {
+                Name = GameName,
+                Path = GamePath,
+            };
+
+            // 将 GameModel 对象序列化为 JSON 字符串，并赋值给 DialogResultData
+            DialogResultData = JsonSerializer.Serialize(gameData);
+            IsDialogOk = true; // 设置对话框结果为 OK
         }
 
         private void OnCancel()
         {
-            DialogResultPath = null;    // 清空结果
-            IsDialogOk = false;         // 设置对话框结果为 Cancel
+            DialogResultData = null; // 清空结果
+            IsDialogOk = false;      // 设置对话框结果为 Cancel
         }
     }
 }

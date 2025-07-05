@@ -17,7 +17,7 @@
         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
             <GradientStop Color="LightBlue" Offset="0"/>
             <GradientStop Color="White" Offset="1"/>
-        </GradientBrush>
+        </LinearGradientBrush>
     </Window.Background> -->
     <StackPanel>
         <Border Margin="5" CornerRadius="10" Background="LightBlue">
@@ -51,22 +51,11 @@
                     Margin="0,0,20,0"/>
             
         </Grid>
-        
-        <!-- ⭐️ 修改这里：使用 ContentControl 来显示 CurrentPage 对应的 View -->
-        <!-- 移除 x:Name="PageHost"，因为 ContentControl 会自动根据 DataTemplate 切换内容 -->
         <ContentControl Content="{Binding CurrentPage}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <ContentControl.DataTemplates>
-                <!-- ⭐️ 为 GameStartOptionsViewModel 定义一个数据模板 -->
                 <DataTemplate DataType="{x:Type vm:GameStartOptionsViewModel}">
                     <views:GameStartOptionsView />
                 </DataTemplate>
-                
-                <!-- 如果您有其他 ViewModel 绑定到 CurrentPage，也需要在这里添加对应的 DataTemplate -->
-                <!-- 例如，如果 InstallGameDataViewModel 也要通过 CurrentPage 显示，可以这样添加： -->
-                <!-- <DataTemplate DataType="{x:Type vm:InstallGameDataViewModel}">
-                    <views:InstallGameDataView />
-                </DataTemplate> -->
-
             </ContentControl.DataTemplates>
         </ContentControl>
     </StackPanel>
