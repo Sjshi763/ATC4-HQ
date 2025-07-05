@@ -1,0 +1,36 @@
+name: Build Release for ATC4-HQ
+
+on:
+  push:
+    branches: [ dev ] # 当代码推送到 dev 分支时触发
+  release:
+    types: [ created ] # 当创建新的 GitHub Release 时触发
+
+jobs:
+  build:
+    runs-on: windows-latest # 在最新的 Windows 环境下运行
+
+    steps:
+    - name: Checkout code # 步骤1: 检出仓库代码
+      uses: actions/checkout@v4
+
+    - name: Setup .NET SDK # 步骤2: 安装 .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.x.x' # 指定 .NET 8 LTS 版本，您可以根据您的项目实际使用的版本修改
+
+    - name: Restore dependencies # 步骤3: 恢复 NuGet 包依赖
+      run: dotnet restore ATC4-for-RJOO-problem/ATC4-HQ.csproj # 请确保这里的路径和项目文件名正确
+
+    - name: Build project # 步骤4: 构建项目 (Release 配置)
+      run: dotnet build ATC4-for-RJOO-problem/ATC4-HQ.csproj --configuration Release --no-restore # --no-restore 防止重复恢复
+
+    - name: Publish application # 步骤5: 发布应用程序 (生成可执行文件)
+      run: dotnet publish ATC4-for-RJOO-problem/ATC4-HQ.csproj --configuration Release --no-build -o publish # --no-build 防止重复构建
+      # -o publish 会将发布输出到名为 'publish' 的文件夹
+
+    - name: Upload build artifact # 步骤6: 上传构建产物
+      uses: actions/upload-artifact@v4
+      with:
+        name: ATC4-HQ-Release-Build # 产物的名称，您可以在 GitHub Actions 页面下载
+        path: ATC4-for-RJOO-problem/publish # 上传 'publish' 文件夹中的所有内容
