@@ -1,19 +1,13 @@
 ﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:ATC4_HQ.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ATC4_HQ.Views.GameStartOptionsView"
              x:DataType="vm:GameStartOptionsViewModel">
-	<Design.DataContext>
-		<vm:GameStartOptionsViewModel />
-	</Design.DataContext>
+    
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20">
+        <TextBlock Text="请选择游戏启动选项喵！" FontSize="24" FontWeight="Bold" Margin="0,0,0,20" HorizontalAlignment="Center"/>
 
-	<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20">
-		<TextBlock Text="请选择游戏启动选项喵！" FontSize="24" FontWeight="Bold" Margin="0,0,0,20" HorizontalAlignment="Center"/>
-
-		<Button Content="上一次游戏" Command="{Binding Button1Command}" Width="200" Height="50"/>
-		<Button Content="全部游戏" Command="{Binding Button2Command}" Width="200" Height="50"/>
-	</StackPanel>
+        <Button Content="启动上一次游戏" Command="{Binding Button1Command}" Width="200" Height="50"/>
+        <Button Content="列出全部游戏" Command="{Binding Button2Command}" Width="200" Height="50"/>
+    </StackPanel>
 </UserControl>
