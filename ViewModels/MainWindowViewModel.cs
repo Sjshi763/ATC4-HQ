@@ -1,7 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
-using System.IO.Pipes; // 用于命名管道
 using System.Text;     // 用于文本编码
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -53,65 +52,15 @@ namespace ATC4_HQ.ViewModels
         // 处理游戏安装和解压的通用方法，现在接收 GameModel 对象
         public async Task HandleInstallGameAndUnzipAsync(GameModel gameData) // ⭐️ 确保方法是 public 且接收 GameModel
         {
-            Console.WriteLine($"MainWindowViewModel 接收到游戏数据并准备执行 IPC: 名称={gameData.Name}, 路径={gameData.Path}");
-            
-            // 1. 发送 ADD_GAME 命令给服务端
-            // 参数格式: <Name>|<Path> (不再包含 CoverImagePath)
-            string addGameParameter = $"{gameData.Name}|{gameData.Path}"; 
-            await SendIpcCommandAsync("ADD_GAME", addGameParameter); 
-            Console.WriteLine("已发送 ADD_GAME 命令。");
-
-            // 2. 发送 UNZIP 命令给服务端
-            // 参数格式: <Path>
-            await SendIpcCommandAsync("UNZIP", gameData.Path); 
-            Console.WriteLine("已发送 UNZIP 命令。");
+           
         }
-
-        // 一个通用的公共方法，用于发送带命令和参数的 IPC 消息
-        public async Task SendIpcCommandAsync(string command, string parameter)
-        {
-            // 构造完整的消息字符串，命令和参数之间用空格分隔
-            string fullMessage = $"{command} {parameter}";
-            await SendRawMessageViaIpcAsync(fullMessage);
-        }
-
-        // 实际进行命名管道通信的底层方法
-        private async Task SendRawMessageViaIpcAsync(string message)
-        {
-            Console.WriteLine($"尝试通过 IPC 发送原始消息 (在 ViewModel 中): {message}");
-            try
-            {
-                using var pipeClient = new NamedPipeClientStream(".", "ATC4Pipe", PipeDirection.Out, PipeOptions.Asynchronous);
-                await pipeClient.ConnectAsync(5000); // 连接超时时间设置为 5 秒
-                
-                if (pipeClient.IsConnected)
-                {
-                    // 使用 UTF8 编码发送完整消息（包括命令和参数）
-                    byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-                    await pipeClient.WriteAsync(messageBytes, 0, messageBytes.Length);
-                    Console.WriteLine("原始消息已通过 IPC 发送。");
-                }
-                else
-                {
-                    Console.WriteLine("IPC 客户端连接失败: 无法连接到命名管道服务器。");
-                }
-            }
-            catch (TimeoutException)
-            {
-                Console.WriteLine("IPC 连接超时: 无法在指定时间内连接到命名管道服务器。");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"IPC 发送错误: {ex.Message}");
-            }
-        }
+        
     }
 
     // GameStartOptionsViewModel 的定义，它必须在 ATC4_HQ.ViewModels 命名空间内
     public partial class GameStartOptionsViewModel : ViewModelBase
     {
-        // 用于引用 MainWindowViewModel 的字段，以便调用 IPC 方法
-        private readonly MainWindowViewModel _mainWindowViewModel;
+                private readonly MainWindowViewModel _mainWindowViewModel;
 
         public ICommand Button1Command { get; } // 启动上一次游戏
         public ICommand Button2Command { get; } // 列出全部游戏
@@ -133,16 +82,17 @@ namespace ATC4_HQ.ViewModels
             // 如果需要客户端启动游戏，需要获取游戏路径。
             // 暂时只是打印到控制台。
             // 示例：假设您知道上一次游戏的ID是1，可以这样发送命令（但目前服务端不会返回路径）
-            // _mainWindowViewModel.SendIpcCommandAsync("LAUNCH_GAME", "1"); 
+
         }
 
+        // 删除SendIpcCommandAsync方法及其实现
+        // 删除SendRawMessageViaIpcAsync私有方法
+        // 移除pipeClient连接逻辑
         private async void OnListAllGames()
         {
             Console.WriteLine("Game Start Options: 第二个按钮被点击了！尝试列出全部游戏。");
-            // 发送 GET_GAMES 命令给服务端
-            await _mainWindowViewModel.SendIpcCommandAsync("GET_GAMES", ""); 
-            Console.WriteLine("游戏列表请求已发送至服务端。请查看服务端日志 (pipe_server_log.txt) 获取详细列表。");
-            // TODO: 如果未来需要将游戏列表返回到客户端显示，需要修改 IPC 为双向通信
+            // 已移除IPC调用
+            Console.WriteLine("该功能当前不可用");
         }
     }
 }
