@@ -40,7 +40,7 @@
                     Click="InstallGame_Click"
                     Width="120"
                     Height="40"
-                    HorizontalAlignment="Left"
+                    HorizontalAlignment="Center"
                     Margin="20,0,0,0"/>
             <Button Grid.Column="2"
                     Content="设置"

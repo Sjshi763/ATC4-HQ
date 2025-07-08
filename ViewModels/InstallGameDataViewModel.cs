@@ -34,6 +34,7 @@ namespace ATC4_HQ.ViewModels
             FindFileCommand = new RelayCommand(OnFindFile);
             SaveCommand = new RelayCommand(OnSave);
             CancelCommand = new RelayCommand(OnCancel);
+
         }
 
         // --- 命令的实现 ---
@@ -48,7 +49,7 @@ namespace ATC4_HQ.ViewModels
         private void OnSave()
         {
             // ⭐️ 新增：对 GameName 的验证
-            if (string.IsNullOrWhiteSpace(GameName) || GameName == "未命名游戏")
+            if (string.IsNullOrWhiteSpace(GameName) || GameName == "取个名字方便找到它")
             {
                 Console.WriteLine("请为游戏输入一个名称！");
                 // 可以在 UI 上显示错误提示
