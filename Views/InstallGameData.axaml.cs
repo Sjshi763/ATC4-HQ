@@ -16,7 +16,6 @@ namespace ATC4_HQ.Views
             this.Unloaded += InstallGameData_Unloaded; // 添加 Unloaded 事件处理，以取消订阅
         }
 
-        // 修改 sender 参数为 object?
         private void InstallGameData_Loaded(object? sender, RoutedEventArgs e)
         {
             if (DataContext is InstallGameDataViewModel viewModel)
@@ -25,7 +24,6 @@ namespace ATC4_HQ.Views
             }
         }
 
-        // 修改 sender 参数为 object?
         private void InstallGameData_Unloaded(object? sender, RoutedEventArgs e)
         {
             if (DataContext is InstallGameDataViewModel viewModel)

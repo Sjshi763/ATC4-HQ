@@ -1,4 +1,4 @@
-﻿﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Text;     // 用于文本编码
@@ -54,7 +54,6 @@ namespace ATC4_HQ.ViewModels
         {
            
         }
-        
     }
 
     // GameStartOptionsViewModel 的定义，它必须在 ATC4_HQ.ViewModels 命名空间内
@@ -62,8 +61,14 @@ namespace ATC4_HQ.ViewModels
     {
                 private readonly MainWindowViewModel _mainWindowViewModel;
 
-        public ICommand Button1Command { get; } // 启动上一次游戏
-        public ICommand Button2Command { get; } // 列出全部游戏
+        public ICommand Button1Command
+        {
+            get; // 启动上一次游戏
+        } 
+        public ICommand Button2Command
+        {
+            get; // 列出全部游戏
+        } 
 
         // 修改构造函数：接收 MainWindowViewModel 实例
         public GameStartOptionsViewModel(MainWindowViewModel mainWindowViewModel)
@@ -76,23 +81,13 @@ namespace ATC4_HQ.ViewModels
         private void OnLaunchLastGame()
         {
             Console.WriteLine("Game Start Options: 第一个按钮被点击了！尝试启动上一次游戏。");
-            // TODO: 在这里实现启动上一次游戏的逻辑。
-            // 这可能需要从服务端获取“上一次游戏”的信息，或者从客户端本地存储中读取。
-            // 目前，由于 IPC 是单向的，我们只能在服务端日志中看到结果。
-            // 如果需要客户端启动游戏，需要获取游戏路径。
-            // 暂时只是打印到控制台。
-            // 示例：假设您知道上一次游戏的ID是1，可以这样发送命令（但目前服务端不会返回路径）
-
+            
         }
 
-        // 删除SendIpcCommandAsync方法及其实现
-        // 删除SendRawMessageViaIpcAsync私有方法
-        // 移除pipeClient连接逻辑
         private async void OnListAllGames()
         {
             Console.WriteLine("Game Start Options: 第二个按钮被点击了！尝试列出全部游戏。");
-            // 已移除IPC调用
-            Console.WriteLine("该功能当前不可用");
+
         }
     }
 }
