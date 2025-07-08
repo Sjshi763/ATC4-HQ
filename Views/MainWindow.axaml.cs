@@ -5,6 +5,8 @@ using ATC4_HQ.ViewModels;
 using System;
 using System.Text.Json; // ⭐️ 新增：引入 JSON 命名空间
 using ATC4_HQ.Models; // ⭐️ 新增：引入 GameModel 的命名空间
+using master.Globals;
+using System.IO;
 
 namespace ATC4_HQ.Views
 {
@@ -14,6 +16,7 @@ namespace ATC4_HQ.Views
         {
             InitializeComponent();
             this.Loaded += MainWindow_Loaded;
+            StartUp();
         }
 
         private void InitializeComponent()
@@ -33,7 +36,7 @@ namespace ATC4_HQ.Views
         {
             if (DataContext is MainWindowViewModel viewModel)
             {
-                viewModel.StartGameCommand.Execute(null); 
+                viewModel.StartGameCommand.Execute(null);
             }
         }
 
@@ -46,14 +49,14 @@ namespace ATC4_HQ.Views
 
                 var dialogWindow = new InstallGameDataDialogWindow();
                 // 修复 CS8604 警告：确保 owner 是可空类型或显式转换
-                Window? ownerWindow = TopLevel.GetTopLevel(this) as Window; 
+                Window? ownerWindow = TopLevel.GetTopLevel(this) as Window;
                 bool? dialogResult = await dialogWindow.ShowDialog<bool?>(ownerWindow);
 
                 // 现在获取的是 DialogResultData (JSON 字符串)
                 if (dialogResult == true && dialogWindow.DataContext is InstallGameDataViewModel dialogViewModel)
                 {
                     // ⭐️ 修复 CS1061 错误：使用 DialogResultData 而不是 DialogResultPath
-                    string? selectedGameDataJson = dialogViewModel.DialogResultData; 
+                    string? selectedGameDataJson = dialogViewModel.DialogResultData;
                     if (!string.IsNullOrEmpty(selectedGameDataJson))
                     {
                         Console.WriteLine($"从对话框中获取到的 JSON 数据: {selectedGameDataJson}");
@@ -65,7 +68,7 @@ namespace ATC4_HQ.Views
                             {
                                 Console.WriteLine($"解析到的游戏名称: {gameData.Name}, 路径: {gameData.Path}");
                                 // ⭐️ 关键修改：调用 MainWindowViewModel 中的 HandleInstallGameAndUnzipAsync
-                                await viewModel.HandleInstallGameAndUnzipAsync(gameData); 
+                                await viewModel.HandleInstallGameAndUnzipAsync(gameData);
                             }
                             else
                             {
@@ -96,6 +99,25 @@ namespace ATC4_HQ.Views
                 Console.WriteLine("设置按钮被点击了！");
                 viewModel.SettingCommand.Execute(null);
             }
+        }
+
+        private void StartUp()
+        {
+
+        }
+
+        private string? ParseInformation(string SourcesOfInformation , string MessageName)
+        {
+            string[] lines = File.ReadAllLines(SourcesOfInformation);
+            foreach (var line in lines)
+            {
+                if (line.Contains(MessageName))
+                {
+                    string Endline = line.Replace(MessageName + " = ", "");
+                    return Endline;
+                }
+            }
+            return null;
         }
     }
 }

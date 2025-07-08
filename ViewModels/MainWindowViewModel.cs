@@ -58,7 +58,7 @@ namespace ATC4_HQ.ViewModels
             string zipPath = @"B:\XIANGMU\ATC4-HQ\ATC4ALL.zip";
             // 解压 .zip 文件到指定目录
             ZipFile.ExtractToDirectory(zipPath, gameData.Path + @"");
-            File.WriteAllText(gameData.Path + @"\gamedata.json", JsonSerializer.Serialize(@"gameData.Name" + " = " + gameData.Name)); // 将 GameModel 对象序列化为 JSON 并写入文件
+            File.WriteAllText(gameData.Path + @"\gamedata.ini", @"gameData.Name" + " = " + gameData.Name);         
         }
     }
 
