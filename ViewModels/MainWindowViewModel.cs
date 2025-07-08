@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using ATC4_HQ.Models; // 引入 GameModel 的命名空间
 using System.IO.Compression; // 用于解压缩功能
+using System.Text.Json;
+using System.IO; // 用于文件操作
 
 namespace ATC4_HQ.ViewModels
 {
@@ -54,10 +56,9 @@ namespace ATC4_HQ.ViewModels
         public async Task HandleInstallGameAndUnzipAsync(GameModel gameData) // ⭐️ 确保方法是 public 且接收 GameModel
         {
             string zipPath = @"B:\XIANGMU\ATC4-HQ\ATC4ALL.zip";
-            string extractPath ;
-            extractPath = gameData.Path;
             // 解压 .zip 文件到指定目录
-            ZipFile.ExtractToDirectory(zipPath, extractPath);
+            ZipFile.ExtractToDirectory(zipPath, gameData.Path + @"");
+            File.WriteAllText(gameData.Path + @"\gamedata.json", JsonSerializer.Serialize(@"gameData.Name" + " = " + gameData.Name)); // 将 GameModel 对象序列化为 JSON 并写入文件
         }
     }
 
