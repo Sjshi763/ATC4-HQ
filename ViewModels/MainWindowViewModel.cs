@@ -5,6 +5,7 @@ using System.Text;     // 用于文本编码
 using System.Threading.Tasks;
 using System.Windows.Input;
 using ATC4_HQ.Models; // 引入 GameModel 的命名空间
+using System.IO.Compression; // 用于解压缩功能
 
 namespace ATC4_HQ.ViewModels
 {
@@ -52,23 +53,23 @@ namespace ATC4_HQ.ViewModels
         // 处理游戏安装和解压的通用方法，现在接收 GameModel 对象
         public async Task HandleInstallGameAndUnzipAsync(GameModel gameData) // ⭐️ 确保方法是 public 且接收 GameModel
         {
-           
+            string zipPath = @"B:\XIANGMU\ATC4-HQ\ATC4ALL.zip";
+            string extractPath ;
+            extractPath = gameData.Path;
+            // 解压 .zip 文件到指定目录
+            ZipFile.ExtractToDirectory(zipPath, extractPath);
         }
     }
 
     // GameStartOptionsViewModel 的定义，它必须在 ATC4_HQ.ViewModels 命名空间内
     public partial class GameStartOptionsViewModel : ViewModelBase
     {
-                private readonly MainWindowViewModel _mainWindowViewModel;
+        private readonly MainWindowViewModel _mainWindowViewModel;
 
         public ICommand Button1Command
-        {
-            get; // 启动上一次游戏
-        } 
+        {  get; } // 启动上一次游戏
         public ICommand Button2Command
-        {
-            get; // 列出全部游戏
-        } 
+        {  get; } // 列出全部游戏
 
         // 修改构造函数：接收 MainWindowViewModel 实例
         public GameStartOptionsViewModel(MainWindowViewModel mainWindowViewModel)
