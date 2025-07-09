@@ -7,6 +7,9 @@ using System.Text.Json; // ⭐️ 新增：引入 JSON 命名空间
 using ATC4_HQ.Models; // ⭐️ 新增：引入 GameModel 的命名空间
 using master.Globals;
 using System.IO;
+using System.Text;
+using Masuit.Tools.Security;
+using Masuit.Tools.Files;
 
 namespace ATC4_HQ.Views
 {
@@ -16,6 +19,8 @@ namespace ATC4_HQ.Views
         {
             InitializeComponent();
             this.Loaded += MainWindow_Loaded;
+            Console.OutputEncoding = Encoding.UTF8;
+            Console.InputEncoding = Encoding.UTF8;
             StartUp();
         }
 
@@ -103,21 +108,55 @@ namespace ATC4_HQ.Views
 
         private void StartUp()
         {
-
-        }
-
-        private string? ParseInformation(string SourcesOfInformation , string MessageName)
-        {
-            string[] lines = File.ReadAllLines(SourcesOfInformation);
-            foreach (var line in lines)
+            try
             {
-                if (line.Contains(MessageName))
+                if (!File.Exists(GlobalPaths.InitiatorProfileName))
                 {
-                    string Endline = line.Replace(MessageName + " = ", "");
-                    return Endline;
+                    Console.WriteLine("错误：配置文件不存在，请检查路径。");
+                    PrimaryProfile();
+                    return;
                 }
             }
-            return null;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"错误：无法访问配置文件 - {ex.Message}");
+                return;
+            }
+            Console.WriteLine("配置文件存在，正在加载...");
+            IniFile ini = new IniFile(GlobalPaths.InitiatorProfileName);
+            var PrimaryProfileVersion = ini.GetValue("main", "Version");
+            if (PrimaryProfileVersion != GlobalPaths.Version)
+            {
+                Console.WriteLine($"配置文件版本不匹配，当前版本：{GlobalPaths.Version}，配置文件版本：{PrimaryProfileVersion}");
+                return;
+            }
+            GlobalPaths.TransitSoftwareLE = ini.GetValue("main", "TransitSoftwareLE");
+            GlobalPaths.GamePath = ini.GetValue("main", "GamePath");
+        }
+
+        private void PrimaryProfile()
+        {
+            // 获取时间
+            Console.WriteLine("配置文件不存在，正在创建初始配置文件...");
+            DateTimeOffset now = DateTimeOffset.UtcNow;
+            Console.WriteLine($"当前时间（UTC）：{now}");
+            string generalShort = now.ToString("g");
+            Console.WriteLine($"当前时间：{generalShort}");
+
+            // 获取加密时间
+            string encryptedText = generalShort.AESEncrypt(GlobalPaths.Keys);;
+            Console.WriteLine($"加密后的时间：{encryptedText}");
+
+            //返回值
+            GlobalPaths.FirstRun = encryptedText;
+
+            Console.WriteLine("创建初始配置文件...");
+            IniFile ini=new IniFile(GlobalPaths.InitiatorProfileName);
+            ini.SetValue("main", "Version", GlobalPaths.Version);
+            ini.SetValue("main", "FirstRun", GlobalPaths.FirstRun);
+            ini.SetValue("main", "TransitSoftwareLE" , "null");
+            Console.WriteLine("初始配置文件已创建。");
+            ini.Save();
         }
     }
 }

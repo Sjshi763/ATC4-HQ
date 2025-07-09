@@ -6,8 +6,7 @@
 [python](https://www.python.org/)
 > [!WARNING]
 > 以上库已经在最新版本被移除
-
-[minizip-ng](https://github.com/zlib-ng/minizip-ng)
+[Masuit.Tools](https://github.com/ldqk/Masuit.Tools)
 > [!IMPORTANT]
 > *感谢以上库的开发者，没有你们我的项目不可能这么好！！*
 # 这个项目的更新
