@@ -19,6 +19,9 @@ namespace ATC4_HQ.ViewModels
 
         [ObservableProperty]
         private bool _isDialogOk; // 用于指示对话框是“确定”关闭还是“取消”关闭
+        
+        [ObservableProperty]
+        private bool _shouldClose;
 
         // 用于触发 View 执行文件选择操作的事件
         public event EventHandler? RequestOpenFilePicker; // ⭐️ 标记为可为 null 的事件，解决警告
@@ -64,18 +67,20 @@ namespace ATC4_HQ.ViewModels
             var gameData = new Models.GameModel // 明确指定命名空间和类名
             {
                 Name = GameName,
-                Path = GamePath,
+                Path = GamePath
             };
 
             // 将 GameModel 对象序列化为 JSON 字符串，并赋值给 DialogResultData
             DialogResultData = JsonSerializer.Serialize(gameData);
             IsDialogOk = true; // 设置对话框结果为 OK
+            ShouldClose = true;
         }
 
         private void OnCancel()
         {
             DialogResultData = null; // 清空结果
             IsDialogOk = false;      // 设置对话框结果为 Cancel
+            ShouldClose = true;
         }
     }
 }
