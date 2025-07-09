@@ -2,9 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Text.Json; // 用于 JSON 序列化
-using System.Threading.Tasks;
 using System.Windows.Input;
-using ATC4_HQ.Models; // ⭐️ 引入 GameModel 的命名空间
 
 namespace ATC4_HQ.ViewModels
 {
@@ -34,7 +32,6 @@ namespace ATC4_HQ.ViewModels
             FindFileCommand = new RelayCommand(OnFindFile);
             SaveCommand = new RelayCommand(OnSave);
             CancelCommand = new RelayCommand(OnCancel);
-
         }
 
         // --- 命令的实现 ---
@@ -64,7 +61,7 @@ namespace ATC4_HQ.ViewModels
             }
 
             // ⭐️ 修改：创建 GameModel 对象并序列化为 JSON 字符串
-            var gameData = new ATC4_HQ.Models.GameModel // 明确指定命名空间和类名
+            var gameData = new Models.GameModel // 明确指定命名空间和类名
             {
                 Name = GameName,
                 Path = GamePath,
