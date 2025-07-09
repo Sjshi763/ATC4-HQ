@@ -7,7 +7,9 @@ using System.Windows.Input;
 using ATC4_HQ.Models; // 引入 GameModel 的命名空间
 using System.IO.Compression; // 用于解压缩功能
 using System.Text.Json;
-using System.IO; // 用于文件操作
+using System.IO;
+using master.Globals;
+using Masuit.Tools.Files; // 用于文件操作
 
 namespace ATC4_HQ.ViewModels
 {
@@ -53,8 +55,15 @@ namespace ATC4_HQ.ViewModels
         {
             string zipPath = @"B:\XIANGMU\ATC4-HQ\ATC4ALL.zip";
             // 解压 .zip 文件到指定目录
-            ZipFile.ExtractToDirectory(zipPath, gameData.Path + @"");
-            File.WriteAllText(gameData.Path + @"\gamedata.ini", @"gameData.Name" + " = " + gameData.Name);         
+            ZipFile.ExtractToDirectory(zipPath, gameData.Path);
+            GlobalPaths.GamePath = gameData.Path; // 更新全局路径
+            IniFile ini = new IniFile(GlobalPaths.InitiatorProfileName);
+            ini.SetValue("main", "GamePath", GlobalPaths.GamePath);
+            ini.Save();
+            GlobalPaths.GameName = gameData.Name;
+            ini = new IniFile(GlobalPaths.GamePath + @"\GameData.ini");
+            ini.SetValue("GameSettings" , "GameName" , GlobalPaths.GameName);
+            ini.Save();
         }
     }
 

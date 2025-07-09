@@ -130,6 +130,8 @@ namespace ATC4_HQ.Views
                 Console.WriteLine($"配置文件版本不匹配，当前版本：{GlobalPaths.Version}，配置文件版本：{PrimaryProfileVersion}");
                 return;
             }
+            GlobalPaths.TransitSoftwareLE = ini.GetValue("main", "TransitSoftwareLE");
+            GlobalPaths.GamePath = ini.GetValue("main", "GamePath");
         }
 
         private void PrimaryProfile()
