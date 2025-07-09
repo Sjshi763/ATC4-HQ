@@ -72,10 +72,8 @@ namespace ATC4_HQ.ViewModels
     {
         private readonly MainWindowViewModel _mainWindowViewModel;
 
-        public ICommand Button1Command
-        {  get; } // 启动上一次游戏
-        public ICommand Button2Command
-        {  get; } // 列出全部游戏
+        public ICommand Button1Command {  get; } // 启动上一次游戏
+        public ICommand Button2Command {  get; } // 列出全部游戏
 
         // 修改构造函数：接收 MainWindowViewModel 实例
         public GameStartOptionsViewModel(MainWindowViewModel mainWindowViewModel)
@@ -94,7 +92,7 @@ namespace ATC4_HQ.ViewModels
         private async void OnListAllGames()
         {
             Console.WriteLine("Game Start Options: 第二个按钮被点击了！尝试列出全部游戏。");
-
+            
         }
     }
 }
