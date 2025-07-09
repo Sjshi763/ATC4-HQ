@@ -23,5 +23,6 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Masuit.Tools.Net" Version="2025.4.4" />
   </ItemGroup>
 </Project>
