@@ -7,7 +7,6 @@ using System.Windows.Input;
 using ATC4_HQ.Models; // 引入 GameModel 的命名空间
 using System.IO.Compression; // 用于解压缩功能
 using System.Text.Json;
-using System.IO;
 using master.Globals;
 using Masuit.Tools.Files; // 用于文件操作
 
@@ -73,14 +72,14 @@ namespace ATC4_HQ.ViewModels
         private readonly MainWindowViewModel _mainWindowViewModel;
 
         public ICommand Button1Command {  get; } // 启动上一次游戏
-        public ICommand Button2Command {  get; } // 列出全部游戏
+        public ICommand Button3Command {  get; } // 启动选择游戏
 
         // 修改构造函数：接收 MainWindowViewModel 实例
         public GameStartOptionsViewModel(MainWindowViewModel mainWindowViewModel)
         {
             _mainWindowViewModel = mainWindowViewModel; // 保存引用
             Button1Command = new RelayCommand(OnLaunchLastGame);
-            Button2Command = new RelayCommand(OnListAllGames);
+            Button3Command = new RelayCommand(OnListAllGames);
         }
 
         private void OnLaunchLastGame()
@@ -91,8 +90,8 @@ namespace ATC4_HQ.ViewModels
 
         private async void OnListAllGames()
         {
-            Console.WriteLine("Game Start Options: 第二个按钮被点击了！尝试列出全部游戏。");
-            
+            Console.WriteLine("Game Start Options: 第三个按钮被点击了！尝试启动选择的游戏。");
+
         }
     }
 }
