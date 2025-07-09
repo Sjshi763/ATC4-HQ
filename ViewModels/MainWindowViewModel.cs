@@ -22,10 +22,6 @@ namespace ATC4_HQ.ViewModels
 
         public MainWindowViewModel()
         {
-            //输入输出UTF-8
-            Console.OutputEncoding = Encoding.UTF8;
-            Console.InputEncoding = Encoding.UTF8;
-
             StartGameCommand = new RelayCommand(OnStartGame);
             InstallGameCommand = new RelayCommand(OnInstallGame); 
             SettingCommand = new RelayCommand(OnSetting);
