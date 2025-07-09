@@ -8,6 +8,8 @@
         CanResize="False"
         Title="选择游戏">
         <Grid>
-                
+			<Grid>
+				
+			</Grid>
         </Grid>
 </Window>
