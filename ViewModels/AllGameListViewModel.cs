@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 
+
 namespace ATC4_HQ.ViewModels;
 
 public class AllGameListViewModel : ObservableObject
@@ -15,10 +16,12 @@ public class AllGameListViewModel : ObservableObject
 
     public AllGameListViewModel()
     {
+        //从配置文件找要显示的东西
+        
+        //显示的内容
         AllGames = new ObservableCollection<string>
         {
-            "a",
-            "b"
+            
         };
     }
 }

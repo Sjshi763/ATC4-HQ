@@ -10,23 +10,13 @@
         x:Class="ATC4_HQ.Views.GameListWindow"
         CanResize="False"
         Title="选择游戏">
-        <Grid >
-            <Grid>
-                <TextBlock 
-                   Text="安装游戏数据页面"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   FontSize="24"
-                   Margin="0,0,0,30" /> 
-            </Grid>
-            <Grid >
-                <ListBox ItemsSource="{Binding AllGames}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding}" FontSize="16" Margin="10"/>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </Grid>
+        <Grid >           
+            <ListBox ItemsSource="{Binding AllGames}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" FontSize="16" Margin="10"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>          
         </Grid>
 </Window>
