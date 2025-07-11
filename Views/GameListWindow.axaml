@@ -3,13 +3,30 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        Width="800" Height="450"
         Icon="/Assets/ATC4.ico"
+        xmlns:vm="using:ATC4_HQ.ViewModels"
+        x:DataType="vm:AllGameListViewModel"
         x:Class="ATC4_HQ.Views.GameListWindow"
         CanResize="False"
         Title="选择游戏">
-        <Grid>
-			<Grid>
-				
-			</Grid>
+        <Grid >
+            <Grid>
+                <TextBlock 
+                   Text="安装游戏数据页面"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   FontSize="24"
+                   Margin="0,0,0,30" /> 
+            </Grid>
+            <Grid >
+                <ListBox ItemsSource="{Binding AllGames}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" FontSize="16" Margin="10"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
         </Grid>
 </Window>
