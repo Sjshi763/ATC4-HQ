@@ -8,11 +8,18 @@ namespace ATC4_HQ.ViewModels;
 public class AllGameListViewModel : ObservableObject
 {
     private ObservableCollection<string>? _AllGames;
+    private string? _selectedGame;
 
     public ObservableCollection<string> AllGames
     {
         get { return _AllGames; }
         set { SetProperty(ref _AllGames, value); }
+    }
+
+    public string? SelectedGame
+    {
+        get { return _selectedGame; }
+        set { SetProperty(ref _selectedGame, value); }
     }
 
     public AllGameListViewModel()

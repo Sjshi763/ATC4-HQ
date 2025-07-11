@@ -25,7 +25,14 @@ namespace ATC4_HQ.Views
             var dialogWindow = new GameListWindow();
             // 修复 CS8604 警告：确保 owner 是可空类型或显式转换
             Window? ownerWindow = TopLevel.GetTopLevel(this) as Window;
-            await dialogWindow.ShowDialog<bool?>(ownerWindow);
+            var selectedGame = await dialogWindow.ShowDialog<string>(ownerWindow);
+
+            if (selectedGame != null)
+            {
+                // 如果选择了游戏，调用GameStart处理
+                var gameStart = new ViewModels.GameStart();
+                gameStart.StartGame(selectedGame);
+            }
         }
     }
 }

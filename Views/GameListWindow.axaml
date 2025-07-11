@@ -10,8 +10,8 @@
         x:Class="ATC4_HQ.Views.GameListWindow"
         CanResize="False"
         Title="选择游戏">
-        <Grid >           
-            <ListBox ItemsSource="{Binding AllGames}">
+        <Grid>           
+            <ListBox Name="GameListBox" ItemsSource="{Binding AllGames}" SelectedItem="{Binding SelectedGame}" DoubleTapped="GameListBox_DoubleTapped">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding}" FontSize="16" Margin="10"/>
