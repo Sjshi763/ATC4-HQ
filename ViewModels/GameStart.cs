@@ -2,6 +2,9 @@ using System;
 using master.Globals;
 using System.Diagnostics;
 using System.IO;
+using ATC4_HQ.Views;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 
 namespace ATC4_HQ.ViewModels;
 
@@ -13,7 +16,23 @@ public class GameStart
         {
             Console.WriteLine($"准备启动游戏: {selectedGame}");
 
-            // 设置游戏路径
+            // 设置游戏需要的路径
+            if (1==1) // 测试条件
+            // 正式条件：
+            // if (string.IsNullOrEmpty(GlobalPaths.TransitSoftwareLE))
+            {
+                Console.WriteLine("爷LE呢！？");
+                var dialogWindow = new WarningPop_up();
+                var mainWindow = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop 
+                    ? desktop.MainWindow 
+                    : null;
+                // 可选：设置警告消息
+                // if (dialogWindow.Content is TextBlock contentBlock)
+                // {
+                //     contentBlock.Text = "请先在设置中设置 Locale Emulator 路径";
+                // }
+                dialogWindow.ShowDialog(mainWindow);
+            }
             string gamePath = GlobalPaths.GamePath + @"\AXA.exe";
             string LEin = GlobalPaths.TransitSoftwareLE;
 
@@ -28,25 +47,39 @@ public class GameStart
             if (!File.Exists(LEin))
             {
                 Console.WriteLine($"错误: 本地模拟器不存在于路径: {LEin}");
-                throw new FileNotFoundException("找不到本地模拟器程序", LEin);
+                throw new FileNotFoundException("找不到本地LE", LEin);
+                // 可选：显示友好的错误提示
+                // var dialogWindow = new WarningPop_up();
+                // if (dialogWindow.Content is TextBlock contentBlock)
+                // {
+                //     contentBlock.Text = $"找不到 Locale Emulator，请检查路径：{LEin}";
+                // }
+                // dialogWindow.ShowDialog(mainWindow);
+                // return;
             }
 
             if (!File.Exists(gamePath))
             {
                 Console.WriteLine($"错误: 游戏可执行文件不存在于路径: {gamePath}");
                 throw new FileNotFoundException("找不到游戏程序", gamePath);
+                // 可选：显示友好的错误提示
+                // var dialogWindow = new WarningPop_up();
+                // if (dialogWindow.Content is TextBlock contentBlock)
+                // {
+                //     contentBlock.Text = $"找不到游戏程序，请检查路径：{gamePath}";
+                // }
+                // dialogWindow.ShowDialog(mainWindow);
+                // return;
             }
 
-            // 创建进程启动信息
             ProcessStartInfo psi = new ProcessStartInfo
             {
                 FileName = LEin,
-                Arguments = gamePath,
-                UseShellExecute = true, // 使用系统外壳程序启动
-                CreateNoWindow = false  // 创建窗口
+                Arguments = gamePath, // 可选改进：Arguments = $"\"{gamePath}\"", // 处理包含空格的路径
+                UseShellExecute = true,
+                CreateNoWindow = false
             };
 
-            // 实际启动进程
             Console.WriteLine("正在启动进程...");
             using (Process? process = Process.Start(psi))
             {
@@ -63,7 +96,14 @@ public class GameStart
         {
             Console.WriteLine($"启动游戏时发生错误: {ex.Message}");
             Console.WriteLine($"错误详情: {ex.StackTrace}");
-            throw; // 重新抛出异常以便调用者处理
+            throw;
+            // 可选：显示友好的错误提示
+            // var dialogWindow = new WarningPop_up();
+            // if (dialogWindow.Content is TextBlock contentBlock)
+            // {
+            //     contentBlock.Text = $"启动游戏时发生错误：{ex.Message}";
+            // }
+            // dialogWindow.ShowDialog(mainWindow);
         }
     }
 }

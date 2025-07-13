@@ -27,7 +27,7 @@ public class AllGameListViewModel : ObservableObject
         //从配置文件找要显示的东西
         IniFile ini = new IniFile(GlobalPaths.GamePath + @"\GameData.ini");
         var GameName = ini.GetValue("GameSettings", "GameName");
-        
+                
         //显示的内容
         AllGames = new ObservableCollection<string>
         {
