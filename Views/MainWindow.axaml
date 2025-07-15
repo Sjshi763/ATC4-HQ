@@ -56,6 +56,9 @@
                 <DataTemplate DataType="{x:Type vm:GameStartOptionsViewModel}">
                     <views:GameStartOptionsView />
                 </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:SettingViewModel}">
+                    <views:Setting />
+                </DataTemplate>
             </ContentControl.DataTemplates>
         </ContentControl>
     </StackPanel>
