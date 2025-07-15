@@ -2,6 +2,7 @@ using System;
 using master.Globals;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using ATC4_HQ.Views;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -10,19 +11,19 @@ namespace ATC4_HQ.ViewModels;
 
 public class GameStart
 {
-    public void StartGame(string selectedGame)
+    public async Task StartGame(string selectedGame)
     {
         try
         {
             Console.WriteLine($"准备启动游戏: {selectedGame}");
 
             // 设置游戏需要的路径
-            if (1==1) // 测试条件
+            // if (1==1) // 测试条件
             // 正式条件：
-            // if (string.IsNullOrEmpty(GlobalPaths.TransitSoftwareLE))
+            if (string.IsNullOrEmpty(GlobalPaths.TransitSoftwareLE))
             {
                 Console.WriteLine("爷LE呢！？");
-                var dialogWindow = new WarningPop_up();
+                var dialogWindow = new WarningPop_upForNoLE();
                 var mainWindow = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop 
                     ? desktop.MainWindow 
                     : null;
@@ -31,7 +32,15 @@ public class GameStart
                 // {
                 //     contentBlock.Text = "请先在设置中设置 Locale Emulator 路径";
                 // }
-                dialogWindow.ShowDialog(mainWindow);
+                bool result = await dialogWindow.ShowDialog(mainWindow);
+                if (!result)
+                {
+                    Console.WriteLine("用户取消了操作，停止启动游戏。");
+                    return; // 用户取消操作
+                }
+                Console.WriteLine("对话框已确认，继续执行");
+                Console.WriteLine($"");
+                //TODO: 这里可以添加代码来打开设置界面，或者直接当场配置
             }
             string gamePath = GlobalPaths.GamePath + @"\AXA.exe";
             string LEin = GlobalPaths.TransitSoftwareLE;
@@ -39,6 +48,12 @@ public class GameStart
             // 硬编码路径用于测试
             LEin = @"B:\Locale-Emulator-2.5.0.1\LEProc.exe";
             gamePath = @"A:\ATC4\ATC4" + @"\AXA.exe";
+            
+            if (LEin == null || gamePath == null)
+            {
+                Console.WriteLine("错误: LEin 或 gamePath 为空");
+                return;
+            }
 
             Console.WriteLine($"使用LE: {LEin}");
             Console.WriteLine($"游戏路径: {gamePath}");
