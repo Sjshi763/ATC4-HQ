@@ -4,5 +4,17 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ATC4_HQ.Views.Setting">
-    Welcome to Avalonia!
+	<Grid RowDefinitions="Auto, Auto">
+		<Grid Grid.Row="0" Margin="5"
+		      ColumnDefinitions="100, 350 ,50" 
+		      RowDefinitions="Auto, Auto, Auto"
+		      HorizontalAlignment="Left">
+			<Label Grid.Row="0" Grid.Column="0">LE位置</Label>
+			<TextBox Grid.Row="0" Grid.Column="1" Width="300" Margin="0,0,0,0" />
+			<Button Grid.Row="0" Grid.Column="2" Content="浏览" Margin="5,0,0,0"/>
+		</Grid>
+		<Grid Grid.Row="1">
+			<Button HorizontalAlignment="Center" Margin="5">保存</Button>
+		</Grid>
+	</Grid>
 </UserControl>
