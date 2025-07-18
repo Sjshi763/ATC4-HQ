@@ -1,15 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
-using System.Text;     // 用于文本编码
 using System.Threading.Tasks;
 using System.Windows.Input;
 using ATC4_HQ.Models; // 引入 GameModel 的命名空间
 using System.IO.Compression; // 用于解压缩功能
-using System.Text.Json;
 using master.Globals;
 using Masuit.Tools.Files;
-using Newtonsoft.Json.Converters; // 用于文件操作
 
 namespace ATC4_HQ.ViewModels
 {
@@ -17,7 +14,6 @@ namespace ATC4_HQ.ViewModels
     {
         [ObservableProperty]
         private ViewModelBase? _currentPage; // 当前显示在 PageHost 中的 ViewModel
-
         public ICommand StartGameCommand { get; }
         public ICommand InstallGameCommand { get; } // 用于 ViewModel 内部逻辑或未来绑定
         public ICommand SettingCommand { get; }
