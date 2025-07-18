@@ -4,6 +4,9 @@ using CommunityToolkit.Mvvm.Input;
 using System.Windows.Input;
 using master.Globals;
 using Masuit.Tools.Files;
+using Avalonia.Controls;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 
 namespace ATC4_HQ.ViewModels;
 
@@ -50,6 +53,22 @@ public partial class SettingViewModel : ViewModelBase
         _ini.Save();
         Console.WriteLine($"设置已保存。{GlobalPaths.TransitSoftwareLE}");
     }
-    
-    //TODO: 浏览LE地址
+
+    public IAsyncRelayCommand BrowseLECommand => new AsyncRelayCommand(async () => 
+{
+    var dialog = new OpenFolderDialog
+    {
+        Title = "选择 LE 文件夹"
+    };
+
+    // 使用应用程序生命周期来获取主窗口
+    if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+    {
+        var result = await dialog.ShowAsync(desktop.MainWindow);
+        if (!string.IsNullOrEmpty(result))
+        {
+            LE_address = result + @"\LEProc.exe";
+        }
+    }
+});
 }

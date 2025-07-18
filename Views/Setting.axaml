@@ -13,7 +13,7 @@
 		      HorizontalAlignment="Left">
 			<Label Grid.Row="0" Grid.Column="0">LE位置</Label>
 			<TextBox Grid.Row="0" Text="{Binding LE_address, Mode=TwoWay}" Grid.Column="1" Width="300" Margin="0,0,0,0" />
-			<Button Grid.Row="0" Grid.Column="2" Content="浏览" Margin="5,0,0,0"/>
+			<Button Grid.Row="0" Grid.Column="2" Content="浏览" Margin="5,0,0,0" Command="{Binding BrowseLECommand}"/>
 		</Grid>
 		<Grid Grid.Row="1">
 			<Button HorizontalAlignment="Center" Margin="5" Command="{Binding SaveSettingCommand}">保存</Button>
