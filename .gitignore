@@ -1,6 +1,5 @@
 # 编辑器生成
 .vscode/
-ATC4-HQ.ini
 .idea/
 ATC4/
 .vs/
@@ -17,3 +16,6 @@ pipe_server_log.txt
 *.ps1
 打包/
 ATC4ALL.zip
+# 项目生成的文件
+gamedata.ini
+ATC4-HQ.ini

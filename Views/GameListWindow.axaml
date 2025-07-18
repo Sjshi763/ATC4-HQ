@@ -1,0 +1,22 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        Width="800" Height="450"
+        Icon="/Assets/ATC4.ico"
+        xmlns:vm="using:ATC4_HQ.ViewModels"
+        x:DataType="vm:AllGameListViewModel"
+        x:Class="ATC4_HQ.Views.GameListWindow"
+        CanResize="False"
+        Title="选择游戏">
+        <Grid>           
+            <ListBox Name="GameListBox" ItemsSource="{Binding AllGames}" SelectedItem="{Binding SelectedGame}" DoubleTapped="GameListBox_DoubleTapped">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" FontSize="16" Margin="10"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>          
+        </Grid>
+</Window>

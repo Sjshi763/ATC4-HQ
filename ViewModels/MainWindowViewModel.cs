@@ -1,10 +1,12 @@
-﻿﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
-using System.Text;     // 用于文本编码
 using System.Threading.Tasks;
 using System.Windows.Input;
 using ATC4_HQ.Models; // 引入 GameModel 的命名空间
+using System.IO.Compression; // 用于解压缩功能
+using master.Globals;
+using Masuit.Tools.Files;
 
 namespace ATC4_HQ.ViewModels
 {
@@ -12,17 +14,12 @@ namespace ATC4_HQ.ViewModels
     {
         [ObservableProperty]
         private ViewModelBase? _currentPage; // 当前显示在 PageHost 中的 ViewModel
-
         public ICommand StartGameCommand { get; }
         public ICommand InstallGameCommand { get; } // 用于 ViewModel 内部逻辑或未来绑定
         public ICommand SettingCommand { get; }
 
         public MainWindowViewModel()
         {
-            //输入输出UTF-8
-            Console.OutputEncoding = Encoding.UTF8;
-            Console.InputEncoding = Encoding.UTF8;
-
             StartGameCommand = new RelayCommand(OnStartGame);
             InstallGameCommand = new RelayCommand(OnInstallGame); 
             SettingCommand = new RelayCommand(OnSetting);
@@ -46,53 +43,24 @@ namespace ATC4_HQ.ViewModels
 
         private void OnSetting()
         {
-            Console.WriteLine("ViewModel: 设置逻辑。");
+            Console.WriteLine("启动设置");
+            CurrentPage = new SettingViewModel(); 
         }
 
         // 处理游戏安装和解压的通用方法，现在接收 GameModel 对象
         public async Task HandleInstallGameAndUnzipAsync(GameModel gameData) // ⭐️ 确保方法是 public 且接收 GameModel
         {
-           
-        }
-        
-    }
-
-    // GameStartOptionsViewModel 的定义，它必须在 ATC4_HQ.ViewModels 命名空间内
-    public partial class GameStartOptionsViewModel : ViewModelBase
-    {
-                private readonly MainWindowViewModel _mainWindowViewModel;
-
-        public ICommand Button1Command { get; } // 启动上一次游戏
-        public ICommand Button2Command { get; } // 列出全部游戏
-
-        // 修改构造函数：接收 MainWindowViewModel 实例
-        public GameStartOptionsViewModel(MainWindowViewModel mainWindowViewModel)
-        {
-            _mainWindowViewModel = mainWindowViewModel; // 保存引用
-            Button1Command = new RelayCommand(OnLaunchLastGame);
-            Button2Command = new RelayCommand(OnListAllGames);
-        }
-
-        private void OnLaunchLastGame()
-        {
-            Console.WriteLine("Game Start Options: 第一个按钮被点击了！尝试启动上一次游戏。");
-            // TODO: 在这里实现启动上一次游戏的逻辑。
-            // 这可能需要从服务端获取“上一次游戏”的信息，或者从客户端本地存储中读取。
-            // 目前，由于 IPC 是单向的，我们只能在服务端日志中看到结果。
-            // 如果需要客户端启动游戏，需要获取游戏路径。
-            // 暂时只是打印到控制台。
-            // 示例：假设您知道上一次游戏的ID是1，可以这样发送命令（但目前服务端不会返回路径）
-
-        }
-
-        // 删除SendIpcCommandAsync方法及其实现
-        // 删除SendRawMessageViaIpcAsync私有方法
-        // 移除pipeClient连接逻辑
-        private async void OnListAllGames()
-        {
-            Console.WriteLine("Game Start Options: 第二个按钮被点击了！尝试列出全部游戏。");
-            // 已移除IPC调用
-            Console.WriteLine("该功能当前不可用");
+            string zipPath = @"B:\XIANGMU\ATC4-HQ\ATC4ALL.zip";
+            // 解压 .zip 文件到指定目录
+            ZipFile.ExtractToDirectory(zipPath, gameData.Path);
+            GlobalPaths.GamePath = gameData.Path; // 更新全局路径
+            IniFile ini = new IniFile(GlobalPaths.InitiatorProfileName);
+            ini.SetValue("main", "GamePath", GlobalPaths.GamePath);
+            ini.Save();
+            GlobalPaths.GameName = gameData.Name;
+            ini = new IniFile(GlobalPaths.GamePath + @"\GameData.ini");
+            ini.SetValue("GameSettings" , "GameName" , GlobalPaths.GameName);
+            ini.Save();
         }
     }
 }
