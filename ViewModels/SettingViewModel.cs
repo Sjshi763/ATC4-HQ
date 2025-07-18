@@ -55,20 +55,20 @@ public partial class SettingViewModel : ViewModelBase
     }
 
     public IAsyncRelayCommand BrowseLECommand => new AsyncRelayCommand(async () => 
-{
-    var dialog = new OpenFolderDialog
     {
-        Title = "选择 LE 文件夹"
-    };
-
-    // 使用应用程序生命周期来获取主窗口
-    if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-    {
-        var result = await dialog.ShowAsync(desktop.MainWindow);
-        if (!string.IsNullOrEmpty(result))
+        var dialog = new OpenFolderDialog
         {
-            LE_address = result + @"\LEProc.exe";
+            Title = "选择 LE 文件夹"
+        };
+
+        // 使用应用程序生命周期来获取主窗口
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            var result = await dialog.ShowAsync(desktop.MainWindow);
+            if (!string.IsNullOrEmpty(result))
+            {
+                LE_address = result + @"\LEProc.exe";
+            }
         }
-    }
-});
+    });
 }
