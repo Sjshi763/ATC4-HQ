@@ -1,0 +1,48 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
+        x:Class="ATC4_HQ.Views.WarningPop_upForNoLE"
+        Title="警告"
+        Width="400"
+        Height="200"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+    
+    <StackPanel Margin="20">
+        <!-- 标题 -->
+        <TextBlock Text="警告"
+                 FontSize="24"
+                 FontWeight="Bold"
+                 HorizontalAlignment="Center"
+                 Margin="0,0,0,20"/>
+        
+        <!-- 内容 -->
+        <TextBlock Text="请先在设置中设置 Locale Emulator 路径"
+                 FontSize="18"
+                 TextWrapping="Wrap"
+                 HorizontalAlignment="Center"
+                 Margin="0,0,0,30"/>
+        
+        <!-- 按钮 -->
+        <Button Content="确定"
+                Click="Close_OnClick"
+                Width="150"
+                Height="50"
+                FontSize="20"
+                HorizontalAlignment="Center"
+                HorizontalContentAlignment="Center"
+                VerticalContentAlignment="Center">
+            <Button.Styles>
+                <Style Selector="Button">
+                    <Setter Property="Background" Value="#007ACC"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Style>
+                <Style Selector="Button:pointerover">
+                    <Setter Property="Background" Value="#005999"/>
+                </Style>
+            </Button.Styles>
+        </Button>
+    </StackPanel>
+</Window>

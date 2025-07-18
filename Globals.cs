@@ -10,8 +10,7 @@ namespace master
             public static string? FirstRun;
             public static string Keys = "0x5A";
             public static string? GamePath;
-            // <summary>
-            // </summary>
+            
             public static string? GameName;
         }
     }
