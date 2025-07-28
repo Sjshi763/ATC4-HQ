@@ -57,5 +57,5 @@ jobs:
       uses: softprops/action-gh-release@v1 # 使用 softprops/action-gh-release Action
       if: startsWith(github.ref, 'refs/tags/') # 仅当工作流由标签推送触发时才运行此步骤
       with:
-        files: ATC4-HQ-Release-Build/ATC4-HQ-Release-Build.zip # ⭐️ 指向下载后的ZIP文件路径
+        files: ./ATC4-HQ-Release-Build.zip # ⭐️ 指向下载后的ZIP文件路径
         token: ${{ secrets.GITHUB_TOKEN }} # GitHub 自动提供的令牌，用于认证
