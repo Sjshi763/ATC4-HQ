@@ -20,44 +20,44 @@ jobs:
         dotnet-version: '9.x.x' # 指定 .NET 9 LTS 版本，您可以根据您的项目实际使用的版本修改
 
     - name: Restore dependencies # 步骤3: 恢复 NuGet 包依赖
-      run: dotnet restore ./ATC4-HQ.csproj # ⭐️ 修复路径：假设 ATC4-HQ 文件夹在仓库根目录
+      run: dotnet restore ./ATC4-HQ.csproj # 修复路径：假设 ATC4-HQ 文件夹在仓库根目录
 
     - name: Build project # 步骤4: 构建项目 (Release 配置)
-      run: dotnet build ./ATC4-HQ.csproj --configuration Release --no-restore # ⭐️ 修复路径
+      run: dotnet build ./ATC4-HQ.csproj --configuration Release --no-restore # 修复路径
 
     - name: Publish application # 步骤5: 发布应用程序 (生成可执行文件)
-      run: dotnet publish ./ATC4-HQ.csproj --configuration Release --no-build -o publish # ⭐️ 修复路径
+      run: dotnet publish ./ATC4-HQ.csproj --configuration Release --no-build -o publish # 修复路径
 
     - name: Create Zip Archive of Published Output # ⭐️ 新增步骤：打包发布目录为ZIP
       run: tar -a -c -f ATC4-HQ-Release-Build.zip -C ./publish . # 使用tar命令创建zip文件
       # -a: 自动检测压缩格式 (如zip)
       # -c: 创建归档
       # -f: 指定归档文件名
-      # -C ATC4-HQ/publish: 切换到发布目录，然后将该目录下的所有内容 (.) 添加到zip中
+      # -C ./publish: 切换到发布目录，然后将该目录下的所有内容 (.) 添加到zip中
 
-    - name: Upload build artifact # 步骤6: 上传构建产物
+    - name: Upload build artifact # 步骤6: 上传构建产物 (现在上传的是ZIP文件)
       uses: actions/upload-artifact@v4
       with:
         name: ATC4-HQ-Release-Build # 产物的名称，您可以在 GitHub Actions 页面下载
-        path: ./publish # ⭐️ 修复路径：上传 'publish' 文件夹中的所有内容
+        path: ATC4-HQ-Release-Build.zip # ⭐️ 修改：上传的是打包好的ZIP文件
 
   release: # ⭐️ 新增作业：用于创建/更新 GitHub Release
-      needs: build # 此作业依赖于 'build' 作业，确保在构建成功后才运行
-      runs-on: windows-latest # 在最新的 Windows 环境下运行
+    needs: build # 此作业依赖于 'build' 作业，确保在构建成功后才运行
+    runs-on: windows-latest # 在最新的 Windows 环境下运行
 
-      steps:
-      - name: Checkout code # 步骤1: 检出仓库代码 (再次检出以确保可以访问仓库元数据)
-        uses: actions/checkout@v4
+    steps:
+    - name: Checkout code # 步骤1: 检出仓库代码 (再次检出以确保可以访问仓库元数据)
+      uses: actions/checkout@v4
 
-      - name: Download build artifact # 步骤2: 下载 'build' 作业中上传的产物
-        uses: actions/download-artifact@v4
-        with:
-          name: ATC4-HQ-Release-Build # 指定要下载的产物名称
-          path: ./release-artifacts # 将产物下载到此目录，以便后续上传
+    - name: Download build artifact # 步骤2: 下载 'build' 作业中上传的ZIP产物
+      uses: actions/download-artifact@v4
+      with:
+        name: ATC4-HQ-Release-Build # 指定要下载的产物名称
+        path: . # 将ZIP文件下载到当前工作目录，它会创建一个同名文件夹
 
-      - name: Create Release and Upload Assets # 步骤3: 创建或更新 Release 并上传资产
-        uses: softprops/action-gh-release@v1 # 使用 softprops/action-gh-release Action
-        if: startsWith(github.ref, 'refs/tags/') # 仅当工作流由标签推送触发时才运行此步骤
-        with:
-          files: ./release-artifacts/**/* # ⭐️ 将下载的产物目录中的所有文件作为资产上传
-          token: ${{ secrets.GITHUB_TOKEN }} # GitHub 自动提供的令牌，用于认证
+    - name: Create Release and Upload Assets # 步骤3: 创建或更新 Release 并上传资产
+      uses: softprops/action-gh-release@v1 # 使用 softprops/action-gh-release Action
+      if: startsWith(github.ref, 'refs/tags/') # 仅当工作流由标签推送触发时才运行此步骤
+      with:
+        files: ATC4-HQ-Release-Build/ATC4-HQ-Release-Build.zip # ⭐️ 修改：指向下载后的ZIP文件路径
+        token: ${{ secrets.GITHUB_TOKEN }} # GitHub 自动提供的令牌，用于认证
