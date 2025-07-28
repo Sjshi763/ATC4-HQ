@@ -28,25 +28,23 @@ jobs:
     - name: Publish application # 步骤5: 发布应用程序 (生成可执行文件)
       run: dotnet publish ./ATC4-HQ.csproj --configuration Release --no-build -o publish # 修复路径
 
-    - name: Create Zip Archive of Published Output # ⭐️ 新增步骤：打包发布目录为ZIP
-      run: tar -a -c -f ATC4-HQ-Release-Build.zip -C ./publish . # 使用tar命令创建zip文件
-      # -a: 自动检测压缩格式 (如zip)
-      # -c: 创建归档
-      # -f: 指定归档文件名
-      # -C ./publish: 切换到发布目录，然后将该目录下的所有内容 (.) 添加到zip中
+    - name: Create Zip Archive of Published Output # ⭐️ 修改：使用 Compress-Archive 打包发布目录为ZIP
+      run: Compress-Archive -Path ./publish/* -DestinationPath ATC4-HQ-Release-Build.zip
+      # -Path ./publish/*: 指定要压缩的源路径，即 publish 目录下的所有内容
+      # -DestinationPath ATC4-HQ-Release-Build.zip: 指定生成的ZIP文件的名称和位置
 
     - name: Upload build artifact # 步骤6: 上传构建产物 (现在上传的是ZIP文件)
       uses: actions/upload-artifact@v4
       with:
-        name: ATC4-HQ-Release-Build # 产物的名称，您可以在 GitHub Actions 页面下载
-        path: ATC4-HQ-Release-Build.zip # ⭐️ 修改：上传的是打包好的ZIP文件
+        name: ATC4-HQ-Release-Build # 产物的名称
+        path: ATC4-HQ-Release-Build.zip # ⭐️ 上传的是打包好的ZIP文件
 
-  release: # ⭐️ 新增作业：用于创建/更新 GitHub Release
-    needs: build # 此作业依赖于 'build' 作业，确保在构建成功后才运行
+  release: # 用于创建/更新 GitHub Release
+    needs: build # 此作业依赖于 'build' 作业
     runs-on: windows-latest # 在最新的 Windows 环境下运行
 
     steps:
-    - name: Checkout code # 步骤1: 检出仓库代码 (再次检出以确保可以访问仓库元数据)
+    - name: Checkout code # 步骤1: 检出仓库代码
       uses: actions/checkout@v4
 
     - name: Download build artifact # 步骤2: 下载 'build' 作业中上传的ZIP产物
@@ -59,5 +57,5 @@ jobs:
       uses: softprops/action-gh-release@v1 # 使用 softprops/action-gh-release Action
       if: startsWith(github.ref, 'refs/tags/') # 仅当工作流由标签推送触发时才运行此步骤
       with:
-        files: ATC4-HQ-Release-Build/ATC4-HQ-Release-Build.zip # ⭐️ 修改：指向下载后的ZIP文件路径
+        files: ATC4-HQ-Release-Build/ATC4-HQ-Release-Build.zip # ⭐️ 指向下载后的ZIP文件路径
         token: ${{ secrets.GITHUB_TOKEN }} # GitHub 自动提供的令牌，用于认证
