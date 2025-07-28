@@ -33,3 +33,24 @@ jobs:
       with:
         name: ATC4-HQ-Release-Build # 产物的名称，您可以在 GitHub Actions 页面下载
         path: ./publish # ⭐️ 修复路径：上传 'publish' 文件夹中的所有内容
+
+  release: # ⭐️ 新增作业：用于创建/更新 GitHub Release
+      needs: build # 此作业依赖于 'build' 作业，确保在构建成功后才运行
+      runs-on: windows-latest # 在最新的 Windows 环境下运行
+
+      steps:
+      - name: Checkout code # 步骤1: 检出仓库代码 (再次检出以确保可以访问仓库元数据)
+        uses: actions/checkout@v4
+
+      - name: Download build artifact # 步骤2: 下载 'build' 作业中上传的产物
+        uses: actions/download-artifact@v4
+        with:
+          name: ATC4-HQ-Release-Build # 指定要下载的产物名称
+          path: ./release-artifacts # 将产物下载到此目录，以便后续上传
+
+      - name: Create Release and Upload Assets # 步骤3: 创建或更新 Release 并上传资产
+        uses: softprops/action-gh-release@v1 # 使用 softprops/action-gh-release Action
+        if: startsWith(github.ref, 'refs/tags/') # 仅当工作流由标签推送触发时才运行此步骤
+        with:
+          files: ./release-artifacts/**/* # ⭐️ 将下载的产物目录中的所有文件作为资产上传
+          token: ${{ secrets.GITHUB_TOKEN }} # GitHub 自动提供的令牌，用于认证
