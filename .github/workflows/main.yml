@@ -28,6 +28,13 @@ jobs:
     - name: Publish application # 步骤5: 发布应用程序 (生成可执行文件)
       run: dotnet publish ./ATC4-HQ.csproj --configuration Release --no-build -o publish # ⭐️ 修复路径
 
+    - name: Create Zip Archive of Published Output # ⭐️ 新增步骤：打包发布目录为ZIP
+      run: tar -a -c -f ATC4-HQ-Release-Build.zip -C ATC4-HQ/publish . # 使用tar命令创建zip文件
+      # -a: 自动检测压缩格式 (如zip)
+      # -c: 创建归档
+      # -f: 指定归档文件名
+      # -C ATC4-HQ/publish: 切换到发布目录，然后将该目录下的所有内容 (.) 添加到zip中
+
     - name: Upload build artifact # 步骤6: 上传构建产物
       uses: actions/upload-artifact@v4
       with:
