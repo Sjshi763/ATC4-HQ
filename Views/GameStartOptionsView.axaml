@@ -1,0 +1,14 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ATC4_HQ.ViewModels"
+             x:Class="ATC4_HQ.Views.GameStartOptionsView"
+             x:DataType="vm:GameStartOptionsViewModel">
+    
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20">
+        <TextBlock Text="请选择游戏启动选项喵！" FontSize="24" FontWeight="Bold" Margin="0,0,0,20" HorizontalAlignment="Center"/>
+
+        <Button Content="启动上一次游戏" Command="{Binding Button1Command}" Width="200" Height="50"/>
+        <Button Content="列出全部游戏" Click="Button2" Width="200" Height="50"/>
+        <Button Content="启动选择游戏" Command="{Binding Button3Command}" Width="200" Height="50"/>
+    </StackPanel>
+</UserControl>
