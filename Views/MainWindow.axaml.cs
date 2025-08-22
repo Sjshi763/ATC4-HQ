@@ -9,6 +9,9 @@ using System.IO;
 using System.Text;
 using Masuit.Tools.Security;
 using Masuit.Tools.Files;
+using Avalonia.Layout; // 用于布局相关类
+using Avalonia.Media; // 用于媒体相关类
+using Avalonia; // 用于Thickness等类
 
 namespace ATC4_HQ.Views
 {
@@ -21,6 +24,9 @@ namespace ATC4_HQ.Views
             Console.OutputEncoding = Encoding.UTF8;
             Console.InputEncoding = Encoding.UTF8;
             StartUp();
+            
+            // 订阅DataContextChanged事件，确保在DataContext设置后再订阅OpenALNotInstalled事件
+            this.DataContextChanged += OnDataContextChanged;
         }
 
         private void InitializeComponent()
@@ -156,6 +162,82 @@ namespace ATC4_HQ.Views
             ini.SetValue("main", "TransitSoftwareLE" , "null");
             Console.WriteLine("初始配置文件已创建。");
             ini.Save();
+        }
+        
+        /// <summary>
+        /// 处理DataContextChanged事件，订阅OpenALNotInstalled事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        private void OnDataContextChanged(object? sender, EventArgs e)
+        {
+            if (DataContext is MainWindowViewModel viewModel)
+            {
+                viewModel.OpenALNotInstalled += OnOpenALNotInstalled;
+            }
+        }
+        
+        /// <summary>
+        /// 处理OpenAL未安装事件，显示警告对话框
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        private void OnOpenALNotInstalled(object? sender, EventArgs e)
+        {
+            // 创建警告对话框
+            var warningWindow = new Window
+            {
+                Title = "警告",
+                Width = 400,
+                Height = 200,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                CanResize = false
+            };
+
+            var stackPanel = new StackPanel { Margin = new Thickness(20) };
+
+            var titleTextBlock = new TextBlock
+            {
+                Text = "警告",
+                FontSize = 24,
+                FontWeight = FontWeight.Bold,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 20)
+            };
+
+            var contentTextBlock = new TextBlock
+            {
+                Text = "系统未检测到OPENAL，请先安装OPENAL库后再运行程序。",
+                FontSize = 18,
+                TextWrapping = TextWrapping.Wrap,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 30)
+            };
+
+            var okButton = new Button
+            {
+                Content = "确定",
+                Width = 150,
+                Height = 50,
+                FontSize = 20,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                HorizontalContentAlignment = HorizontalAlignment.Center,
+                VerticalContentAlignment = VerticalAlignment.Center
+            };
+
+            okButton.Click += (s, args) =>
+            {
+                warningWindow.Close();
+            };
+
+            stackPanel.Children.Add(titleTextBlock);
+            stackPanel.Children.Add(contentTextBlock);
+            stackPanel.Children.Add(okButton);
+
+            warningWindow.Content = stackPanel;
+            
+            // 显示警告对话框
+            warningWindow.ShowDialog(this);
         }
     }
 }

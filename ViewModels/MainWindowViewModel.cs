@@ -7,6 +7,7 @@ using ATC4_HQ.Models; // 引入 GameModel 的命名空间
 using System.IO.Compression; // 用于解压缩功能
 using master.Globals;
 using Masuit.Tools.Files;
+using System.IO; // 用于检查文件是否存在
 
 namespace ATC4_HQ.ViewModels
 {
@@ -14,6 +15,10 @@ namespace ATC4_HQ.ViewModels
     {
         [ObservableProperty]
         private ViewModelBase? _currentPage; // 当前显示在 PageHost 中的 ViewModel
+        
+        // 事件：当需要显示OPENAL未安装警告时触发
+        public event EventHandler? OpenALNotInstalled;
+        
         public ICommand StartGameCommand { get; }
         public ICommand InstallGameCommand { get; } // 用于 ViewModel 内部逻辑或未来绑定
         public ICommand SettingCommand { get; }
@@ -28,6 +33,16 @@ namespace ATC4_HQ.ViewModels
         private void OnStartGame()
         {
             Console.WriteLine("ViewModel: 启动游戏逻辑。");
+            
+            // 检查OPENAL是否安装
+            if (!IsOpenALInstalled())
+            {
+                Console.WriteLine("ViewModel: OPENAL未安装，触发警告事件。");
+                // 触发事件通知View显示警告对话框
+                OpenALNotInstalled?.Invoke(this, EventArgs.Empty);
+                return; // 不继续执行后续逻辑
+            }
+            
             // 实现启动游戏的业务逻辑
             // 将 CurrentPage 设置为 GameStartOptionsViewModel 的实例
             CurrentPage = new GameStartOptionsViewModel(this); 
@@ -45,6 +60,17 @@ namespace ATC4_HQ.ViewModels
         {
             Console.WriteLine("启动设置");
             CurrentPage = new SettingViewModel(); 
+        }
+
+        /// <summary>
+        /// 检查OPENAL是否安装
+        /// </summary>
+        /// <returns>如果OPENAL已安装返回true，否则返回false</returns>
+        private bool IsOpenALInstalled()
+        {
+            // 检查系统目录中是否存在openal32.dll
+            string openalPath = Path.Combine(Environment.SystemDirectory, "openal32.dll");
+            return File.Exists(openalPath);
         }
 
         // 处理游戏安装和解压的通用方法，现在接收 GameModel 对象
