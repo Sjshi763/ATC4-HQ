@@ -12,7 +12,6 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -33,25 +32,8 @@
                    HorizontalAlignment="Center"
                    Margin="0,0,0,20"/>
 
-        <!-- 安装选项 -->
-        <TextBlock Grid.Row="2"
-                   Text="请选择安装方式："
-                   FontSize="18"
-                   FontWeight="SemiBold"
-                   Margin="0,0,0,10"/>
-
-        <!-- 自动安装按钮 -->
-        <Button Grid.Row="3"
-                Name="AutoInstallButton"
-                Content="自动下载并安装"
-                HorizontalAlignment="Center"
-                Width="200"
-                Height="40"
-                FontSize="16"
-                Margin="0,0,0,10"/>
-
         <!-- 手动安装说明 -->
-        <StackPanel Grid.Row="4"
+        <StackPanel Grid.Row="2"
                     Margin="0,20,0,20">
             <TextBlock Text="手动安装：" 
                        FontSize="16" 
@@ -67,14 +49,14 @@
                        FontSize="14" 
                        Margin="0,0,0,10"/>
             <Button Name="OpenWebsiteButton"
-                    Content="打开官方网站"
+                    Content="手动安装"
                     Width="150"
                     Height="35"
                     FontSize="14"/>
         </StackPanel>
 
         <!-- 返回按钮 -->
-        <Button Grid.Row="5"
+        <Button Grid.Row="3"
                 Name="BackButton"
                 Content="返回"
                 HorizontalAlignment="Center"

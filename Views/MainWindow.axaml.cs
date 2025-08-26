@@ -263,12 +263,22 @@ namespace ATC4_HQ.Views
             // 显示警告对话框
             await warningWindow.ShowDialog(this);
             
-            // 如果用户选择前往安装，可以在这里添加安装逻辑
+            // 如果用户选择前往安装，显示OpenAL安装界面
             if (shouldInstall)
             {
-                // 这里可以添加打开安装页面或执行安装的逻辑
                 Console.WriteLine("用户选择前往安装OPENAL");
-                // 例如：打开浏览器到OPENAL下载页面，或者显示安装界面
+                // 显示OpenAL安装界面
+                var openALInstallView = new OpenALInstallView();
+                var openALInstallWindow = new Window
+                {
+                    Title = "OPENAL 安装",
+                    Width = 500,
+                    Height = 400,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                    CanResize = false,
+                    Content = openALInstallView
+                };
+                await openALInstallWindow.ShowDialog(this);
             }
         }
     }
