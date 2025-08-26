@@ -19,6 +19,9 @@ namespace ATC4_HQ.ViewModels
         // 事件：当需要显示OPENAL未安装警告时触发
         public event EventHandler? OpenALNotInstalled;
         
+        // 事件：当需要显示OPENAL安装界面时触发
+        public event EventHandler? ShowOpenALInstallView;
+        
         public ICommand StartGameCommand { get; }
         public ICommand InstallGameCommand { get; } // 用于 ViewModel 内部逻辑或未来绑定
         public ICommand SettingCommand { get; }
@@ -37,9 +40,9 @@ namespace ATC4_HQ.ViewModels
             // 检查OPENAL是否安装
             if (!IsOpenALInstalled())
             {
-                Console.WriteLine("ViewModel: OPENAL未安装，触发警告事件。");
-                // 触发事件通知View显示警告对话框
-                OpenALNotInstalled?.Invoke(this, EventArgs.Empty);
+                Console.WriteLine("ViewModel: OPENAL未安装，触发显示安装界面事件。");
+                // 触发事件通知View显示OpenAL安装界面
+                ShowOpenALInstallView?.Invoke(this, EventArgs.Empty);
                 return; // 不继续执行后续逻辑
             }
             

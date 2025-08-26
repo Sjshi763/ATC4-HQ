@@ -172,7 +172,7 @@ namespace ATC4_HQ.Views
         }
         
         /// <summary>
-        /// 处理DataContextChanged事件，订阅OpenALNotInstalled事件
+        /// 处理DataContextChanged事件，订阅ShowOpenALInstallView事件
         /// </summary>
         /// <param name="sender">事件发送者</param>
         /// <param name="e">事件参数</param>
@@ -180,102 +180,19 @@ namespace ATC4_HQ.Views
         {
             if (DataContext is MainWindowViewModel viewModel)
             {
-                viewModel.OpenALNotInstalled += OnOpenALNotInstalled;
+                viewModel.ShowOpenALInstallView += OnShowOpenALInstallView;
             }
         }
         
         /// <summary>
-        /// 处理OpenAL未安装事件，显示警告对话框
+        /// 处理显示OpenAL安装界面事件
         /// </summary>
         /// <param name="sender">事件发送者</param>
         /// <param name="e">事件参数</param>
-        private async void OnOpenALNotInstalled(object? sender, EventArgs e)
+        private async void OnShowOpenALInstallView(object? sender, EventArgs e)
         {
-            // 创建警告对话框
-            var warningWindow = new Window
-            {
-                Title = "警告",
-                Width = 450,
-                Height = 250,
-                WindowStartupLocation = WindowStartupLocation.CenterScreen,
-                CanResize = false
-            };
-
-            var stackPanel = new StackPanel { Margin = new Thickness(20) };
-
-            var titleTextBlock = new TextBlock
-            {
-                Text = "警告",
-                FontSize = 24,
-                FontWeight = FontWeight.Bold,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, 0, 0, 20)
-            };
-
-            var contentTextBlock = new TextBlock
-            {
-                Text = "系统未检测到OPENAL，请先安装OPENAL库后再运行程序。",
-                FontSize = 18,
-                TextWrapping = TextWrapping.Wrap,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, 0, 0, 30)
-            };
-
-            // 创建按钮面板
-            var buttonPanel = new StackPanel
-            {
-                Orientation = Orientation.Horizontal,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Spacing = 20
-            };
-
-            var installButton = new Button
-            {
-                Content = "前往安装",
-                Width = 120,
-                Height = 40,
-                FontSize = 16
-            };
-
-            var cancelButton = new Button
-            {
-                Content = "取消启动",
-                Width = 120,
-                Height = 40,
-                FontSize = 16
-            };
-
-            // 设置按钮点击事件
-            bool shouldInstall = false;
-            installButton.Click += (s, args) =>
-            {
-                shouldInstall = true;
-                warningWindow.Close();
-            };
-
-            cancelButton.Click += (s, args) =>
-            {
-                warningWindow.Close();
-            };
-
-            buttonPanel.Children.Add(installButton);
-            buttonPanel.Children.Add(cancelButton);
-
-            stackPanel.Children.Add(titleTextBlock);
-            stackPanel.Children.Add(contentTextBlock);
-            stackPanel.Children.Add(buttonPanel);
-
-            warningWindow.Content = stackPanel;
-            
-            // 显示警告对话框
-            await warningWindow.ShowDialog(this);
-            
-            // 如果用户选择前往安装，显示OpenAL安装界面
-            if (shouldInstall)
-            {
-                Console.WriteLine("用户选择前往安装OPENAL");
-                await ShowOpenALInstallView();
-            }
+            Console.WriteLine("直接显示OpenAL安装界面");
+            await ShowOpenALInstallView();
         }
 
         /// <summary>
