@@ -10,6 +10,8 @@ using System.Text;
 using Masuit.Tools.Security;
 using Masuit.Tools.Files;
 using System.Threading.Tasks; // 添加Task支持
+using Avalonia;
+using Avalonia.Media;
 
 namespace ATC4_HQ.Views
 {
@@ -194,6 +196,9 @@ namespace ATC4_HQ.Views
         {
             // 显示OpenAL安装界面
             var openALInstallView = new OpenALInstallView();
+            var openALInstallViewModel = new ViewModels.OpenALInstallViewModel();
+            openALInstallView.DataContext = openALInstallViewModel;
+            
             var openALInstallWindow = new Window
             {
                 Title = "OPENAL 安装",
@@ -203,7 +208,73 @@ namespace ATC4_HQ.Views
                 CanResize = false,
                 Content = openALInstallView
             };
+            
+            // 订阅ViewModel事件
+            openALInstallViewModel.RequestClose += (s, e) => openALInstallWindow.Close();
+            openALInstallViewModel.ShowMessage += (s, message) => ShowMessageDialog(openALInstallWindow, message);
+            
             await openALInstallWindow.ShowDialog(this);
+        }
+        
+        /// <summary>
+        /// 显示消息对话框
+        /// </summary>
+        /// <param name="parentWindow">父窗口</param>
+        /// <param name="message">消息内容</param>
+        private async void ShowMessageDialog(Window parentWindow, string message)
+        {
+            var lines = message.Split('\n');
+            string title = lines.Length > 0 ? lines[0] : "提示";
+            string content = lines.Length > 1 ? string.Join("\n", lines[1..]) : message;
+            
+            // 创建测试结果对话框
+            var resultWindow = new Window
+            {
+                Title = title,
+                Width = 400,
+                Height = 200,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                CanResize = false
+            };
+
+            var stackPanel = new StackPanel { Margin = new Thickness(20) };
+
+            var titleTextBlock = new TextBlock
+            {
+                Text = title,
+                FontSize = 20,
+                FontWeight = Avalonia.Media.FontWeight.Bold,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 10)
+            };
+
+            var messageTextBlock = new TextBlock
+            {
+                Text = content,
+                FontSize = 16,
+                TextWrapping = TextWrapping.Wrap,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 20)
+            };
+
+            var okButton = new Button
+            {
+                Content = "确定",
+                Width = 80,
+                Height = 35,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center
+            };
+
+            okButton.Click += (s, args) => resultWindow.Close();
+
+            stackPanel.Children.Add(titleTextBlock);
+            stackPanel.Children.Add(messageTextBlock);
+            stackPanel.Children.Add(okButton);
+
+            resultWindow.Content = stackPanel;
+            
+            // 显示对话框
+            await resultWindow.ShowDialog(parentWindow);
         }
     }
 }
