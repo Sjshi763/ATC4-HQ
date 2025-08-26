@@ -12,6 +12,7 @@ using Masuit.Tools.Files;
 using Avalonia.Layout; // 用于布局相关类
 using Avalonia.Media; // 用于媒体相关类
 using Avalonia; // 用于Thickness等类
+using System.Threading.Tasks; // 添加Task支持
 
 namespace ATC4_HQ.Views
 {
@@ -109,6 +110,12 @@ namespace ATC4_HQ.Views
                 Console.WriteLine("设置按钮被点击了！");
                 viewModel.SettingCommand.Execute(null);
             }
+        }
+
+        private async void OpenALTest_Click(object? sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("OpenAL测试按钮被点击了！");
+            await ShowOpenALInstallView();
         }
 
         private void StartUp()
@@ -267,19 +274,27 @@ namespace ATC4_HQ.Views
             if (shouldInstall)
             {
                 Console.WriteLine("用户选择前往安装OPENAL");
-                // 显示OpenAL安装界面
-                var openALInstallView = new OpenALInstallView();
-                var openALInstallWindow = new Window
-                {
-                    Title = "OPENAL 安装",
-                    Width = 500,
-                    Height = 400,
-                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
-                    CanResize = false,
-                    Content = openALInstallView
-                };
-                await openALInstallWindow.ShowDialog(this);
+                await ShowOpenALInstallView();
             }
+        }
+
+        /// <summary>
+        /// 显示OpenAL安装界面
+        /// </summary>
+        public async Task ShowOpenALInstallView()
+        {
+            // 显示OpenAL安装界面
+            var openALInstallView = new OpenALInstallView();
+            var openALInstallWindow = new Window
+            {
+                Title = "OPENAL 安装",
+                Width = 500,
+                Height = 400,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                CanResize = false,
+                Content = openALInstallView
+            };
+            await openALInstallWindow.ShowDialog(this);
         }
     }
 }
