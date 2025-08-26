@@ -12,6 +12,7 @@ using Masuit.Tools.Files;
 using Avalonia.Layout; // 用于布局相关类
 using Avalonia.Media; // 用于媒体相关类
 using Avalonia; // 用于Thickness等类
+using System.Threading.Tasks; // 添加Task支持
 
 namespace ATC4_HQ.Views
 {
@@ -111,6 +112,7 @@ namespace ATC4_HQ.Views
             }
         }
 
+
         private void StartUp()
         {
             try
@@ -165,7 +167,7 @@ namespace ATC4_HQ.Views
         }
         
         /// <summary>
-        /// 处理DataContextChanged事件，订阅OpenALNotInstalled事件
+        /// 处理DataContextChanged事件，订阅ShowOpenALInstallView事件
         /// </summary>
         /// <param name="sender">事件发送者</param>
         /// <param name="e">事件参数</param>
@@ -173,71 +175,38 @@ namespace ATC4_HQ.Views
         {
             if (DataContext is MainWindowViewModel viewModel)
             {
-                viewModel.OpenALNotInstalled += OnOpenALNotInstalled;
+                viewModel.ShowOpenALInstallView += OnShowOpenALInstallView;
             }
         }
         
         /// <summary>
-        /// 处理OpenAL未安装事件，显示警告对话框
+        /// 处理显示OpenAL安装界面事件
         /// </summary>
         /// <param name="sender">事件发送者</param>
         /// <param name="e">事件参数</param>
-        private void OnOpenALNotInstalled(object? sender, EventArgs e)
+        private async void OnShowOpenALInstallView(object? sender, EventArgs e)
         {
-            // 创建警告对话框
-            var warningWindow = new Window
+            Console.WriteLine("直接显示OpenAL安装界面");
+            await ShowOpenALInstallView();
+        }
+
+        /// <summary>
+        /// 显示OpenAL安装界面
+        /// </summary>
+        public async Task ShowOpenALInstallView()
+        {
+            // 显示OpenAL安装界面
+            var openALInstallView = new OpenALInstallView();
+            var openALInstallWindow = new Window
             {
-                Title = "警告",
-                Width = 400,
-                Height = 200,
+                Title = "OPENAL 安装",
+                Width = 500,
+                Height = 400,
                 WindowStartupLocation = WindowStartupLocation.CenterScreen,
-                CanResize = false
+                CanResize = false,
+                Content = openALInstallView
             };
-
-            var stackPanel = new StackPanel { Margin = new Thickness(20) };
-
-            var titleTextBlock = new TextBlock
-            {
-                Text = "警告",
-                FontSize = 24,
-                FontWeight = FontWeight.Bold,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, 0, 0, 20)
-            };
-
-            var contentTextBlock = new TextBlock
-            {
-                Text = "系统未检测到OPENAL，请先安装OPENAL库后再运行程序。",
-                FontSize = 18,
-                TextWrapping = TextWrapping.Wrap,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, 0, 0, 30)
-            };
-
-            var okButton = new Button
-            {
-                Content = "确定",
-                Width = 150,
-                Height = 50,
-                FontSize = 20,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                HorizontalContentAlignment = HorizontalAlignment.Center,
-                VerticalContentAlignment = VerticalAlignment.Center
-            };
-
-            okButton.Click += (s, args) =>
-            {
-                warningWindow.Close();
-            };
-
-            stackPanel.Children.Add(titleTextBlock);
-            stackPanel.Children.Add(contentTextBlock);
-            stackPanel.Children.Add(okButton);
-
-            warningWindow.Content = stackPanel;
-            
-            // 显示警告对话框
-            warningWindow.ShowDialog(this);
+            await openALInstallWindow.ShowDialog(this);
         }
     }
 }

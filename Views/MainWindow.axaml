@@ -50,7 +50,6 @@
                     HorizontalAlignment="Right"
                     Margin="0,0,20,0"/>
             
-        </Grid>
         <ContentControl Content="{Binding CurrentPage}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <ContentControl.DataTemplates>
                 <DataTemplate DataType="{x:Type vm:GameStartOptionsViewModel}">
