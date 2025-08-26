@@ -182,14 +182,14 @@ namespace ATC4_HQ.Views
         /// </summary>
         /// <param name="sender">事件发送者</param>
         /// <param name="e">事件参数</param>
-        private void OnOpenALNotInstalled(object? sender, EventArgs e)
+        private async void OnOpenALNotInstalled(object? sender, EventArgs e)
         {
             // 创建警告对话框
             var warningWindow = new Window
             {
                 Title = "警告",
-                Width = 400,
-                Height = 200,
+                Width = 450,
+                Height = 250,
                 WindowStartupLocation = WindowStartupLocation.CenterScreen,
                 CanResize = false
             };
@@ -214,30 +214,62 @@ namespace ATC4_HQ.Views
                 Margin = new Thickness(0, 0, 0, 30)
             };
 
-            var okButton = new Button
+            // 创建按钮面板
+            var buttonPanel = new StackPanel
             {
-                Content = "确定",
-                Width = 150,
-                Height = 50,
-                FontSize = 20,
+                Orientation = Orientation.Horizontal,
                 HorizontalAlignment = HorizontalAlignment.Center,
-                HorizontalContentAlignment = HorizontalAlignment.Center,
-                VerticalContentAlignment = VerticalAlignment.Center
+                Spacing = 20
             };
 
-            okButton.Click += (s, args) =>
+            var installButton = new Button
+            {
+                Content = "前往安装",
+                Width = 120,
+                Height = 40,
+                FontSize = 16
+            };
+
+            var cancelButton = new Button
+            {
+                Content = "取消启动",
+                Width = 120,
+                Height = 40,
+                FontSize = 16
+            };
+
+            // 设置按钮点击事件
+            bool shouldInstall = false;
+            installButton.Click += (s, args) =>
+            {
+                shouldInstall = true;
+                warningWindow.Close();
+            };
+
+            cancelButton.Click += (s, args) =>
             {
                 warningWindow.Close();
             };
 
+            buttonPanel.Children.Add(installButton);
+            buttonPanel.Children.Add(cancelButton);
+
             stackPanel.Children.Add(titleTextBlock);
             stackPanel.Children.Add(contentTextBlock);
-            stackPanel.Children.Add(okButton);
+            stackPanel.Children.Add(buttonPanel);
 
             warningWindow.Content = stackPanel;
             
             // 显示警告对话框
-            warningWindow.ShowDialog(this);
+            await warningWindow.ShowDialog(this);
+            
+            // 如果用户选择前往安装，可以在这里添加安装逻辑
+            if (shouldInstall)
+            {
+                // 这里可以添加打开安装页面或执行安装的逻辑
+                Console.WriteLine("用户选择前往安装OPENAL");
+                // 例如：打开浏览器到OPENAL下载页面，或者显示安装界面
+            }
         }
     }
 }
