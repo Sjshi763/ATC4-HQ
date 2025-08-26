@@ -9,9 +9,6 @@ using System.IO;
 using System.Text;
 using Masuit.Tools.Security;
 using Masuit.Tools.Files;
-using Avalonia.Layout; // 用于布局相关类
-using Avalonia.Media; // 用于媒体相关类
-using Avalonia; // 用于Thickness等类
 using System.Threading.Tasks; // 添加Task支持
 
 namespace ATC4_HQ.Views
