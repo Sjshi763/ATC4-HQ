@@ -112,11 +112,6 @@ namespace ATC4_HQ.Views
             }
         }
 
-        private async void OpenALTest_Click(object? sender, RoutedEventArgs e)
-        {
-            Console.WriteLine("OpenAL测试按钮被点击了！");
-            await ShowOpenALInstallView();
-        }
 
         private void StartUp()
         {
