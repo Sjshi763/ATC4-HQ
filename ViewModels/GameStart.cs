@@ -23,15 +23,10 @@ public class GameStart
             if (string.IsNullOrEmpty(GlobalPaths.TransitSoftwareLE))
             {
                 Console.WriteLine("爷LE呢！？");
-                var dialogWindow = new WarningPop_upForNoLE();
+                var dialogWindow = new ATC4_HQ.Views.LEInstallWindow();
                 var mainWindow = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop 
                     ? desktop.MainWindow 
                     : null;
-                // 可选：设置警告消息
-                // if (dialogWindow.Content is TextBlock contentBlock)
-                // {
-                //     contentBlock.Text = "请先在设置中设置 Locale Emulator 路径";
-                // }
                 bool result = await dialogWindow.ShowDialog(mainWindow);
                 if (!result)
                 {
