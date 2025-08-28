@@ -35,8 +35,6 @@ namespace ATC4_HQ.ViewModels
         [ObservableProperty]
         private string _downloadButtonText = "自动下载安装";
 
-        [ObservableProperty]
-        private string _testButtonText = "测试安装";
 
         [ObservableProperty]
         private string _backButtonText = "返回";
@@ -48,7 +46,6 @@ namespace ATC4_HQ.ViewModels
         private string _installStatus = "";
 
         public IRelayCommand DownloadAndInstallCommand { get; }
-        public IRelayCommand TestInstallCommand { get; }
         public IRelayCommand BackCommand { get; }
 
         public event EventHandler? RequestClose;
@@ -57,7 +54,6 @@ namespace ATC4_HQ.ViewModels
         public LEInstallViewModel()
         {
             DownloadAndInstallCommand = new RelayCommand(async () => await DownloadAndInstallLEAsync());
-            TestInstallCommand = new RelayCommand(TestInstall);
             BackCommand = new RelayCommand(OnBack);
         }
 
@@ -186,23 +182,6 @@ namespace ATC4_HQ.ViewModels
             }
         }
 
-        private void TestInstall()
-        {
-            // 测试安装逻辑
-            System.Console.WriteLine("用户点击测试安装按钮");
-            
-            // 检查Locale Emulator是否已安装（检查注册表或安装目录）
-            if (IsLEInstalled())
-            {
-                // 显示安装成功的消息
-                ShowMessage?.Invoke(this, "测试成功\nLocale Emulator已正确安装！");
-            }
-            else
-            {
-                // 显示安装失败的消息
-                ShowMessage?.Invoke(this, "测试失败\nLocale Emulator未安装或安装不完整！");
-            }
-        }
 
         private bool IsLEInstalled()
         {

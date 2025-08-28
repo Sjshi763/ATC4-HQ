@@ -72,19 +72,4 @@ public partial class SettingViewModel : ViewModelBase
             }
         }
     });
-
-    public ICommand TestLEInstallCommand => new RelayCommand(TestLEInstall);
-
-    private void TestLEInstall()
-    {
-        // 创建并显示LE安装窗口
-        var leInstallWindow = new LEInstallWindow();
-        
-        // 获取主窗口
-        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            _ = leInstallWindow.ShowDialog(desktop.MainWindow);
-        }
-    }
-
 }
