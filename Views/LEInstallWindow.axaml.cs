@@ -47,7 +47,7 @@ public partial class LEInstallWindow : Window
         AvaloniaXamlLoader.Load(this);
     }
     
-    public async Task<bool> ShowDialog(Window parent)
+    public new async Task<bool> ShowDialog(Window parent)
     {
         await base.ShowDialog(parent);
         return _dialogResult;

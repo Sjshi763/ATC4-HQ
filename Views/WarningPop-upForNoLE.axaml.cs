@@ -30,9 +30,9 @@ public partial class WarningPop_upForNoLE : Window
         Close();
     }
     
-    public async Task<bool> ShowDialog(Window parent)
+    public new async Task<bool> ShowDialog(Window parent)
     {
-        await base.ShowDialog(parent); // 使用 base 调用父类的 ShowDialog
+        await base.ShowDialog(parent);
         return _dialogResult;
     }
 }
