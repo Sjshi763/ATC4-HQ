@@ -32,7 +32,7 @@ public partial class WarningPop_upForNoLE : Window
     
     public new async Task<bool> ShowDialog(Window parent)
     {
-        await base.ShowDialog(parent);
+        await base.ShowDialog(parent); 
         return _dialogResult;
     }
 }
