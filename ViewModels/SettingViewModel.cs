@@ -7,6 +7,7 @@ using Masuit.Tools.Files;
 using Avalonia.Controls;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using ATC4_HQ.Views;
 
 namespace ATC4_HQ.ViewModels;
 
