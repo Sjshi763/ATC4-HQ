@@ -2,10 +2,11 @@ using System;
 using System.IO;
 using System.Management;
 using System.Runtime.Versioning;
-namespace ATC4_HQ.Helpers
+
+namespace ATC4_HQ.ViewModels
 {
     [SupportedOSPlatform("Windows")] 
-    public static class DriveTypeHelper
+    public static class DriveTypeService
     {
         public static bool IsDriveSSD(string path)
         {

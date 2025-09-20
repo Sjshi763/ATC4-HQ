@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Text.Json; // 用于 JSON 序列化
 using System.Windows.Input;
-using ATC4_HQ.Helpers; // 添加引用以使用DriveTypeHelper
+using ATC4_HQ.ViewModels; // 添加引用以使用DriveTypeService
 
 namespace ATC4_HQ.ViewModels
 {
@@ -55,7 +55,7 @@ namespace ATC4_HQ.ViewModels
             // 检测路径是否在SSD上并更新警告
             if (!string.IsNullOrWhiteSpace(value) && value != "未选择任何文件夹")
             {
-                if (DriveTypeHelper.IsDriveSSD(value) && DriveTypeHelper.HasHDD())
+                if (DriveTypeService.IsDriveSSD(value) && DriveTypeService.HasHDD())
                 {
                     SsdWarning = "提示：检测到您正在使用SSD安装游戏，普通HDD就足够流畅运行！";
                 }
