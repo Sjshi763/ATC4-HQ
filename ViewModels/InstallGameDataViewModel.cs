@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Text.Json; // 用于 JSON 序列化
 using System.Windows.Input;
+using ATC4_HQ.Helpers; // 添加引用以使用DriveTypeHelper
 
 namespace ATC4_HQ.ViewModels
 {
@@ -22,6 +23,9 @@ namespace ATC4_HQ.ViewModels
         
         [ObservableProperty]
         private bool _shouldClose;
+
+        [ObservableProperty]
+        private string _ssdWarning = string.Empty; // 用于显示SSD警告
 
         // 用于触发 View 执行文件选择操作的事件
         public event EventHandler? RequestOpenFilePicker; // ⭐️ 标记为可为 null 的事件，解决警告
@@ -46,6 +50,26 @@ namespace ATC4_HQ.ViewModels
             // View 会处理 RequestOpenFilePicker 事件，然后将选定的路径赋值给 GamePath 属性
         }
 
+        partial void OnGamePathChanged(string value)
+        {
+            // 检测路径是否在SSD上并更新警告
+            if (!string.IsNullOrWhiteSpace(value) && value != "未选择任何文件夹")
+            {
+                if (DriveTypeHelper.IsDriveSSD(value) && DriveTypeHelper.HasHDD())
+                {
+                    SsdWarning = "提示：检测到您正在使用SSD安装游戏，普通HDD就足够流畅运行！";
+                }
+                else
+                {
+                    SsdWarning = string.Empty;
+                }
+            }
+            else
+            {
+                SsdWarning = string.Empty;
+            }
+        }
+
         private void OnSave()
         {
             // ⭐️ 新增：对 GameName 的验证
@@ -62,6 +86,9 @@ namespace ATC4_HQ.ViewModels
                 Console.WriteLine("请选择一个有效的游戏路径！");
                 return;
             }
+            
+            // 即使检测到SSD也允许安装，只是显示警告
+            // 这里不阻止安装，只显示信息性提示
 
             // ⭐️ 修改：创建 GameModel 对象并序列化为 JSON 字符串
             var gameData = new Models.GameModel // 明确指定命名空间和类名
