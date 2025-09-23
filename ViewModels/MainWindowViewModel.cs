@@ -82,6 +82,49 @@ namespace ATC4_HQ.ViewModels
             string zipPath = @"B:\XIANGMU\ATC4-HQ\ATC4ALL.zip";
             // 解压 .zip 文件到指定目录
             ZipFile.ExtractToDirectory(zipPath, gameData.Path);
+
+            // 检查解压后的文件中是否有以/或\开头的zip文件，并再次解压
+            var extractedFiles = Directory.GetFiles(gameData.Path, "*.zip", SearchOption.AllDirectories);
+            foreach (var file in extractedFiles)
+            {
+                var fileName = Path.GetFileName(file);
+                if (fileName.StartsWith("/") || fileName.StartsWith("\\"))
+                {
+                    // 使用一个新的 MemoryStream 来读取和解压，避免文件占用问题
+                    using (var fileStream = new FileStream(file, FileMode.Open, FileAccess.Read))
+                    {
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            await fileStream.CopyToAsync(memoryStream);
+                            memoryStream.Position = 0; // 重置流的位置
+
+                            using (ZipArchive archive = new ZipArchive(memoryStream, ZipArchiveMode.Read))
+                            {
+                                foreach (ZipArchiveEntry entry in archive.Entries)
+                                {
+                                    // 去掉条目前面的斜杠，构造正确的目标路径
+                                    string destinationPath = Path.Combine(gameData.Path, entry.FullName.TrimStart('/', '\\'));
+                                    
+                                    // 确保目标目录存在
+                                    string? destinationDirectory = Path.GetDirectoryName(destinationPath);
+                                    if (destinationDirectory != null)
+                                    {
+                                        Directory.CreateDirectory(destinationDirectory);
+                                    }
+
+                                    // 如果不是目录，则解压文件
+                                    if (!string.IsNullOrEmpty(entry.Name))
+                                    {
+                                        entry.ExtractToFile(destinationPath, true);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    File.Delete(file); // 解压完成后删除这个临时的zip文件
+                }
+            }
+
             GlobalPaths.GamePath = gameData.Path; // 更新全局路径
             IniFile ini = new IniFile(GlobalPaths.InitiatorProfileName);
             ini.SetValue("main", "GamePath", GlobalPaths.GamePath);
