@@ -4,6 +4,6 @@
         x:Class="ATC4_HQ.Views.InstallGameDataWindow"
         Title="安装游戏数据"
         Icon="/Assets/ATC4.ico"
-        Width="600" Height="400" CanResize="False">
+        Width="500" Height="300" CanResize="False">
     <local:InstallGameData />
 </Window>

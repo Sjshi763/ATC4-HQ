@@ -3,6 +3,8 @@ using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Text.Json; // 用于 JSON 序列化
 using System.Windows.Input;
+using System.Net.Http; // ⭐️ 新增：用于网络请求
+using System.Threading.Tasks; // ⭐️ 新增：用于异步编程
 using ATC4_HQ.ViewModels; // 添加引用以使用DriveTypeService
 
 namespace ATC4_HQ.ViewModels
@@ -29,19 +31,64 @@ namespace ATC4_HQ.ViewModels
 
         // 用于触发 View 执行文件选择操作的事件
         public event EventHandler? RequestOpenFilePicker; // ⭐️ 标记为可为 null 的事件，解决警告
+        public event EventHandler<SaveFileDialogEventArgs>? RequestSaveFileDialog; // ⭐️ 新增：用于请求保存文件对话框的事件
+
 
         public ICommand FindFileCommand { get; }
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
+        public ICommand DownloadCommand { get; } // ⭐️ 新增：下载命令
 
         public InstallGameDataViewModel()
         {
             FindFileCommand = new RelayCommand(OnFindFile);
             SaveCommand = new RelayCommand(OnSave);
             CancelCommand = new RelayCommand(OnCancel);
+            DownloadCommand = new AsyncRelayCommand(OnDownload); // ⭐️ 新增：初始化下载命令
         }
 
         // --- 命令的实现 ---
+
+        private async Task OnDownload()
+        {
+            var args = new SaveFileDialogEventArgs();
+            RequestSaveFileDialog?.Invoke(this, args);
+
+            string? savePath = await args.GetResultAsync();
+
+            if (!string.IsNullOrWhiteSpace(savePath))
+            {
+                // 在这里执行下载逻辑
+                using (var httpClient = new HttpClient())
+                {
+                    try
+                    {
+                        // 假设我们要下载的文件名为 "ATC4_XJATC.zip"
+                        string fileName = "ATC4_XJATC.zip";
+                        string url = $"http://localhost:8080/download?file={fileName}";
+
+                        var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                        response.EnsureSuccessStatusCode();
+
+                        using (var stream = await response.Content.ReadAsStreamAsync())
+                        using (var fileStream = new System.IO.FileStream(savePath, System.IO.FileMode.Create, System.IO.FileAccess.Write, System.IO.FileShare.None))
+                        {
+                            await stream.CopyToAsync(fileStream);
+                        }
+
+                        // 下载完成后，可以将路径设置为下载的文件的路径或解压后的文件夹路径
+                        // 这里我们先简单地设置为保存的文件路径
+                        GamePath = savePath; 
+                        Console.WriteLine($"文件已下载到: {savePath}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"下载失败: {ex.Message}");
+                        // 可以在UI上显示错误提示
+                    }
+                }
+            }
+        }
 
         private void OnFindFile()
         {
@@ -108,6 +155,22 @@ namespace ATC4_HQ.ViewModels
             DialogResultData = null; // 清空结果
             IsDialogOk = false;      // 设置对话框结果为 Cancel
             ShouldClose = true;
+        }
+    }
+
+    // ⭐️ 新增：用于传递保存文件对话框参数的事件参数类
+    public class SaveFileDialogEventArgs : EventArgs
+    {
+        private readonly TaskCompletionSource<string?> _tcs = new TaskCompletionSource<string?>();
+
+        public void SetResult(string? result)
+        {
+            _tcs.SetResult(result);
+        }
+
+        public Task<string?> GetResultAsync()
+        {
+            return _tcs.Task;
         }
     }
 }
