@@ -53,105 +53,103 @@ namespace ATC4_HQ.ViewModels
         {
             Console.WriteLine("=== 下载流程开始 ===");
             
-            // 步骤1: 触发保存文件对话框
-            Console.WriteLine("[步骤1] 触发保存文件对话框");
-            var args = new SaveFileDialogEventArgs();
-            RequestSaveFileDialog?.Invoke(this, args);
+            // 步骤1: 准备下载（生成临时文件路径）
+            Console.WriteLine("[步骤1] 准备下载到临时路径");
+            string tempPath = System.IO.Path.GetTempFileName();
+            Console.WriteLine($"[步骤1] 临时文件路径: {tempPath}");
 
-            // 步骤2: 获取用户选择的保存路径
-            Console.WriteLine("[步骤2] 等待用户选择保存路径...");
-            string? savePath = await args.GetResultAsync();
-            Console.WriteLine($"[步骤2] 保存路径结果: {(string.IsNullOrWhiteSpace(savePath) ? "用户取消操作" : savePath)}");
-
-            if (!string.IsNullOrWhiteSpace(savePath))
+            try
             {
-                // 步骤3: 准备下载
-                Console.WriteLine("[步骤3] 准备下载文件");
+                // 步骤2: 准备下载信息
+                Console.WriteLine("[步骤2] 准备下载文件信息");
+                string fileName = "ATC4ALL.zip";
+                string url = $"http://localhost:8080/download?file={fileName}";
+                Console.WriteLine($"[步骤2] 下载文件名: {fileName}");
+                Console.WriteLine($"[步骤2] 最终下载URL: {url}");
+
+                // 步骤3: 发送HTTP请求
+                Console.WriteLine("[步骤3] 发送HTTP GET请求...");
                 using (var httpClient = new HttpClient())
                 {
-                    try
+                    var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                    Console.WriteLine($"[步骤3] HTTP响应状态码: {response.StatusCode}");
+                    
+                    response.EnsureSuccessStatusCode();
+                    Console.WriteLine("[步骤3] HTTP请求成功");
+
+                    // 步骤4: 获取文件信息
+                    Console.WriteLine("[步骤4] 获取文件信息");
+                    long? totalBytes = response.Content.Headers.ContentLength;
+                    Console.WriteLine($"[步骤4] 文件总大小: {(totalBytes.HasValue ? $"{totalBytes.Value} 字节 ({totalBytes.Value / 1024.0 / 1024.0:F2} MB)" : "未知")}");
+
+                    // 步骤5: 下载并写入临时文件
+                    Console.WriteLine("[步骤5] 开始下载并写入临时文件");
+                    using (var stream = await response.Content.ReadAsStreamAsync())
+                    using (var fileStream = new System.IO.FileStream(tempPath, System.IO.FileMode.Create, System.IO.FileAccess.Write, System.IO.FileShare.None))
                     {
-                        // 假设我们要下载的文件名为 "ATC4ALL.zip"
-                        string fileName = "ATC4ALL.zip";
-                        string url = $"http://localhost:8080/download?file={fileName}";
-                        Console.WriteLine($"[步骤3] 下载文件名: {fileName}");
-                        Console.WriteLine($"[步骤3] 最终下载URL: {url}");
-
-                        // 步骤4: 发送HTTP请求
-                        Console.WriteLine("[步骤4] 发送HTTP GET请求...");
-                        var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-                        Console.WriteLine($"[步骤4] HTTP响应状态码: {response.StatusCode}");
+                        Console.WriteLine($"[步骤5] 目标临时文件路径: {tempPath}");
                         
-                        response.EnsureSuccessStatusCode();
-                        Console.WriteLine("[步骤4] HTTP请求成功");
+                        // 缓冲区大小
+                        byte[] buffer = new byte[8192];
+                        long totalBytesRead = 0;
+                        int bytesRead;
+                        int progressPercentage = 0;
 
-                        // 步骤5: 获取文件信息
-                        Console.WriteLine("[步骤5] 获取文件信息");
-                        long? totalBytes = response.Content.Headers.ContentLength;
-                        Console.WriteLine($"[步骤5] 文件总大小: {(totalBytes.HasValue ? $"{totalBytes.Value} 字节 ({totalBytes.Value / 1024.0 / 1024.0:F2} MB)" : "未知")}");
-
-                        // 步骤6: 下载并写入文件
-                        Console.WriteLine("[步骤6] 开始下载并写入文件");
-                        using (var stream = await response.Content.ReadAsStreamAsync())
-                        using (var fileStream = new System.IO.FileStream(savePath, System.IO.FileMode.Create, System.IO.FileAccess.Write, System.IO.FileShare.None))
+                        Console.WriteLine("[步骤5] 开始下载文件内容...");
+                        while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
                         {
-                            Console.WriteLine($"[步骤6] 目标文件路径: {savePath}");
+                            await fileStream.WriteAsync(buffer, 0, bytesRead);
+                            totalBytesRead += bytesRead;
                             
-                            // 缓冲区大小
-                            byte[] buffer = new byte[8192];
-                            long totalBytesRead = 0;
-                            int bytesRead;
-                            int progressPercentage = 0;
-
-                            Console.WriteLine("[步骤6] 开始下载文件内容...");
-                            while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                            // 打印下载进度（每5%更新一次，避免日志过多）
+                            if (totalBytes.HasValue)
                             {
-                                await fileStream.WriteAsync(buffer, 0, bytesRead);
-                                totalBytesRead += bytesRead;
-                                
-                                // 打印下载进度（每5%更新一次，避免日志过多）
-                                if (totalBytes.HasValue)
+                                int newProgress = (int)((double)totalBytesRead / totalBytes.Value * 100);
+                                if (newProgress >= progressPercentage + 5 || newProgress == 100)
                                 {
-                                    int newProgress = (int)((double)totalBytesRead / totalBytes.Value * 100);
-                                    if (newProgress >= progressPercentage + 5 || newProgress == 100)
-                                    {
-                                        progressPercentage = newProgress;
-                                        Console.WriteLine($"[步骤6] 下载进度: {progressPercentage}% ({totalBytesRead}/{totalBytes.Value} 字节)");
-                                    }
-                                }
-                                else
-                                {
-                                    // 每下载1MB打印一次进度
-                                    if (totalBytesRead % (1024 * 1024) == 0)
-                                    {
-                                        Console.WriteLine($"[步骤6] 已下载: {totalBytesRead} 字节 ({totalBytesRead / 1024.0 / 1024.0:F2} MB)");
-                                    }
+                                    progressPercentage = newProgress;
+                                    Console.WriteLine($"[步骤5] 下载进度: {progressPercentage}% ({totalBytesRead}/{totalBytes.Value} 字节)");
                                 }
                             }
-                            
-                            Console.WriteLine($"[步骤6] 文件下载完成，总字节数: {totalBytesRead} ({totalBytesRead / 1024.0 / 1024.0:F2} MB)");
+                            else
+                            {
+                                // 每下载1MB打印一次进度
+                                if (totalBytesRead % (1024 * 1024) == 0)
+                                {
+                                    Console.WriteLine($"[步骤5] 已下载: {totalBytesRead} 字节 ({totalBytesRead / 1024.0 / 1024.0:F2} MB)");
+                                }
+                            }
                         }
+                        
+                        Console.WriteLine($"[步骤5] 文件下载完成，总字节数: {totalBytesRead} ({totalBytesRead / 1024.0 / 1024.0:F2} MB)");
+                    }
 
-                        // 步骤7: 下载完成
-                        Console.WriteLine("[步骤7] 下载流程完成");
-                        GamePath = savePath; 
-                        Console.WriteLine($"[步骤7] 文件已保存到: {savePath}");
-                        Console.WriteLine("=== 下载流程结束 ===");
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"[错误] 下载失败: {ex.Message}");
-                        Console.WriteLine($"[错误] 异常类型: {ex.GetType().Name}");
-                        Console.WriteLine("=== 下载流程结束（失败） ===");
-                        // 可以在UI上显示错误提示
-                    }
+                    // 步骤6: 下载完成
+                    Console.WriteLine("[步骤6] 下载流程完成");
+                    GamePath = tempPath; 
+                    Console.WriteLine($"[步骤6] 文件已保存到临时路径: {tempPath}");
+                    Console.WriteLine("=== 下载流程结束 ===");
                 }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine("[步骤3] 用户取消了下载操作");
-                Console.WriteLine("[步骤4] 跳过下载流程");
-                Console.WriteLine("=== 下载流程结束（取消） ===");
+                Console.WriteLine($"[错误] 下载失败: {ex.Message}");
+                Console.WriteLine($"[错误] 异常类型: {ex.GetType().Name}");
+                Console.WriteLine("=== 下载流程结束（失败） ===");
+                
+                // 清理临时文件
+                try
+                {
+                    if (System.IO.File.Exists(tempPath))
+                    {
+                        System.IO.File.Delete(tempPath);
+                        Console.WriteLine("[清理] 已删除临时文件");
+                    }
+                }
+                catch (Exception cleanupEx)
+                {
+                    Console.WriteLine($"[清理错误] 删除临时文件失败: {cleanupEx.Message}");
+                }
             }
         }
 
