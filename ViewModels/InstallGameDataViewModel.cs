@@ -77,7 +77,11 @@ namespace ATC4_HQ.ViewModels
                     var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
                     Console.WriteLine($"[步骤3] HTTP响应状态码: {response.StatusCode}");
                     
-                    response.EnsureSuccessStatusCode();
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine($"[步骤3] HTTP请求失败: {response.StatusCode} - {response.ReasonPhrase}");
+                        throw new HttpRequestException($"HTTP请求失败: {response.StatusCode}");
+                    }
                     Console.WriteLine("[步骤3] HTTP请求成功");
 
                     // 步骤4: 获取文件信息
