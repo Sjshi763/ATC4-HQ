@@ -29,6 +29,8 @@ namespace ATC4_HQ.ViewModels
         [ObservableProperty]
         private string _ssdWarning = string.Empty; // 用于显示SSD警告
 
+        private string? _tempDownloadPath; // 用于存储下载过程中的临时文件路径
+
         // 用于触发 View 执行文件选择操作的事件
         public event EventHandler? RequestOpenFilePicker; // ⭐️ 标记为可为 null 的事件，解决警告
         public event EventHandler<SaveFileDialogEventArgs>? RequestSaveFileDialog; // ⭐️ 新增：用于请求保存文件对话框的事件
@@ -55,8 +57,10 @@ namespace ATC4_HQ.ViewModels
             
             // 步骤1: 准备下载（生成临时文件路径）
             Console.WriteLine("[步骤1] 准备下载到临时路径");
-            string tempPath = System.IO.Path.GetTempFileName();
-            Console.WriteLine($"[步骤1] 临时文件路径: {tempPath}");
+            _tempDownloadPath = System.IO.Path.GetTempFileName();
+            Console.WriteLine($"[步骤1] 临时文件路径: {_tempDownloadPath}");
+
+            string tempPath = _tempDownloadPath; // 使用类级别变量
 
             try
             {
@@ -273,6 +277,20 @@ namespace ATC4_HQ.ViewModels
 
         private void OnCancel()
         {
+            // 删除临时下载文件
+            try
+            {
+                if (!string.IsNullOrEmpty(_tempDownloadPath) && System.IO.File.Exists(_tempDownloadPath))
+                {
+                    System.IO.File.Delete(_tempDownloadPath);
+                    Console.WriteLine("[取消] 已删除临时下载文件");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[取消错误] 删除临时文件失败: {ex.Message}");
+            }
+
             DialogResultData = null; // 清空结果
             IsDialogOk = false;      // 设置对话框结果为 Cancel
             ShouldClose = true;
