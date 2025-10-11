@@ -21,6 +21,7 @@ namespace ATC4_HQ.Views
             if (DataContext is InstallGameDataViewModel viewModel)
             {
                 viewModel.RequestOpenFilePicker += OnRequestOpenFilePicker;
+                viewModel.RequestSaveFileDialog += OnRequestSaveFileDialog; // 添加保存文件对话框事件处理
             }
         }
 
@@ -29,6 +30,7 @@ namespace ATC4_HQ.Views
             if (DataContext is InstallGameDataViewModel viewModel)
             {
                 viewModel.RequestOpenFilePicker -= OnRequestOpenFilePicker;
+                viewModel.RequestSaveFileDialog -= OnRequestSaveFileDialog; // 取消订阅保存文件对话框事件
             }
         }
 
@@ -38,6 +40,15 @@ namespace ATC4_HQ.Views
             {
                 string? driveLetter = await OpenFolderDialog();
                 viewModel.GamePath = driveLetter ?? "未选择任何文件夹";
+            }
+        }
+
+        private async void OnRequestSaveFileDialog(object? sender, SaveFileDialogEventArgs e)
+        {
+            if (DataContext is InstallGameDataViewModel viewModel)
+            {
+                string? selectedPath = await OpenSaveFileDialog();
+                e.SetResult(selectedPath);
             }
         }
 
@@ -71,6 +82,52 @@ namespace ATC4_HQ.Views
                 else
                 {
                     Console.WriteLine("未选择任何文件夹"); // Console 错误会解决
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        public async Task<string?> OpenSaveFileDialog()
+        {
+            var topLevel = TopLevel.GetTopLevel(this);
+
+            if (topLevel?.StorageProvider is { } storageProvider)
+            {
+                var file = await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+                {
+                    Title = "请选择游戏文件保存位置",
+                    DefaultExtension = ".zip",
+                    FileTypeChoices = new FilePickerFileType[]
+                    {
+                        new FilePickerFileType("ZIP文件")
+                        {
+                            Patterns = new[] { "*.zip" }
+                        },
+                        new FilePickerFileType("所有文件")
+                        {
+                            Patterns = new[] { "*.*" }
+                        }
+                    }
+                });
+
+                if (file != null)
+                {
+                    try
+                    {
+                        var selectedPath = file.Path.LocalPath;
+                        Console.WriteLine($"已选择保存路径: {selectedPath}");
+                        return selectedPath;
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        Console.WriteLine("选定的位置不是本地文件路径。");
+                        return null;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("未选择保存位置");
                     return null;
                 }
             }

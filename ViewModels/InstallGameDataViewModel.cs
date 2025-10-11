@@ -29,6 +29,8 @@ namespace ATC4_HQ.ViewModels
         [ObservableProperty]
         private string _ssdWarning = string.Empty; // 用于显示SSD警告
 
+        private string? _tempDownloadPath; // 用于存储下载过程中的临时文件路径
+
         // 用于触发 View 执行文件选择操作的事件
         public event EventHandler? RequestOpenFilePicker; // ⭐️ 标记为可为 null 的事件，解决警告
         public event EventHandler<SaveFileDialogEventArgs>? RequestSaveFileDialog; // ⭐️ 新增：用于请求保存文件对话框的事件
@@ -51,41 +53,164 @@ namespace ATC4_HQ.ViewModels
 
         private async Task OnDownload()
         {
-            var args = new SaveFileDialogEventArgs();
-            RequestSaveFileDialog?.Invoke(this, args);
+            Console.WriteLine("=== 下载流程开始 ===");
+            
+            // 步骤1: 准备下载（生成临时文件路径）
+            Console.WriteLine("[步骤1] 准备下载到临时路径");
+            _tempDownloadPath = System.IO.Path.GetTempFileName();
+            Console.WriteLine($"[步骤1] 临时文件路径: {_tempDownloadPath}");
 
-            string? savePath = await args.GetResultAsync();
+            string tempPath = _tempDownloadPath; // 使用类级别变量
 
-            if (!string.IsNullOrWhiteSpace(savePath))
+            try
             {
-                // 在这里执行下载逻辑
+                // 步骤2: 准备下载信息
+                Console.WriteLine("[步骤2] 准备下载文件信息");
+                string fileName = "ATC4ALL.zip";
+                string url = $"http://localhost:8080/download?file={fileName}";
+                Console.WriteLine($"[步骤2] 下载文件名: {fileName}");
+                Console.WriteLine($"[步骤2] 最终下载URL: {url}");
+
+                // 步骤3: 发送HTTP请求（添加超时和重试机制）
+                Console.WriteLine("[步骤3] 发送HTTP GET请求...");
                 using (var httpClient = new HttpClient())
                 {
-                    try
+                    // 设置请求超时
+                    httpClient.Timeout = TimeSpan.FromMinutes(10);
+                    
+                    var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                    Console.WriteLine($"[步骤3] HTTP响应状态码: {response.StatusCode}");
+                    
+                    if (!response.IsSuccessStatusCode)
                     {
-                        // 假设我们要下载的文件名为 "ATC4_XJATC.zip"
-                        string fileName = "ATC4_XJATC.zip";
-                        string url = $"http://localhost:8080/download?file={fileName}";
+                        Console.WriteLine($"[步骤3] HTTP请求失败: {response.StatusCode} - {response.ReasonPhrase}");
+                        throw new HttpRequestException($"HTTP请求失败: {response.StatusCode}");
+                    }
+                    Console.WriteLine("[步骤3] HTTP请求成功");
 
-                        var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-                        response.EnsureSuccessStatusCode();
+                    // 步骤4: 获取文件信息
+                    Console.WriteLine("[步骤4] 获取文件信息");
+                    long? totalBytes = response.Content.Headers.ContentLength;
+                    Console.WriteLine($"[步骤4] 文件总大小: {(totalBytes.HasValue ? $"{totalBytes.Value} 字节 ({totalBytes.Value / 1024.0 / 1024.0:F2} MB)" : "未知")}");
 
-                        using (var stream = await response.Content.ReadAsStreamAsync())
-                        using (var fileStream = new System.IO.FileStream(savePath, System.IO.FileMode.Create, System.IO.FileAccess.Write, System.IO.FileShare.None))
+                    // 步骤5: 下载并写入临时文件
+                    Console.WriteLine("[步骤5] 开始下载并写入临时文件");
+                    using (var stream = await response.Content.ReadAsStreamAsync())
+                    using (var fileStream = new System.IO.FileStream(tempPath, System.IO.FileMode.Create, System.IO.FileAccess.Write, System.IO.FileShare.None))
+                    {
+                        Console.WriteLine($"[步骤5] 目标临时文件路径: {tempPath}");
+                        
+                        // 缓冲区大小
+                        byte[] buffer = new byte[8192];
+                        long totalBytesRead = 0;
+                        int bytesRead;
+                        int progressPercentage = 0;
+
+                        Console.WriteLine("[步骤5] 开始下载文件内容...");
+                        while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
                         {
-                            await stream.CopyToAsync(fileStream);
+                            await fileStream.WriteAsync(buffer, 0, bytesRead);
+                            totalBytesRead += bytesRead;
+                            
+                            // 打印下载进度（每5%更新一次，避免日志过多）
+                            if (totalBytes.HasValue)
+                            {
+                                int newProgress = (int)((double)totalBytesRead / totalBytes.Value * 100);
+                                if (newProgress >= progressPercentage + 5 || newProgress == 100)
+                                {
+                                    progressPercentage = newProgress;
+                                    Console.WriteLine($"[步骤5] 下载进度: {progressPercentage}% ({totalBytesRead}/{totalBytes.Value} 字节)");
+                                }
+                            }
+                            else
+                            {
+                                // 每下载1MB打印一次进度
+                                if (totalBytesRead % (1024 * 1024) == 0)
+                                {
+                                    Console.WriteLine($"[步骤5] 已下载: {totalBytesRead} 字节 ({totalBytesRead / 1024.0 / 1024.0:F2} MB)");
+                                }
+                            }
                         }
+                        
+                        Console.WriteLine($"[步骤5] 文件下载完成，总字节数: {totalBytesRead} ({totalBytesRead / 1024.0 / 1024.0:F2} MB)");
+                    }
 
-                        // 下载完成后，可以将路径设置为下载的文件的路径或解压后的文件夹路径
-                        // 这里我们先简单地设置为保存的文件路径
-                        GamePath = savePath; 
-                        Console.WriteLine($"文件已下载到: {savePath}");
-                    }
-                    catch (Exception ex)
+                    // 步骤6: 下载完成 - 提示用户选择保存位置
+                    Console.WriteLine("[步骤6] 下载流程完成");
+                    
+                    // 触发保存文件对话框，让用户选择保存位置
+                    string? finalPath = await ShowSaveFileDialog(tempPath);
+                    if (!string.IsNullOrEmpty(finalPath))
                     {
-                        Console.WriteLine($"下载失败: {ex.Message}");
-                        // 可以在UI上显示错误提示
+                        GamePath = finalPath; 
+                        Console.WriteLine($"[步骤6] 文件已保存到用户指定路径: {finalPath}");
                     }
+                    else
+                    {
+                        // 如果用户取消了保存对话框，仍然使用临时路径
+                        GamePath = tempPath; 
+                        Console.WriteLine($"[步骤6] 用户取消保存，文件保留在临时路径: {tempPath}");
+                    }
+                    Console.WriteLine("=== 下载流程结束 ===");
+                }
+            }
+            catch (HttpRequestException httpEx)
+            {
+                Console.WriteLine($"[网络错误] 下载失败: {httpEx.Message}");
+                Console.WriteLine($"[网络错误] 请检查网络连接或服务器状态");
+                Console.WriteLine("=== 下载流程结束（失败） ===");
+                
+                // 清理临时文件
+                try
+                {
+                    if (System.IO.File.Exists(tempPath))
+                    {
+                        System.IO.File.Delete(tempPath);
+                        Console.WriteLine("[清理] 已删除临时文件");
+                    }
+                }
+                catch (Exception cleanupEx)
+                {
+                    Console.WriteLine($"[清理错误] 删除临时文件失败: {cleanupEx.Message}");
+                }
+            }
+            catch (TaskCanceledException tcEx) when (tcEx.InnerException is System.TimeoutException)
+            {
+                Console.WriteLine($"[超时错误] 下载超时: 请求超时，请检查网络连接");
+                Console.WriteLine("=== 下载流程结束（失败） ===");
+                
+                // 清理临时文件
+                try
+                {
+                    if (System.IO.File.Exists(tempPath))
+                    {
+                        System.IO.File.Delete(tempPath);
+                        Console.WriteLine("[清理] 已删除临时文件");
+                    }
+                }
+                catch (Exception cleanupEx)
+                {
+                    Console.WriteLine($"[清理错误] 删除临时文件失败: {cleanupEx.Message}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[错误] 下载失败: {ex.Message}");
+                Console.WriteLine($"[错误] 异常类型: {ex.GetType().Name}");
+                Console.WriteLine("=== 下载流程结束（失败） ===");
+                
+                // 清理临时文件
+                try
+                {
+                    if (System.IO.File.Exists(tempPath))
+                    {
+                        System.IO.File.Delete(tempPath);
+                        Console.WriteLine("[清理] 已删除临时文件");
+                    }
+                }
+                catch (Exception cleanupEx)
+                {
+                    Console.WriteLine($"[清理错误] 删除临时文件失败: {cleanupEx.Message}");
                 }
             }
         }
@@ -152,9 +277,62 @@ namespace ATC4_HQ.ViewModels
 
         private void OnCancel()
         {
+            // 删除临时下载文件
+            try
+            {
+                if (!string.IsNullOrEmpty(_tempDownloadPath) && System.IO.File.Exists(_tempDownloadPath))
+                {
+                    System.IO.File.Delete(_tempDownloadPath);
+                    Console.WriteLine("[取消] 已删除临时下载文件");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[取消错误] 删除临时文件失败: {ex.Message}");
+            }
+
             DialogResultData = null; // 清空结果
             IsDialogOk = false;      // 设置对话框结果为 Cancel
             ShouldClose = true;
+        }
+
+        // 显示保存文件对话框，让用户选择文件保存位置
+        private async Task<string?> ShowSaveFileDialog(string tempFilePath)
+        {
+            var args = new SaveFileDialogEventArgs();
+            
+            // 触发保存文件对话框事件
+            RequestSaveFileDialog?.Invoke(this, args);
+            
+            // 等待用户选择结果
+            string? selectedPath = await args.GetResultAsync();
+            
+            if (!string.IsNullOrEmpty(selectedPath))
+            {
+                try
+                {
+                    // 将临时文件移动到用户选择的位置
+                    if (System.IO.File.Exists(tempFilePath))
+                    {
+                        // 如果目标文件已存在，先删除
+                        if (System.IO.File.Exists(selectedPath))
+                        {
+                            System.IO.File.Delete(selectedPath);
+                        }
+                        
+                        // 移动文件
+                        System.IO.File.Move(tempFilePath, selectedPath);
+                        Console.WriteLine($"[保存] 文件已移动到: {selectedPath}");
+                        return selectedPath;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[保存错误] 移动文件失败: {ex.Message}");
+                }
+            }
+            
+            return selectedPath;
         }
     }
 
