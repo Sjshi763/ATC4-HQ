@@ -4,45 +4,62 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewmodels="clr-namespace:ATC4_HQ.ViewModels"
              mc:Ignorable="d"
-             d:DesignWidth="700"
-             d:DesignHeight="250"
+             d:DesignWidth="600"
+             d:DesignHeight="200"
              x:Class="ATC4_HQ.Views.InstallGameData"
              x:DataType="viewmodels:InstallGameDataViewModel">
 
     <Grid ColumnDefinitions="Auto,*"
           RowDefinitions="Auto,Auto,Auto,Auto"
-          Margin="20">
+          Margin="15">
 
         <!-- 标题 -->
         <TextBlock Grid.ColumnSpan="2"
-                   Text="安装游戏数据页面"
+                   Text="安装游戏数据"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
-                   FontSize="24"
-                   Margin="0,0,0,30" />
+                   FontSize="20"
+                   Margin="0,0,0,20" />
 
         <!-- 游戏数据路径 -->
         <Label Grid.Row="1"
-               Content="游戏数据路径:"
+               Content="游戏路径:"
                VerticalAlignment="Center"
                Margin="5" />
-        <StackPanel Grid.Row="1"
-                    Grid.Column="1"
-                    Orientation="Horizontal"
-                    Spacing="5">
+        <Grid Grid.Row="1"
+              Grid.Column="1"
+              ColumnDefinitions="*,Auto">
             <TextBox x:Name="WhereIsTheGames"
-                     Width="300"
-                     Height="30"
+                     Grid.Column="0"
+                     Width="250"
+                     Height="25"
                      Margin="5"
                      Watermark="请输入游戏路径"
-                     Text="{Binding GamePath}" />
-            <Button x:Name="BrowseButton"
-                    Content="浏览"
-                    Width="80"
-                    Height="30"
-                    Margin="5"
-                    Command="{Binding FindFileCommand}" />
-        </StackPanel>
+                     Text="{Binding GamePath}"
+                     VerticalAlignment="Center"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5">
+                <Button x:Name="BrowseButton"
+                        Content="浏览"
+                        Width="60"
+                        Height="25"
+                        Margin="5"
+                        Command="{Binding FindFileCommand}" />
+                <Button Content="下载"
+                        Command="{Binding DownloadCommand}"
+                        Width="60"
+                        Height="25"
+                        Margin="5" />
+            </StackPanel>
+        </Grid>
+        <!-- SSD警告 -->
+        <TextBlock Grid.Row="1"
+                   Grid.Column="1"
+                   Text="{Binding SsdWarning}"
+                   Foreground="OrangeRed"
+                   Margin="5,35,0,0"
+                   FontSize="12"
+                   VerticalAlignment="Top"
+                   HorizontalAlignment="Left"/>
 
         <!-- 游戏名称 -->
         <Label Grid.Row="2"
@@ -52,8 +69,8 @@
         <TextBox Grid.Row="2"
                  Grid.Column="1"
                  x:Name="TheGameName"
-                 Width="400"
-                 Height="30"
+                 Width="350"
+                 Height="25"
                  Margin="5"
                  Watermark="取个名字方便找到它"
                  Text="{Binding GameName}" 
@@ -67,14 +84,14 @@
                     Margin="0,10,0,0">
             <Button Content="保存"
                     Command="{Binding SaveCommand}"
-                    Width="120"
-                    Height="40"
-                    Margin="0,0,20,0" />
+                    Width="100"
+                    Height="35"
+                    Margin="0,0,15,0" />
             <Button Content="取消"
                     Command="{Binding CancelCommand}"
-                    Width="120"
-                    Height="40"
-                    Margin="20,0,0,0" />
+                    Width="100"
+                    Height="35"
+                    Margin="15,0,0,0" />
         </StackPanel>
     </Grid>
 </UserControl>
