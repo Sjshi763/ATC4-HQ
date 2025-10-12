@@ -112,7 +112,7 @@ namespace ATC4_HQ.Views
         }
 
 
-        private void StartUp()
+        private async void StartUp()
         {
             try
             {
@@ -138,6 +138,25 @@ namespace ATC4_HQ.Views
             }
             GlobalPaths.TransitSoftwareLE = ini.GetValue("main", "TransitSoftwareLE");
             GlobalPaths.GamePath = ini.GetValue("main", "GamePath");
+
+            // BT同意弹窗集成
+            GlobalPaths.BtConsentAgreed = ATC4_HQ.Utils.ConfigHelper.LoadBtConsent(GlobalPaths.InitiatorProfileName);
+            if (!GlobalPaths.BtConsentAgreed)
+            {
+                var consentDialog = new BtConsentDialog();
+                var parentWindow = TopLevel.GetTopLevel(this) as Window;
+                bool agreed = await consentDialog.ShowDialogAsync(parentWindow!);
+                if (agreed)
+                {
+                    ATC4_HQ.Utils.ConfigHelper.SaveBtConsent(GlobalPaths.InitiatorProfileName, true);
+                    GlobalPaths.BtConsentAgreed = true;
+                }
+                else
+                {
+                    // 用户未同意，按需处理（如退出或禁用BT功能）
+                    GlobalPaths.BtConsentAgreed = false;
+                }
+            }
         }
 
         private void PrimaryProfile()
