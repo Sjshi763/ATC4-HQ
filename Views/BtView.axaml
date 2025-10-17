@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:ATC4_HQ.ViewModels"
              x:Class="ATC4_HQ.Views.BtView"
+             x:DataType="vm:BtViewModel"
              mc:Ignorable="d">
     <UserControl.DataContext>
         <vm:BtViewModel/>
