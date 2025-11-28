@@ -1,0 +1,21 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="ATC4_HQ.Views.BtConsentDialog"
+        Title="BT功能说明与同意"
+        Width="400" Height="250"
+        WindowStartupLocation="CenterOwner">
+    <StackPanel Margin="20" Spacing="16">
+        <TextBlock Text="BT下载/上传说明" FontWeight="Bold" FontSize="18"/>
+        <TextBlock TextWrapping="Wrap">
+            本程序将使用BT（BitTorrent）协议进行文件的上传和下载。
+            只有在您同意的情况下，才会进行数据的分发和共享。
+            BT协议会占用一定的网络带宽，并可能上传您已下载的部分数据给其他用户。
+            如有疑问请查阅帮助文档或联系我们。
+        </TextBlock>
+        <CheckBox x:Name="ConsentCheckBox" Content="我已了解并同意使用BT上传和下载数据"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+            <Button x:Name="OkButton" Content="同意" IsEnabled="False" Width="80"/>
+            <Button x:Name="CancelButton" Content="取消" Width="80"/>
+        </StackPanel>
+    </StackPanel>
+</Window>

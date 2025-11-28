@@ -71,5 +71,10 @@
                 </DataTemplate>
             </ContentControl.DataTemplates>
         </ContentControl>
+
+        <!-- BT下载器区域 -->
+        <Border Margin="10" Padding="10" CornerRadius="8" BorderBrush="Gray" BorderThickness="1">
+            <views:BtView />
+        </Border>
     </StackPanel>
 </Window>

@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:ATC4_HQ.ViewModels"
+             x:Class="ATC4_HQ.Views.BtView"
+             x:DataType="vm:BtViewModel"
+             mc:Ignorable="d">
+    <UserControl.DataContext>
+        <vm:BtViewModel/>
+    </UserControl.DataContext>
+    <StackPanel Margin="20" Spacing="12">
+        <TextBlock Text="BT下载/上传" FontWeight="Bold" FontSize="18"/>
+        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <TextBlock Text="种子文件：" VerticalAlignment="Center"/>
+            <TextBox Text="{Binding TorrentFilePath, Mode=TwoWay}" Width="260"/>
+            <Button Content="选择..." Width="60"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <TextBlock Text="下载目录：" VerticalAlignment="Center"/>
+            <TextBox Text="{Binding DownloadPath, Mode=TwoWay}" Width="260"/>
+            <Button Content="选择..." Width="60"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,8,0,0">
+            <Button Content="开始" Command="{Binding StartDownloadCommand}" Width="80"/>
+            <Button Content="停止" Command="{Binding StopDownloadCommand}" Width="80"/>
+            <Button Content="刷新进度" Width="80"/>
+        </StackPanel>
+        <ProgressBar Minimum="0" Maximum="100" Value="{Binding Progress}" Height="20" Margin="0,8,0,0"/>
+        <TextBlock Text="{Binding Status}" FontSize="14" Foreground="Gray"/>
+    </StackPanel>
+</UserControl>

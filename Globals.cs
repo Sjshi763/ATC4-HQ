@@ -1,3 +1,4 @@
+using System.Linq;
 namespace master
 {
     namespace Globals
