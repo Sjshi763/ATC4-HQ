@@ -9,6 +9,7 @@ using System.Windows.Input;
 using ATC4_HQ.Models;
 using System.IO;
 using System.Text.Json;
+using master.Globals;
 
 namespace ATC4_HQ.ViewModels
 {
@@ -198,6 +199,12 @@ namespace ATC4_HQ.ViewModels
 
         private void StartAllDownloads()
         {
+            if (!GlobalPaths.BTEnabled)
+            {
+                Console.WriteLine("BT功能未启用，无法开始下载");
+                return;
+            }
+            
             foreach (var item in DownloadItems.Where(x => !x.IsCompleted))
             {
                 item.StartDownload();
@@ -226,6 +233,12 @@ namespace ATC4_HQ.ViewModels
 
         private async Task AddDownload()
         {
+            if (!GlobalPaths.BTEnabled)
+            {
+                Console.WriteLine("BT功能未启用，无法添加下载");
+                return;
+            }
+            
             try
             {
                 var dialog = new Views.AddDownloadDialogWindow();
@@ -264,6 +277,12 @@ namespace ATC4_HQ.ViewModels
 
         private void StartSelectedDownload()
         {
+            if (!GlobalPaths.BTEnabled)
+            {
+                Console.WriteLine("BT功能未启用，无法开始下载");
+                return;
+            }
+            
             if (SelectedDownloadItem != null && !SelectedDownloadItem.IsCompleted)
             {
                 SelectedDownloadItem.StartDownload();

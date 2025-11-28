@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
+using master.Globals;
 
 namespace ATC4_HQ.Models
 {
@@ -77,6 +78,12 @@ namespace ATC4_HQ.Models
         
         public void StartDownload()
         {
+            if (!GlobalPaths.BTEnabled)
+            {
+                SetError("BT功能未启用，无法开始下载");
+                return;
+            }
+            
             IsDownloading = true;
             IsCompleted = false;
             Status = "开始下载";

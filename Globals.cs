@@ -11,7 +11,7 @@ namespace master
             public static string Keys = "0x5A";
             public static string? GamePath;
             public static string? GameName;
-            public static bool BTTure;
+            public static bool BTEnabled;
         }
     }
 }
