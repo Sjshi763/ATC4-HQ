@@ -83,12 +83,12 @@ namespace ATC4_HQ.ViewModels
             // 解压 .zip 文件到指定目录
             ZipFile.ExtractToDirectory(zipPath, gameData.Path);
 
-            // 检查解压后的文件中是否有以/或\开头的zip文件，并再次解压
+            // 检查解压后的文件中是否有以~开头的zip文件，并再次解压
             var extractedFiles = Directory.GetFiles(gameData.Path, "*.zip", SearchOption.AllDirectories);
             foreach (var file in extractedFiles)
             {
                 var fileName = Path.GetFileName(file);
-                if (fileName.StartsWith("/") || fileName.StartsWith("\\"))
+                if (fileName.StartsWith("~"))
                 {
                     // 使用一个新的 MemoryStream 来读取和解压，避免文件占用问题
                     using (var fileStream = new FileStream(file, FileMode.Open, FileAccess.Read))
@@ -102,8 +102,8 @@ namespace ATC4_HQ.ViewModels
                             {
                                 foreach (ZipArchiveEntry entry in archive.Entries)
                                 {
-                                    // 去掉条目前面的斜杠，构造正确的目标路径
-                                    string destinationPath = Path.Combine(gameData.Path, entry.FullName.TrimStart('/', '\\'));
+                                    // 去掉条目前面的波浪号，构造正确的目标路径
+                                    string destinationPath = Path.Combine(gameData.Path, entry.FullName.TrimStart('~'));
                                     
                                     // 确保目标目录存在
                                     string? destinationDirectory = Path.GetDirectoryName(destinationPath);
