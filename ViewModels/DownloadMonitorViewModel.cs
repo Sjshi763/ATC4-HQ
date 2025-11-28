@@ -16,10 +16,10 @@ namespace ATC4_HQ.ViewModels
     public partial class DownloadMonitorViewModel : ViewModelBase
     {
         [ObservableProperty]
-        private ObservableCollection<DownloadItem> _downloadItems = new();
+        private ObservableCollection<DownloadItemViewModel> _downloadItems = new();
         
         [ObservableProperty]
-        private DownloadItem? _selectedDownloadItem;
+        private DownloadItemViewModel? _selectedDownloadItem;
         
         [ObservableProperty]
         private bool _isAllPaused;
@@ -79,7 +79,7 @@ namespace ATC4_HQ.ViewModels
                             // 检查是否已经存在
                             if (!DownloadItems.Any(item => item.MagnetLink == url))
                             {
-                                DownloadItems.Add(new DownloadItem(name, url));
+                                DownloadItems.Add(new DownloadItemViewModel(name, url));
                             }
                         }
                     }
@@ -98,10 +98,11 @@ namespace ATC4_HQ.ViewModels
                 if (File.Exists(_configPath))
                 {
                     var json = File.ReadAllText(_configPath);
-                    var items = JsonSerializer.Deserialize<ObservableCollection<DownloadItem>>(json);
-                    if (items != null)
+                    var modelItems = JsonSerializer.Deserialize<ObservableCollection<DownloadItemModel>>(json);
+                    if (modelItems != null)
                     {
-                        DownloadItems = items;
+                        var viewModels = modelItems.Select(model => new DownloadItemViewModel(model));
+                        DownloadItems = new ObservableCollection<DownloadItemViewModel>(viewModels);
                     }
                 }
             }
@@ -115,7 +116,8 @@ namespace ATC4_HQ.ViewModels
         {
             try
             {
-                var json = JsonSerializer.Serialize(DownloadItems, new JsonSerializerOptions { WriteIndented = true });
+                var modelItems = DownloadItems.Select(vm => vm.Model);
+                var json = JsonSerializer.Serialize(modelItems, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(_configPath, json);
             }
             catch (Exception ex)
@@ -257,7 +259,7 @@ namespace ATC4_HQ.ViewModels
                         // 检查是否已经存在相同的磁力链接
                         if (!DownloadItems.Any(item => item.MagnetLink == viewModel.MagnetLink))
                         {
-                            var newItem = new DownloadItem(viewModel.Name, viewModel.MagnetLink);
+                            var newItem = new DownloadItemViewModel(viewModel.Name, viewModel.MagnetLink);
                             DownloadItems.Add(newItem);
                             SaveDownloadsToConfig();
                         }
