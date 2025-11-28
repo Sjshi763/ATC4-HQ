@@ -111,6 +111,15 @@ namespace ATC4_HQ.Views
             }
         }
 
+        private void DownloadMonitor_Click(object? sender, RoutedEventArgs e)
+        {
+            if (DataContext is MainWindowViewModel viewModel)
+            {
+                Console.WriteLine("下载监视按钮被点击了！");
+                viewModel.DownloadMonitorCommand.Execute(null);
+            }
+        }
+
 
         private void StartUp()
         {

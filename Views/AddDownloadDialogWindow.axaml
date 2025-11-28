@@ -1,0 +1,97 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:ATC4_HQ.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="350"
+        x:Class="ATC4_HQ.Views.AddDownloadDialogWindow"
+        x:DataType="vm:AddDownloadDialogViewModel"
+        Title="添加下载任务"
+        Width="500" Height="350"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+
+  <Grid Margin="20">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="20"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="15"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="15"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="20"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <!-- 标题 -->
+    <TextBlock Grid.Row="0" 
+               Text="添加新的BT下载任务" 
+               FontSize="18" 
+               FontWeight="Bold"
+               HorizontalAlignment="Center"/>
+
+    <!-- 下载名称 -->
+    <StackPanel Grid.Row="2" Spacing="5">
+      <TextBlock Text="下载名称:" FontWeight="SemiBold"/>
+      <TextBox Text="{Binding Name}" 
+               Watermark="请输入下载名称"
+               FontSize="14"/>
+    </StackPanel>
+
+    <!-- 磁力链接 -->
+    <StackPanel Grid.Row="4" Spacing="5">
+      <TextBlock Text="磁力链接:" FontWeight="SemiBold"/>
+      <TextBox Text="{Binding MagnetLink}" 
+               Watermark="magnet:?xt=urn:btih:..."
+               FontSize="14"
+               TextWrapping="Wrap"
+               Height="60"
+               AcceptsReturn="False"/>
+    </StackPanel>
+
+    <!-- 保存路径 -->
+    <StackPanel Grid.Row="6" Spacing="5">
+      <TextBlock Text="保存路径:" FontWeight="SemiBold"/>
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="10"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <TextBox Grid.Column="0" 
+                 Text="{Binding SavePath}" 
+                 FontSize="14"/>
+        <Button Grid.Column="2" 
+                Content="浏览..." 
+                Width="60"
+                Classes="secondary"/>
+      </Grid>
+    </StackPanel>
+
+    <!-- 错误信息 -->
+    <TextBlock Grid.Row="7" 
+               Text="{Binding ErrorMessage}" 
+               Foreground="Red"
+               FontSize="12"
+               TextWrapping="Wrap"
+               Height="40"
+               VerticalAlignment="Top"/>
+
+    <!-- 按钮 -->
+    <StackPanel Grid.Row="8" 
+                Orientation="Horizontal" 
+                HorizontalAlignment="Right"
+                Spacing="10">
+      <Button Name="CancelButton" 
+              Content="取消" 
+              Width="80"
+              Classes="secondary"/>
+      <Button Name="ConfirmButton" 
+              Content="确定" 
+              Width="80"
+              Classes="accent"
+              IsDefault="True"/>
+    </StackPanel>
+  </Grid>
+</Window>

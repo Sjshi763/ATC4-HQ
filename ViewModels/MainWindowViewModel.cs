@@ -25,12 +25,14 @@ namespace ATC4_HQ.ViewModels
         public ICommand StartGameCommand { get; }
         public ICommand InstallGameCommand { get; } // 用于 ViewModel 内部逻辑或未来绑定
         public ICommand SettingCommand { get; }
+        public ICommand DownloadMonitorCommand { get; }
 
         public MainWindowViewModel()
         {
             StartGameCommand = new RelayCommand(OnStartGame);
             InstallGameCommand = new RelayCommand(OnInstallGame); 
             SettingCommand = new RelayCommand(OnSetting);
+            DownloadMonitorCommand = new RelayCommand(OnDownloadMonitor);
         }
 
         private void OnStartGame()
@@ -63,6 +65,12 @@ namespace ATC4_HQ.ViewModels
         {
             Console.WriteLine("启动设置");
             CurrentPage = new SettingViewModel(); 
+        }
+
+        private void OnDownloadMonitor()
+        {
+            Console.WriteLine("打开下载监视器");
+            CurrentPage = new DownloadMonitorViewModel(); 
         }
 
         /// <summary>

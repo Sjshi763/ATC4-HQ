@@ -26,29 +26,36 @@
                        HorizontalAlignment="Center"
                        Text="ATC4-HQ"/>
         </Border>
-        <Grid ColumnDefinitions="*,*,*"
+        <Grid ColumnDefinitions="*,*,*,*"
               Margin="0,10,0,10">
             <Button Grid.Column="0"
                     Content="启动游戏"
                     Click="StartGame_Click"
-                    Width="120"
+                    Width="100"
                     Height="40"
                     HorizontalAlignment="Left"
-                    Margin="20,0,0,0"/>
+                    Margin="10,0,0,0"/>
             <Button Grid.Column="1"
                     Content="安装游戏"
                     Click="InstallGame_Click"
-                    Width="120"
+                    Width="100"
                     Height="40"
                     HorizontalAlignment="Center"
-                    Margin="20,0,0,0"/>
+                    Margin="5,0,0,0"/>
             <Button Grid.Column="2"
+                    Content="下载监视"
+                    Click="DownloadMonitor_Click"
+                    Width="100"
+                    Height="40"
+                    HorizontalAlignment="Center"
+                    Margin="5,0,0,0"/>
+            <Button Grid.Column="3"
                     Content="设置"
                     Click="Setting_Click"
-                    Width="120"
+                    Width="100"
                     Height="40"
                     HorizontalAlignment="Right"
-                    Margin="0,0,20,0"/>
+                    Margin="0,0,10,0"/>
         </Grid>
             
         <ContentControl Content="{Binding CurrentPage}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
@@ -58,6 +65,9 @@
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type vm:SettingViewModel}">
                     <views:Setting />
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:DownloadMonitorViewModel}">
+                    <views:DownloadMonitorView />
                 </DataTemplate>
             </ContentControl.DataTemplates>
         </ContentControl>
