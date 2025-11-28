@@ -9,7 +9,10 @@ using System.Windows.Input;
 using ATC4_HQ.Models;
 using System.IO;
 using System.Text.Json;
+using System.Net.Http;
 using master.Globals;
+using ATC4_HQ.Services;
+using System.IO.Compression;
 
 namespace ATC4_HQ.ViewModels
 {
@@ -32,6 +35,9 @@ namespace ATC4_HQ.ViewModels
         
         private readonly Timer _updateTimer;
         private readonly string _configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "download-config.json");
+        private readonly BtService _btService = new BtService();
+        private readonly HttpClient _httpClient = new HttpClient();
+        private const string GitHubJsonUrl = "https://github.com/ATC4-HQ-DATA/install-files/files-link.json"; // TODO: 请替换为你的实际GitHub仓库URL
 
         public ICommand StartAllCommand { get; }
         public ICommand PauseAllCommand { get; }
@@ -55,8 +61,154 @@ namespace ATC4_HQ.ViewModels
             _updateTimer.Elapsed += UpdateTimer_Elapsed;
             _updateTimer.Start();
 
+            // 初始化BT服务
+            InitializeBtService();
+            
             LoadDownloadsFromConfig();
-            LoadDefaultDownloads();
+            _ = LoadDefaultDownloadsFromGitHub(); // 异步加载
+        }
+
+        private void InitializeBtService()
+        {
+            var downloadPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Downloads");
+            Directory.CreateDirectory(downloadPath);
+            
+            _btService.InitAsync(downloadPath);
+            
+            // 设置事件处理器
+            _btService.DownloadProgressChanged += OnDownloadProgressChanged;
+            _btService.DownloadCompleted += OnDownloadCompleted;
+            
+            // 设置BtService到DownloadItemViewModel
+            DownloadItemViewModel.SetBtService(_btService);
+        }
+
+        private void OnDownloadProgressChanged(object? sender, DownloadProgressEventArgs e)
+        {
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                var item = DownloadItems.FirstOrDefault(x => x.Name == e.GameName);
+                if (item != null)
+                {
+                    item.UpdateProgress(e.Progress, e.DownloadedBytes, e.TotalBytes, e.DownloadSpeed);
+                }
+            });
+        }
+
+        private void OnDownloadCompleted(object? sender, DownloadCompletedEventArgs e)
+        {
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                var item = DownloadItems.FirstOrDefault(x => x.Name == e.GameName);
+                if (item != null)
+                {
+                    item.UpdateProgress(100, item.TotalBytes, item.TotalBytes, 0);
+                    item.Status = "下载完成，正在解压...";
+                    
+                    // 开始解压
+                    _ = Task.Run(() => ExtractDownloadedGame(e.GameName, e.DownloadPath));
+                }
+            });
+        }
+
+        private async Task ExtractDownloadedGame(string gameName, string downloadPath)
+        {
+            try
+            {
+                // 查找下载目录中的zip文件
+                var zipFiles = Directory.GetFiles(downloadPath, "*.zip", SearchOption.AllDirectories);
+                if (zipFiles.Length > 0)
+                {
+                    var zipFile = zipFiles[0];
+                    var extractPath = Path.Combine(downloadPath, "extracted");
+                    Directory.CreateDirectory(extractPath);
+                    
+                    // 解压文件
+                    ZipFile.ExtractToDirectory(zipFile, extractPath);
+                    
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                    {
+                        var item = DownloadItems.FirstOrDefault(x => x.Name == gameName);
+                        if (item != null)
+                        {
+                            item.Status = "解压完成";
+                        }
+                        
+                        Console.WriteLine($"游戏 {gameName} 解压完成: {extractPath}");
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"解压游戏 {gameName} 失败: {ex.Message}");
+                
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    var item = DownloadItems.FirstOrDefault(x => x.Name == gameName);
+                    if (item != null)
+                    {
+                        item.Status = "解压失败";
+                        item.ErrorMessage = ex.Message;
+                    }
+                });
+            }
+        }
+
+        private async Task LoadDefaultDownloadsFromGitHub()
+        {
+            try
+            {
+                Console.WriteLine("正在从GitHub获取游戏列表...");
+                
+                // 尝试从GitHub获取JSON文件
+                var response = await _httpClient.GetAsync(GitHubJsonUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    var data = JsonSerializer.Deserialize<JsonElement>(json);
+                    
+                    if (data.TryGetProperty("main-games", out var games))
+                    {
+                        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                        {
+                            foreach (var game in games.EnumerateArray())
+                            {
+                                string name = game.GetProperty("name").GetString() ?? "未知游戏";
+                                string url = game.GetProperty("url").GetString() ?? "";
+                                
+                                // 检查是否已经存在
+                                if (!DownloadItems.Any(item => item.MagnetLink == url))
+                                {
+                                    var newItem = new DownloadItemViewModel(name, url);
+                                    DownloadItems.Add(newItem);
+                                    Console.WriteLine($"添加游戏到下载列表: {name}");
+                                }
+                            }
+                            
+                            // 自动开始下载
+                            if (GlobalPaths.BTEnabled)
+                            {
+                                Console.WriteLine("自动开始下载游戏...");
+                                StartAllDownloads();
+                            }
+                        });
+                        
+                        Console.WriteLine("从GitHub获取游戏列表成功");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"从GitHub获取游戏列表失败: {response.StatusCode}");
+                    // 如果GitHub获取失败，使用本地文件
+                    LoadDefaultDownloads();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"从GitHub获取游戏列表失败: {ex.Message}");
+                // 如果GitHub获取失败，使用本地文件
+                LoadDefaultDownloads();
+            }
         }
 
         private void LoadDefaultDownloads()
@@ -132,7 +284,6 @@ namespace ATC4_HQ.ViewModels
             Avalonia.Threading.Dispatcher.UIThread.Post(() =>
             {
                 UpdateTotalStats();
-                SimulateDownloadProgress();
             });
         }
 
@@ -167,27 +318,6 @@ namespace ATC4_HQ.ViewModels
             }
         }
 
-        private void SimulateDownloadProgress()
-        {
-            var random = new Random();
-            
-            foreach (var item in DownloadItems.Where(x => x.IsDownloading && !x.IsCompleted))
-            {
-                // 模拟下载进度
-                double progressIncrement = random.NextDouble() * 2; // 0-2%的进度增长
-                double speed = random.NextDouble() * 1024 * 1024; // 0-1MB/s的速度
-                
-                long newProgress = (long)(item.TotalBytes * (item.Progress + progressIncrement) / 100);
-                long downloadedBytes = Math.Min(newProgress, item.TotalBytes);
-                
-                item.UpdateProgress(
-                    Math.Min(item.Progress + progressIncrement, 100),
-                    downloadedBytes,
-                    item.TotalBytes,
-                    speed
-                );
-            }
-        }
 
         private string FormatSpeed(double bytesPerSecond)
         {

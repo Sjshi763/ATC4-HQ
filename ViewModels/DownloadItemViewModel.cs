@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using ATC4_HQ.Models;
 using master.Globals;
+using ATC4_HQ.Services;
 
 namespace ATC4_HQ.ViewModels
 {
@@ -10,6 +11,7 @@ namespace ATC4_HQ.ViewModels
     public partial class DownloadItemViewModel : ViewModelBase
     {
         private readonly DownloadItemModel _model;
+        private static BtService? _btService;
 
         [ObservableProperty]
         private string _name = string.Empty;
@@ -42,6 +44,11 @@ namespace ATC4_HQ.ViewModels
         private string _errorMessage = string.Empty;
 
         public DownloadItemModel Model => _model;
+
+        public static void SetBtService(BtService btService)
+        {
+            _btService = btService;
+        }
 
         public DownloadItemViewModel(DownloadItemModel model)
         {
@@ -93,23 +100,43 @@ namespace ATC4_HQ.ViewModels
         /// <summary>
         /// 开始下载
         /// </summary>
-        public void StartDownload()
+        public async void StartDownload()
         {
             if (!GlobalPaths.BTEnabled)
             {
                 SetError("BT功能未启用，无法开始下载");
                 return;
             }
+
+            if (_btService == null)
+            {
+                SetError("BT服务未初始化");
+                return;
+            }
             
             _model.StartDownload();
             UpdateFromModel();
+
+            // 调用真正的BT服务开始下载
+            var success = await _btService.StartTorrentAsync(MagnetLink, Name);
+            if (!success)
+            {
+                SetError("启动BT下载失败");
+            }
         }
 
         /// <summary>
         /// 暂停下载
         /// </summary>
-        public void PauseDownload()
+        public async void PauseDownload()
         {
+            if (_btService == null)
+            {
+                SetError("BT服务未初始化");
+                return;
+            }
+
+            await _btService.StopTorrentAsync(Name);
             _model.PauseDownload();
             UpdateFromModel();
         }
