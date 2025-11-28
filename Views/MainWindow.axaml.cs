@@ -148,8 +148,8 @@ namespace ATC4_HQ.Views
             GlobalPaths.GamePath = ini.GetValue("main", "GamePath");
 
             // BT同意弹窗集成
-            GlobalPaths.BtConsentAgreed = ATC4_HQ.Utils.ConfigHelper.LoadBtConsent(GlobalPaths.InitiatorProfileName);
-            if (!GlobalPaths.BtConsentAgreed)
+            GlobalPaths.BTEnabled = ATC4_HQ.Utils.ConfigHelper.LoadBtConsent(GlobalPaths.InitiatorProfileName);
+            if (!GlobalPaths.BTEnabled)
             {
                 var consentDialog = new BtConsentDialog();
                 var parentWindow = TopLevel.GetTopLevel(this) as Window;
@@ -157,12 +157,12 @@ namespace ATC4_HQ.Views
                 if (agreed)
                 {
                     ATC4_HQ.Utils.ConfigHelper.SaveBtConsent(GlobalPaths.InitiatorProfileName, true);
-                    GlobalPaths.BtConsentAgreed = true;
+                    GlobalPaths.BTEnabled = true;
                 }
                 else
                 {
                     // 用户未同意，按需处理（如退出或禁用BT功能）
-                    GlobalPaths.BtConsentAgreed = false;
+                    GlobalPaths.BTEnabled = false;
                 }
             }
             

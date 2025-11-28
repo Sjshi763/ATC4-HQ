@@ -11,7 +11,7 @@ namespace ATC4_HQ.Utils
             var lines = File.ReadAllLines(iniPath);
             foreach (var line in lines)
             {
-                if (line.Trim().StartsWith("BtConsentAgreed="))
+                if (line.Trim().StartsWith("BTEnabled="))
                 {
                     var val = line.Split('=')[1].Trim();
                     return val == "1";
@@ -26,9 +26,9 @@ namespace ATC4_HQ.Utils
             bool found = false;
             for (int i = 0; i < lines.Length; i++)
             {
-                if (lines[i].Trim().StartsWith("BtConsentAgreed="))
+                if (lines[i].Trim().StartsWith("BTEnabled="))
                 {
-                    lines[i] = $"BtConsentAgreed={(agreed ? "1" : "0")}";
+                    lines[i] = $"BTEnabled={(agreed ? "1" : "0")}";
                     found = true;
                     break;
                 }
@@ -36,7 +36,7 @@ namespace ATC4_HQ.Utils
             if (!found)
             {
                 var list = lines.ToList();
-                list.Add($"BtConsentAgreed={(agreed ? "1" : "0")}");
+                list.Add($"BTEnabled={(agreed ? "1" : "0")}");
                 lines = list.ToArray();
             }
             File.WriteAllLines(iniPath, lines);
