@@ -101,7 +101,7 @@ jobs:
 
     - name: Generate components for all files
       run: |
-        heat dir publish -dr INSTALLFOLDER -cg ProductComponents -gg -sfrag -out components.wxs
+        heat dir publish -dr INSTALLFOLDER -cg ProductComponents -gg -var var.PublishDir -sfrag -out components.wxs
 
     - name: Combine WiX files
       run: |
@@ -118,7 +118,7 @@ jobs:
 
     - name: Build MSI
       run: |
-        candle combined.wxs -out combined.wixobj
+        candle combined.wxs -dPublishDir=publish -out combined.wixobj
         light combined.wixobj -out ATC4-HQ.msi
 
     - name: Upload MSI artifact
