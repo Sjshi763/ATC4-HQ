@@ -101,7 +101,7 @@ jobs:
 
     - name: Generate components for all files
       run: |
-        heat dir publish -dr INSTALLFOLDER -cg ProductComponents -srd -gg -sfrag -out components.wxs
+        heat dir publish -dr INSTALLFOLDER -cg ProductComponents -gg -sfrag -out components.wxs
 
     - name: Combine WiX files
       run: |
