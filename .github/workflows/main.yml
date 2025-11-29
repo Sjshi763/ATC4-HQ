@@ -84,12 +84,6 @@ jobs:
           </Fragment>
           
           <Fragment>
-            <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-              <!-- 使用Heat工具生成的所有文件组件 -->
-            </ComponentGroup>
-          </Fragment>
-          
-          <Fragment>
             <DirectoryRef Id="ApplicationProgramsFolder">
               <Component Id="ApplicationShortcut" Guid="*">
                 <Shortcut Id="ApplicationStartMenuShortcut"
