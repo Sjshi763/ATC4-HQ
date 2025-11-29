@@ -63,4 +63,4 @@ jobs:
     - name: Build Windows Installer MSI from exe file
       uses: AliceOh/CreateWindowsInstaller@1.0.0
       with:
-        exefile:""
+        exefile: "./publish/ATC4-HQ.exe"
