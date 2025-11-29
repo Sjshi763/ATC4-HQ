@@ -75,9 +75,6 @@ jobs:
               <Directory Id="ProgramFilesFolder">
                 <Directory Id="INSTALLFOLDER" Name="ATC4-HQ" />
               </Directory>
-              <Directory Id="ProgramMenuFolder">
-                <Directory Id="ApplicationProgramsFolder" Name="ATC4-HQ"/>
-              </Directory>
             </Directory>
           </Fragment>
           
@@ -85,7 +82,7 @@ jobs:
             <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
               <Component Id="MainExecutable" Guid="*">
                 <File Id="ATC4HQExe" Source="publish/ATC4-HQ.exe" KeyPath="yes" Checksum="yes"/>
-                <RegistryValue Root="HKCU" Key="Software\ATC4-HQ" Name="installed" Type="integer" Value="1" KeyPath="no"/>
+                <RegistryValue Root="HKLM" Key="Software\ATC4-HQ" Name="installed" Type="integer" Value="1" KeyPath="no"/>
               </Component>
             </ComponentGroup>
           </Fragment>
