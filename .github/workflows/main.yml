@@ -111,7 +111,16 @@ jobs:
 
     - name: Combine WiX files
       run: |
-        Get-Content ATC4-HQ.wxs, components.wxs | Set-Content combined.wxs
+        $mainXml = [xml](Get-Content ATC4-HQ.wxs)
+        $componentsXml = [xml](Get-Content components.wxs)
+        
+        # 将components.xml中的Fragment元素添加到main.xml中
+        foreach ($fragment in $componentsXml.Wix.Fragment) {
+          $importedNode = $mainXml.ImportNode($fragment, $true)
+          $mainXml.Wix.AppendChild($importedNode) | Out-Null
+        }
+        
+        $mainXml.Save("combined.wxs")
 
     - name: Build MSI
       run: |
