@@ -12,6 +12,7 @@ using Masuit.Tools.Files;
 using System.Threading.Tasks; // 添加Task支持
 using Avalonia;
 using Avalonia.Media;
+using Avalonia.Input;
 
 namespace ATC4_HQ.Views
 {
@@ -26,6 +27,9 @@ namespace ATC4_HQ.Views
             
             // 订阅DataContextChanged事件，确保在DataContext设置后再订阅OpenALNotInstalled事件
             this.DataContextChanged += OnDataContextChanged;
+            
+            // 初始化窗口拖拽和按钮事件
+            InitializeWindowControls();
         }
 
         private void InitializeComponent()
@@ -33,6 +37,40 @@ namespace ATC4_HQ.Views
             // 这个方法通常由 Avalonia.Markup.Xaml.AvaloniaXamlLoader.Load(this); 生成。
             // 如果您是手动添加的，请确保引用了 Avalonia.Markup.Xaml。
             Avalonia.Markup.Xaml.AvaloniaXamlLoader.Load(this);
+        }
+        
+        /// <summary>
+        /// 初始化窗口控件事件
+        /// </summary>
+        private void InitializeWindowControls()
+        {
+            // 查找最小化和关闭按钮
+            var minButton = this.Find<Button>("BtnTitleMin");
+            var closeButton = this.Find<Button>("BtnTitleClose");
+            
+            if (minButton != null)
+            {
+                minButton.Click += (s, e) => this.WindowState = WindowState.Minimized;
+            }
+            
+            if (closeButton != null)
+            {
+                closeButton.Click += (s, e) => this.Close();
+            }
+            
+            // 设置窗口拖拽
+            this.PointerPressed += OnWindowPointerPressed;
+        }
+        
+        /// <summary>
+        /// 处理窗口拖拽
+        /// </summary>
+        private void OnWindowPointerPressed(object? sender, PointerPressedEventArgs e)
+        {
+            if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+            {
+                this.BeginMoveDrag(e);
+            }
         }
 
         private async void MainWindow_Loaded(object? sender, RoutedEventArgs e)
