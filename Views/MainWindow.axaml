@@ -98,7 +98,8 @@
         <Border
             CornerRadius="15,15,8,8"
             Margin="18"
-            Name="MainBorder">
+            Name="MainBorder"
+            Background="#2C3E50">
             <Border.Transitions>
                 <Transitions>
                     <BrushTransition Duration="0:0:0.2" Property="Background" />
