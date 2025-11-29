@@ -1,0 +1,130 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:ATC4_HQ.ViewModels"
+             xmlns:models="clr-namespace:ATC4_HQ.Models"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="ATC4_HQ.Views.DownloadMonitorView"
+             x:DataType="vm:DownloadMonitorViewModel">
+
+  <Design.DataContext>
+    <vm:DownloadMonitorViewModel/>
+  </Design.DataContext>
+
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <!-- 标题栏 -->
+    <Border Grid.Row="0" Background="#FF2D2D30" Padding="15,10">
+      <StackPanel Orientation="Horizontal" Spacing="20">
+        <TextBlock Text="📥 BT下载监视器" FontSize="18" FontWeight="Bold" Foreground="White"/>
+        <TextBlock Text="{Binding TotalSpeed}" FontSize="14" Foreground="#FF00FF00" VerticalAlignment="Center"/>
+      </StackPanel>
+    </Border>
+
+    <!-- 总体进度条 -->
+    <Border Grid.Row="1" Background="#FF3C3C3C" Padding="15,10">
+      <StackPanel Spacing="10">
+        <TextBlock Text="总体进度" FontSize="12" Foreground="White"/>
+        <ProgressBar Value="{Binding TotalProgress}" Maximum="100" Height="20" 
+                     Background="#FF1E1E1E" Foreground="#FF007ACC"/>
+        <TextBlock Text="{Binding TotalProgress, StringFormat={}{0:F1}%}" 
+                   FontSize="12" Foreground="White" HorizontalAlignment="Center"/>
+      </StackPanel>
+    </Border>
+
+    <!-- 下载列表 -->
+    <DataGrid Grid.Row="2" 
+              ItemsSource="{Binding DownloadItems}"
+              SelectedItem="{Binding SelectedDownloadItem}"
+              AutoGenerateColumns="False"
+              CanUserReorderColumns="True"
+              CanUserResizeColumns="True"
+              CanUserSortColumns="True"
+              GridLinesVisibility="Horizontal"
+              HorizontalGridLinesBrush="#FF404040"
+              Background="#FF252526"
+              Foreground="White"
+              RowBackground="#FF2D2D30"
+              HeadersVisibility="Column">
+      
+      <DataGrid.Columns>
+        <DataGridTemplateColumn Header="状态" Width="80">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate>
+              <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                <TextBlock Text="⏸️" FontSize="12" IsVisible="{Binding !IsDownloading, FallbackValue=False}"/>
+                <TextBlock Text="▶️" FontSize="12" IsVisible="{Binding IsDownloading, FallbackValue=False}"/>
+                <TextBlock Text="✅" FontSize="12" IsVisible="{Binding IsCompleted, FallbackValue=False}"/>
+                <TextBlock Text="❌" FontSize="12" IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}, FallbackValue=False}"/>
+              </StackPanel>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+
+        <DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="200"/>
+        
+        <DataGridTextColumn Header="状态" Binding="{Binding Status}" Width="100"/>
+        
+        <DataGridTemplateColumn Header="进度" Width="150">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate>
+              <StackPanel Spacing="5">
+                <ProgressBar Value="{Binding Progress}" Maximum="100" Height="15"
+                             Background="#FF1E1E1E" Foreground="#FF007ACC"/>
+                <TextBlock Text="{Binding Progress, StringFormat={}{0:F1}%}" 
+                           FontSize="10" HorizontalAlignment="Center"/>
+              </StackPanel>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+
+        <DataGridTextColumn Header="大小" Binding="{Binding FormattedSize}" Width="120"/>
+        
+        <DataGridTextColumn Header="速度" Binding="{Binding FormattedSpeed}" Width="100"/>
+        
+        <DataGridTextColumn Header="磁力链接" Binding="{Binding MagnetLink}" Width="300"/>
+      </DataGrid.Columns>
+    </DataGrid>
+
+    <!-- 控制按钮栏 -->
+    <Border Grid.Row="3" Background="#FF2D2D30" Padding="15,10">
+      <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+        
+        <!-- 全部控制按钮 -->
+        <StackPanel Orientation="Horizontal" Spacing="5">
+          <Button Content="▶️ 全部开始" Command="{Binding StartAllCommand}" 
+                  Background="#FF007ACC" Foreground="White" Padding="10,5"/>
+          <Button Content="⏸️ 全部暂停" Command="{Binding PauseAllCommand}" 
+                  Background="#FF8B4513" Foreground="White" Padding="10,5"/>
+          <Button Content="🗑️ 清理完成" Command="{Binding RemoveCompletedCommand}" 
+                  Background="#FFDC143C" Foreground="White" Padding="10,5"/>
+        </StackPanel>
+
+        <Separator Width="20" Background="#FF404040"/>
+
+        <!-- 选中项控制按钮 -->
+        <StackPanel Orientation="Horizontal" Spacing="5">
+          <Button Content="▶️ 开始" Command="{Binding StartSelectedCommand}" 
+                  Background="#FF228B22" Foreground="White" Padding="10,5"/>
+          <Button Content="⏸️ 暂停" Command="{Binding PauseSelectedCommand}" 
+                  Background="#FF8B4513" Foreground="White" Padding="10,5"/>
+          <Button Content="🗑️ 删除" Command="{Binding RemoveSelectedCommand}" 
+                  Background="#FFDC143C" Foreground="White" Padding="10,5"/>
+        </StackPanel>
+
+        <Separator Width="20" Background="#FF404040"/>
+
+        <!-- 其他按钮 -->
+        <Button Content="➕ 添加下载" Command="{Binding AddDownloadCommand}" 
+                Background="#FF4169E1" Foreground="White" Padding="10,5"/>
+      </StackPanel>
+    </Border>
+  </Grid>
+</UserControl>

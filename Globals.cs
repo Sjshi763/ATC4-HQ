@@ -1,3 +1,4 @@
+using System.Linq;
 namespace master
 {
     namespace Globals
@@ -11,6 +12,7 @@ namespace master
             public static string Keys = "0x5A";
             public static string? GamePath;
             public static string? GameName;
+            public static bool BTEnabled;
         }
     }
 }

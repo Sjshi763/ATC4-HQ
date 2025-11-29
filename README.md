@@ -13,6 +13,7 @@
 > 以上库已经在最新版本被移除
 
 [Masuit.Tools](https://github.com/ldqk/Masuit.Tools)
+[Avalonia](https://avaloniaui.net/)
 
 > [!IMPORTANT]
 > *感谢以上库的开发者，没有你们我的项目不可能这么好！！*
