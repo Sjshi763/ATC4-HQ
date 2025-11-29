@@ -59,3 +59,8 @@ jobs:
       with:
         files: ./ATC4-HQ-Release-Build.zip # ⭐️ 指向下载后的ZIP文件路径
         token: ${{ secrets.GITHUB_TOKEN }} # GitHub 自动提供的令牌，用于认证
+    
+    - name: Build Windows Installer MSI from exe file
+      uses: AliceOh/CreateWindowsInstaller@1.0.0
+      with:
+        exefile:""
