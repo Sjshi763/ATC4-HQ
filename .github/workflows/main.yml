@@ -28,16 +28,11 @@ jobs:
     - name: Publish application # 步骤5: 发布应用程序 (生成可执行文件)
       run: dotnet publish ./ATC4-HQ.csproj --configuration Release --no-build -o publish # 修复路径
 
-    - name: Create Zip Archive of Published Output # ⭐️ 修改：使用 Compress-Archive 打包发布目录为ZIP
-      run: Compress-Archive -Path ./publish/* -DestinationPath ATC4-HQ-Release-Build.zip
-      # -Path ./publish/*: 指定要压缩的源路径，即 publish 目录下的所有内容
-      # -DestinationPath ATC4-HQ-Release-Build.zip: 指定生成的ZIP文件的名称和位置
-
-    - name: Upload build artifact # 步骤6: 上传构建产物 (现在上传的是ZIP文件)
+    - name: Upload build artifact # 步骤6: 上传构建产物 (publish目录)
       uses: actions/upload-artifact@v4
       with:
-        name: ATC4-HQ-Release-Build # 产物的名称
-        path: ATC4-HQ-Release-Build.zip # ⭐️ 上传的是打包好的ZIP文件
+        name: ATC4-HQ-Publish # 产物的名称
+        path: publish # 上传publish目录
 
   release: # 用于创建/更新 GitHub Release
     needs: build # 此作业依赖于 'build' 作业
@@ -47,20 +42,18 @@ jobs:
     - name: Checkout code # 步骤1: 检出仓库代码
       uses: actions/checkout@v4
 
-    - name: Download build artifact # 步骤2: 下载 'build' 作业中上传的ZIP产物
+    - name: Download build artifact # 步骤2: 下载 'build' 作业中上传的publish目录
       uses: actions/download-artifact@v4
       with:
-        name: ATC4-HQ-Release-Build # 指定要下载的产物名称
-        path: . # 将ZIP文件下载到当前工作目录，它会创建一个同名文件夹
+        name: ATC4-HQ-Publish # 指定要下载的产物名称
+        path: publish # 将publish目录下载到当前工作目录
 
-    - name: Create Release and Upload Assets # 步骤3: 创建或更新 Release 并上传资产
-      uses: softprops/action-gh-release@v1 # 使用 softprops/action-gh-release Action
-      if: startsWith(github.ref, 'refs/tags/') # 仅当工作流由标签推送触发时才运行此步骤
-      with:
-        files: ./ATC4-HQ-Release-Build.zip # ⭐️ 指向下载后的ZIP文件路径
-        token: ${{ secrets.GITHUB_TOKEN }} # GitHub 自动提供的令牌，用于认证
+    - name: Prepare application directory for MSI
+      run: |
+        mkdir application
+        copy ./publish/ATC4-HQ.exe ./application/
     
     - name: Build Windows Installer MSI from exe file
       uses: AliceOh/CreateWindowsInstaller@1.0.0
       with:
-        exefile: "./publish/ATC4-HQ.exe"
+        exefile: "./application/ATC4-HQ.exe"
