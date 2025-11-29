@@ -42,13 +42,25 @@ jobs:
     - name: Checkout code # 步骤1: 检出仓库代码
       uses: actions/checkout@v4
 
-    - name: Build Windows Installer MSI from exe file
-      uses: AliceOh/CreateWindowsInstaller@1.0.0
-      with:
-        exefile: "./ATC4-HQ.exe"
-
     - name: Download build artifact # 步骤2: 下载 'build' 作业中上传的publish目录
       uses: actions/download-artifact@v4
       with:
         name: ATC4-HQ-Publish # 指定要下载的产物名称
         path: publish # 将publish目录下载到当前工作目录
+
+    - name: Build Windows Installer MSI from exe file
+      uses: AliceOh/CreateWindowsInstaller@1.0.0
+      with:
+        exefile: "publish/ATC4-HQ.exe"
+
+    - name: Upload MSI artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ATC4-HQ-MSI
+        path: "*.msi"
+
+    - name: Download MSI artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: ATC4-HQ-MSI
+        path: msi
