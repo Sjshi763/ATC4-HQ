@@ -67,6 +67,7 @@ jobs:
             
             <Feature Id="ProductFeature" Title="ATC4-HQ" Level="1">
               <ComponentGroupRef Id="ProductComponents" />
+              <ComponentRef Id="ApplicationShortcut" />
             </Feature>
           </Product>
           
@@ -75,24 +76,47 @@ jobs:
               <Directory Id="ProgramFilesFolder">
                 <Directory Id="INSTALLFOLDER" Name="ATC4-HQ" />
               </Directory>
+              <Directory Id="ProgramMenuFolder">
+                <Directory Id="ApplicationProgramsFolder" Name="ATC4-HQ"/>
+              </Directory>
+              <Directory Id="DesktopFolder" />
             </Directory>
           </Fragment>
           
           <Fragment>
             <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-              <Component Id="MainExecutable" Guid="*">
-                <File Id="ATC4HQExe" Source="publish/ATC4-HQ.exe" KeyPath="yes" Checksum="yes"/>
-                <RegistryValue Root="HKLM" Key="Software\ATC4-HQ" Name="installed" Type="integer" Value="1" KeyPath="no"/>
-              </Component>
+              <!-- 使用Heat工具生成的所有文件组件 -->
             </ComponentGroup>
+          </Fragment>
+          
+          <Fragment>
+            <DirectoryRef Id="ApplicationProgramsFolder">
+              <Component Id="ApplicationShortcut" Guid="*">
+                <Shortcut Id="ApplicationStartMenuShortcut"
+                          Name="ATC4-HQ"
+                          Description="Launch ATC4-HQ"
+                          Target="[INSTALLFOLDER]ATC4-HQ.exe"
+                          WorkingDirectory="INSTALLFOLDER"/>
+                <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
+                <RegistryValue Root="HKCU" Key="Software\Microsoft\ATC4-HQ" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+              </Component>
+            </DirectoryRef>
           </Fragment>
         </Wix>
         "@ | Out-File -FilePath "ATC4-HQ.wxs" -Encoding UTF8
 
+    - name: Generate components for all files
+      run: |
+        heat dir publish -dr INSTALLFOLDER -cg ProductComponents -srd -gg -sfrag -out components.wxs
+
+    - name: Combine WiX files
+      run: |
+        Get-Content ATC4-HQ.wxs, components.wxs | Set-Content combined.wxs
+
     - name: Build MSI
       run: |
-        candle ATC4-HQ.wxs -out ATC4-HQ.wixobj
-        light ATC4-HQ.wixobj -out ATC4-HQ.msi
+        candle combined.wxs -out combined.wixobj
+        light combined.wixobj -out ATC4-HQ.msi
 
     - name: Upload MSI artifact
       uses: actions/upload-artifact@v4
