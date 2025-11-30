@@ -299,7 +299,6 @@
                         <!--  左边区域背景  -->
                         <Border
                             Background="#F8F8F8"
-                            BoxShadow="2 0 8 0 #40000000"
                             Grid.Column="0"
                             Name="LeftNavigationControlBorder"
                             ZIndex="1">
@@ -314,8 +313,9 @@
                         <!--  右边区域背景  -->
                         <Border
                             Background="White"
+                            BoxShadow="-2 0 8 0 #40000000"
                             Grid.Column="1"
-                            ZIndex="0">
+                            ZIndex="3">
                             <UserControl
                                 Content="{Binding CurrentSubPage}"
                                 Name="RightNavigationControl" />
