@@ -12,6 +12,8 @@
 > [!WARNING]
 > 以上库已经在最新版本被移除
 
+[PCL.Neo](https://github.com/PCL-Community/PCL.Neo)
+- 抄的UI和部分代码
 [Masuit.Tools](https://github.com/ldqk/Masuit.Tools)
 [Avalonia](https://avaloniaui.net/)
 
@@ -19,5 +21,5 @@
 > *感谢以上库的开发者，没有你们我的项目不可能这么好！！*
 
 # 这个项目的更新
-## 1.5.4.0.0
-1. BT自动下载
+## 2.0
+1. 大改UI
