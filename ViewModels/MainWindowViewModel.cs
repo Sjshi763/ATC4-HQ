@@ -8,6 +8,7 @@ using System.IO.Compression; // 用于解压缩功能
 using master.Globals;
 using Masuit.Tools.Files;
 using System.IO; // 用于检查文件是否存在
+using System.Collections.Generic; // 用于Stack
 
 namespace ATC4_HQ.ViewModels
 {
@@ -15,6 +16,27 @@ namespace ATC4_HQ.ViewModels
     {
         [ObservableProperty]
         private ViewModelBase? _currentPage; // 当前显示在 PageHost 中的 ViewModel
+        
+        [ObservableProperty]
+        private ViewModelBase? _currentSubPage; // 右侧内容区域的ViewModel
+        
+        [ObservableProperty]
+        private bool _isNavBtn1Checked = true; // 默认选中第一个导航按钮
+        
+        [ObservableProperty]
+        private bool _isNavBtn2Checked;
+        
+        [ObservableProperty]
+        private bool _isNavBtn3Checked;
+        
+        [ObservableProperty]
+        private bool _isNavBtn4Checked;
+        
+        [ObservableProperty]
+        private bool _canGoBack; // 是否可以返回
+        
+        // 导航历史记录
+        private Stack<ViewModelBase> _navigationHistory = new Stack<ViewModelBase>();
         
         // 事件：当需要显示OPENAL未安装警告时触发
         public event EventHandler? OpenALNotInstalled;
@@ -26,6 +48,8 @@ namespace ATC4_HQ.ViewModels
         public ICommand InstallGameCommand { get; } // 用于 ViewModel 内部逻辑或未来绑定
         public ICommand SettingCommand { get; }
         public ICommand DownloadMonitorCommand { get; }
+        public ICommand NavigateCommand { get; } // 新增导航命令
+        public ICommand GoBackCommand { get; } // 新增返回命令
 
         public MainWindowViewModel()
         {
@@ -33,6 +57,11 @@ namespace ATC4_HQ.ViewModels
             InstallGameCommand = new RelayCommand(OnInstallGame); 
             SettingCommand = new RelayCommand(OnSetting);
             DownloadMonitorCommand = new RelayCommand(OnDownloadMonitor);
+            NavigateCommand = new RelayCommand<string>(OnNavigate);
+            GoBackCommand = new RelayCommand(OnGoBack, () => CanGoBack);
+            
+            // 初始化默认页面
+            OnStartGame();
         }
 
         private void OnStartGame()
@@ -50,7 +79,7 @@ namespace ATC4_HQ.ViewModels
             
             // 实现启动游戏的业务逻辑
             // 将 CurrentPage 设置为 GameStartOptionsViewModel 的实例
-            CurrentPage = new GameStartOptionsViewModel(this); 
+            NavigateToPage(new GameStartOptionsViewModel(this), 1);
             Console.WriteLine("ViewModel: 已切换到游戏启动选项界面。");
         }
 
@@ -64,13 +93,97 @@ namespace ATC4_HQ.ViewModels
         private void OnSetting()
         {
             Console.WriteLine("启动设置");
-            CurrentPage = new SettingViewModel(); 
+            NavigateToPage(new SettingViewModel(), 4);
         }
 
         private void OnDownloadMonitor()
         {
             Console.WriteLine("打开下载监视器");
-            CurrentPage = new DownloadMonitorViewModel(); 
+            NavigateToPage(new DownloadMonitorViewModel(), 3);
+        }
+        
+        /// <summary>
+        /// 导航到指定页面
+        /// </summary>
+        /// <param name="page">要导航到的页面</param>
+        /// <param name="navButtonIndex">导航按钮索引</param>
+        private void NavigateToPage(ViewModelBase page, int navButtonIndex)
+        {
+            // 保存当前页面到历史记录
+            if (CurrentPage != null)
+            {
+                _navigationHistory.Push(CurrentPage);
+            }
+            
+            CurrentPage = page;
+            CurrentSubPage = null; // 清除子页面
+            
+            // 更新导航按钮状态
+            IsNavBtn1Checked = navButtonIndex == 1;
+            IsNavBtn2Checked = navButtonIndex == 2;
+            IsNavBtn3Checked = navButtonIndex == 3;
+            IsNavBtn4Checked = navButtonIndex == 4;
+            
+            // 更新返回按钮状态
+            CanGoBack = _navigationHistory.Count > 0;
+        }
+        
+        /// <summary>
+        /// 处理导航命令
+        /// </summary>
+        /// <param name="parameter">导航参数</param>
+        private void OnNavigate(string? parameter)
+        {
+            if (parameter == null) return;
+            
+            switch (parameter)
+            {
+                case "1":
+                    OnStartGame();
+                    break;
+                case "2":
+                    // 安装游戏逻辑
+                    Console.WriteLine("导航到安装游戏");
+                    // 这里可以添加安装游戏的页面导航
+                    break;
+                case "3":
+                    OnDownloadMonitor();
+                    break;
+                case "4":
+                    OnSetting();
+                    break;
+            }
+        }
+        
+        /// <summary>
+        /// 处理返回命令
+        /// </summary>
+        private void OnGoBack()
+        {
+            if (_navigationHistory.Count > 0)
+            {
+                var previousPage = _navigationHistory.Pop();
+                CurrentPage = previousPage;
+                CurrentSubPage = null;
+                
+                // 更新返回按钮状态
+                CanGoBack = _navigationHistory.Count > 0;
+                
+                // 更新导航按钮状态（根据页面类型）
+                UpdateNavButtonState(previousPage);
+            }
+        }
+        
+        /// <summary>
+        /// 根据页面类型更新导航按钮状态
+        /// </summary>
+        /// <param name="page">当前页面</param>
+        private void UpdateNavButtonState(ViewModelBase page)
+        {
+            IsNavBtn1Checked = page is GameStartOptionsViewModel;
+            IsNavBtn2Checked = false; // 安装游戏页面暂未实现
+            IsNavBtn3Checked = page is DownloadMonitorViewModel;
+            IsNavBtn4Checked = page is SettingViewModel;
         }
 
         /// <summary>

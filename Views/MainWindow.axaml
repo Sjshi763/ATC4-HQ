@@ -1,80 +1,339 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:ATC4_HQ.ViewModels"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:views="using:ATC4_HQ.Views" 
-        mc:Ignorable="d" d:DesignWidth="540" d:DesignHeight="540"
-        x:Class="ATC4_HQ.Views.MainWindow"
-        x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/ATC4.ico"
-        Title="ATC4_HQ"
-        Width="540"
-        Height="540"
-        CanResize="False">
-    <!-- <Window.Background>
-        <ImageBrush Source="/Assets/ATC4.ico" />
-        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="LightBlue" Offset="0"/>
-            <GradientStop Color="White" Offset="1"/>
-        </LinearGradientBrush>
-    </Window.Background> -->
-    <StackPanel>
-        <Border Margin="5" CornerRadius="10" Background="LightBlue">
-            <TextBlock Margin="5"
-                       FontSize="24" 
-                       HorizontalAlignment="Center"
-                       Text="ATC4-HQ"/>
-        </Border>
-        <Grid ColumnDefinitions="*,*,*,*"
-              Margin="0,10,0,10">
-            <Button Grid.Column="0"
-                    Content="启动游戏"
-                    Click="StartGame_Click"
-                    Width="100"
-                    Height="40"
-                    HorizontalAlignment="Left"
-                    Margin="10,0,0,0"/>
-            <Button Grid.Column="1"
-                    Content="安装游戏"
-                    Click="InstallGame_Click"
-                    Width="100"
-                    Height="40"
-                    HorizontalAlignment="Center"
-                    Margin="5,0,0,0"/>
-            <Button Grid.Column="2"
-                    Content="下载监视"
-                    Click="DownloadMonitor_Click"
-                    Width="100"
-                    Height="40"
-                    HorizontalAlignment="Center"
-                    Margin="5,0,0,0"/>
-            <Button Grid.Column="3"
-                    Content="设置"
-                    Click="Setting_Click"
-                    Width="100"
-                    Height="40"
-                    HorizontalAlignment="Right"
-                    Margin="0,0,10,0"/>
+<Window
+    Background="Transparent"
+    Height="500"
+    MinHeight="470"
+    MinWidth="810"
+    SystemDecorations="None"
+    Title="ATC4-HQ"
+    TransparencyLevelHint="Transparent"
+    Width="850"
+    WindowStartupLocation="CenterScreen"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d"
+    x:Class="ATC4_HQ.Views.MainWindow"
+    x:DataType="vm:MainWindowViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:ATC4_HQ"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="using:ATC4_HQ.Views"
+    xmlns:vm="using:ATC4_HQ.ViewModels"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Name="GridRoot">
+        <Grid Margin="10" Name="GridResize" RowDefinitions="14,*,14" ColumnDefinitions="14,*,14">
+            <Border Name="TopLeft" Grid.Column="0" Grid.Row="0">
+                <Border.Background>
+                    <RadialGradientBrush Center="100%,100%" GradientOrigin="100%,100%" RadiusX="100%" RadiusY="100%">
+                        <GradientStop Color="#21000000" Offset="0.43" />
+                        <GradientStop Color="#11000000" Offset="0.6" />
+                        <GradientStop Color="#00000000" Offset="1" />
+                    </RadialGradientBrush>
+                </Border.Background>
+            </Border>
+            <Border Name="TopRight" Grid.Column="2" Grid.Row="0">
+                <Border.Background>
+                    <RadialGradientBrush Center="0%,100%" GradientOrigin="0%,100%" RadiusX="100%" RadiusY="100%">
+                        <GradientStop Color="#21000000" Offset="0.43" />
+                        <GradientStop Color="#11000000" Offset="0.6" />
+                        <GradientStop Color="#00000000" Offset="1" />
+                    </RadialGradientBrush>
+                </Border.Background>
+            </Border>
+            <Border Name="BottomLeft" Grid.Column="0" Grid.Row="2">
+                <Border.Background>
+                    <RadialGradientBrush Center="100%,0%" GradientOrigin="100%,0%" RadiusX="100%" RadiusY="100%">
+                        <GradientStop Color="#21000000" Offset="0.43" />
+                        <GradientStop Color="#11000000" Offset="0.6" />
+                        <GradientStop Color="#00000000" Offset="1" />
+                    </RadialGradientBrush>
+                </Border.Background>
+            </Border>
+            <Border Name="BottomRight" Grid.Column="2" Grid.Row="2">
+                <Border.Background>
+                    <RadialGradientBrush Center="0%,0%" GradientOrigin="0%,0%" RadiusX="100%" RadiusY="100%">
+                        <GradientStop Color="#21000000" Offset="0.43" />
+                        <GradientStop Color="#11000000" Offset="0.6" />
+                        <GradientStop Color="#00000000" Offset="1" />
+                    </RadialGradientBrush>
+                </Border.Background>
+            </Border>
+            <Border Name="Top" Grid.Column="1" Grid.Row="0" Height="8" VerticalAlignment="Top">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                        <GradientStop Color="#00000000" Offset="0" />
+                        <GradientStop Color="#11000000" Offset="0.7" />
+                        <GradientStop Color="#21000000" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Border.Background>
+            </Border>
+            <Border Name="Right" Grid.Column="2" Grid.Row="1" Width="8" HorizontalAlignment="Right">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="100%,0%" EndPoint="0%,0%">
+                        <GradientStop Color="#00000000" Offset="0" />
+                        <GradientStop Color="#11000000" Offset="0.7" />
+                        <GradientStop Color="#21000000" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Border.Background>
+            </Border>
+            <Border Name="Bottom" Grid.Column="1" Grid.Row="2" Height="8" VerticalAlignment="Bottom">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0%,100%" EndPoint="0%,0%">
+                        <GradientStop Color="#00000000" Offset="0" />
+                        <GradientStop Color="#11000000" Offset="0.7" />
+                        <GradientStop Color="#21000000" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Border.Background>
+            </Border>
+            <Border Name="Left" Grid.Column="0" Grid.Row="1" Width="8" HorizontalAlignment="Left">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+                        <GradientStop Color="#00000000" Offset="0" />
+                        <GradientStop Color="#11000000" Offset="0.7" />
+                        <GradientStop Color="#21000000" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Border.Background>
+            </Border>
         </Grid>
-            
-        <ContentControl Content="{Binding CurrentPage}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <ContentControl.DataTemplates>
-                <DataTemplate DataType="{x:Type vm:GameStartOptionsViewModel}">
-                    <views:GameStartOptionsView />
-                </DataTemplate>
-                <DataTemplate DataType="{x:Type vm:SettingViewModel}">
-                    <views:Setting />
-                </DataTemplate>
-                <DataTemplate DataType="{x:Type vm:DownloadMonitorViewModel}">
-                    <views:DownloadMonitorView />
-                </DataTemplate>
-            </ContentControl.DataTemplates>
-        </ContentControl>
+        <Border
+            CornerRadius="15,15,8,8"
+            Margin="18"
+            Name="MainBorder"
+            Background="White">
+            <Border.Transitions>
+                <Transitions>
+                    <BrushTransition Duration="0:0:0.2" Property="Background" />
+                </Transitions>
+            </Border.Transitions>
 
-        <!-- BT下载器区域 -->
-        <Border Margin="10" Padding="10" CornerRadius="8" BorderBrush="Gray" BorderThickness="1">
-            <views:BtView />
+            <Border ClipToBounds="True" CornerRadius="6">
+                <Grid RowDefinitions="Auto 1*">
+                    <!--  title  -->
+                    <StackPanel
+                        Margin="19,0"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        ZIndex="3">
+                        <Path
+                            Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"
+                            Height="16"
+                            HorizontalAlignment="Left"
+                            IsHitTestVisible="False"
+                            Name="ShapeTitleLogo"
+                            Stretch="Fill"
+                            Stroke="White"
+                            StrokeThickness="1.9"
+                            UseLayoutRounding="False"
+                            Width="48" />
+                        <TextBlock
+                            FontSize="17"
+                            Foreground="White"
+                            HorizontalAlignment="Left"
+                            IsHitTestVisible="False"
+                            IsVisible="False"
+                            Margin="18,0,0,0"
+                            Name="LabTitleLogo"
+                            UseLayoutRounding="False"
+                            VerticalAlignment="Center" />
+                        <Image
+                            HorizontalAlignment="Left"
+                            IsHitTestVisible="False"
+                            IsVisible="False"
+                            Margin="7"
+                            Name="ImageTitleLogo"
+                            UseLayoutRounding="False"
+                            VerticalAlignment="Center" />
+
+                        <StackPanel Orientation="Horizontal">
+                            <Border
+                                Background="White"
+                                CornerRadius="5"
+                                Height="20"
+                                HorizontalAlignment="Left"
+                                IsHitTestVisible="False"
+                                Margin="0,0,0,0"
+                                Name="NeoTitleLogo"
+                                UseLayoutRounding="False"
+                                Width="32">
+                                <TextBlock
+                                    Foreground="#2196F3"
+                                    HorizontalAlignment="Center"
+                                    Text="ATC4"
+                                    VerticalAlignment="Center" />
+                            </Border>
+                            <Border
+                                Background="#4CAF50"
+                                CornerRadius="5"
+                                Height="20"
+                                HorizontalAlignment="Left"
+                                IsHitTestVisible="False"
+                                IsVisible="True"
+                                Margin="8,0,0,0"
+                                Name="DevTitleLogo"
+                                UseLayoutRounding="False"
+                                Width="32">
+                                <TextBlock
+                                    Foreground="Black"
+                                    HorizontalAlignment="Center"
+                                    Text="HQ"
+                                    VerticalAlignment="Center" />
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!--  close button  -->
+                    <StackPanel
+                        Grid.Row="0"
+                        HorizontalAlignment="Right"
+                        Margin="0,0,12,0"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        ZIndex="3">
+                        <Button
+                            Height="28"
+                            HorizontalAlignment="Right"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Margin="0,0,2,0"
+                            Name="BtnTitleMin"
+                            VerticalAlignment="Center"
+                            Width="28">
+                            <Path Data="M20,14H4V10H20V14Z" Fill="White" />
+                        </Button>
+
+                        <Button
+                            Height="28"
+                            HorizontalAlignment="Right"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Name="BtnTitleClose"
+                            VerticalAlignment="Center"
+                            Width="28">
+                            <Path Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" Fill="White" />
+                        </Button>
+                    </StackPanel>
+
+                    <!--  navbar  -->
+                    <Border
+                        Background="#2196F3"
+                        Grid.Row="0"
+                        Height="48"
+                        Name="NavBackgroundBorder"
+                        ZIndex="2">
+                        <Grid>
+                            <Image
+                                IsHitTestVisible="False"
+                                Name="ImgTitle"
+                                RenderOptions.BitmapInterpolationMode="LowQuality"
+                                Stretch="UniformToFill" />
+                            <StackPanel
+                                Height="27"
+                                HorizontalAlignment="Center"
+                                Name="PanTitleSelect"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                                <RadioButton
+                                    Command="{Binding NavigateCommand}"
+                                    CommandParameter="1"
+                                    IsChecked="{Binding IsNavBtn1Checked}"
+                                    Margin="5,0"
+                                    Name="BtnTitleSelect0"
+                                    Padding="2,0"
+                                    Tag="1"
+                                    GroupName="NavGroup">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path Data="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" Fill="White" Height="16" Width="16" />
+                                        <TextBlock Text="启动游戏" Margin="5,0,0,0" Foreground="White" />
+                                    </StackPanel>
+                                </RadioButton>
+                                <RadioButton
+                                    Command="{Binding NavigateCommand}"
+                                    CommandParameter="2"
+                                    IsChecked="{Binding IsNavBtn2Checked}"
+                                    Margin="5,0"
+                                    Name="BtnTitleSelect1"
+                                    Padding="2,0"
+                                    Tag="2"
+                                    GroupName="NavGroup">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" Fill="White" Height="16" Width="16" />
+                                        <TextBlock Text="安装游戏" Margin="5,0,0,0" Foreground="White" />
+                                    </StackPanel>
+                                </RadioButton>
+                                <RadioButton
+                                    Command="{Binding NavigateCommand}"
+                                    CommandParameter="3"
+                                    IsChecked="{Binding IsNavBtn3Checked}"
+                                    Margin="5,0"
+                                    Name="BtnTitleSelect2"
+                                    Padding="2,0"
+                                    Tag="3"
+                                    GroupName="NavGroup">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" Fill="White" Height="16" Width="16" />
+                                        <TextBlock Text="下载监视" Margin="5,0,0,0" Foreground="White" />
+                                    </StackPanel>
+                                </RadioButton>
+                                <RadioButton
+                                    Command="{Binding NavigateCommand}"
+                                    CommandParameter="4"
+                                    IsChecked="{Binding IsNavBtn4Checked}"
+                                    Margin="5,0"
+                                    Name="BtnTitleSelect3"
+                                    Padding="2,0"
+                                    Tag="4"
+                                    GroupName="NavGroup">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path Data="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z" Fill="White" Height="16" Width="16" />
+                                        <TextBlock Text="设置" Margin="5,0,0,0" Foreground="White" />
+                                    </StackPanel>
+                                </RadioButton>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Grid
+                        ColumnDefinitions="1*, 2*"
+                        Grid.Row="1"
+                        Name="PanMain">
+                        <!--  左边区域背景  -->
+                        <Border
+                            Background="#F8F8F8"
+                            Grid.Column="0"
+                            Name="LeftNavigationControlBorder"
+                            ZIndex="1">
+                        </Border>
+                        <UserControl
+                            Content="{Binding CurrentPage}"
+                            Grid.Column="0"
+                            HorizontalContentAlignment="Stretch"
+                            Name="LeftNavigationControl"
+                            ZIndex="2" />
+                        
+                        <!--  右边区域背景  -->
+                        <Border
+                            Background="White"
+                            BoxShadow="-2 0 8 0 #40000000"
+                            Grid.Column="1"
+                            ZIndex="3">
+                            <UserControl
+                                Content="{Binding CurrentSubPage}"
+                                Name="RightNavigationControl" />
+                        </Border>
+                    </Grid>
+
+                    <Grid
+                        Background="#00000000"
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
+                        IsVisible="False"
+                        Name="PanMsg"
+                        ZIndex="10" />
+
+                </Grid>
+
+            </Border>
+
         </Border>
-    </StackPanel>
+    </Grid>
 </Window>
