@@ -21,6 +21,24 @@ public class ViewLocator : IDataTemplate
             return (Control)Activator.CreateInstance(type)!;
         }
         
+        // 如果找不到，尝试在Views命名空间中查找
+        var viewName = "ATC4_HQ.Views." + param.GetType().Name.Replace("ViewModel", "");
+        type = Type.GetType(viewName);
+        
+        if (type != null)
+        {
+            return (Control)Activator.CreateInstance(type)!;
+        }
+        
+        // 如果还是找不到，尝试加上View后缀
+        viewName = "ATC4_HQ.Views." + param.GetType().Name.Replace("ViewModel", "View");
+        type = Type.GetType(viewName);
+        
+        if (type != null)
+        {
+            return (Control)Activator.CreateInstance(type)!;
+        }
+        
         return new TextBlock { Text = "Not Found: " + name };
     }
 
