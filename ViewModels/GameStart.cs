@@ -37,12 +37,14 @@ public class GameStart
                 Console.WriteLine($"");
                 //TODO: 这里可以添加代码来打开设置界面，或者直接当场配置
             }
-            string gamePath = GlobalPaths.GamePath + @"\AXA.exe";
+            string gamePath = selectedGame + @"\AXA.exe";
             string LEin = GlobalPaths.TransitSoftwareLE;
 
-            // 硬编码路径用于测试
-            LEin = @"B:\Locale-Emulator-2.5.0.1\LEProc.exe";
-            gamePath = @"A:\ATC4\ATC4" + @"\AXA.exe";
+            // 如果LE路径为空，使用默认路径
+            if (string.IsNullOrEmpty(LEin))
+            {
+                LEin = @"B:\Locale-Emulator-2.5.0.1\LEProc.exe";
+            }
             
             if (LEin == null || gamePath == null)
             {
