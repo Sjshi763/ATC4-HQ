@@ -185,25 +185,6 @@ namespace ATC4_HQ.Views
             GlobalPaths.TransitSoftwareLE = ini.GetValue("main", "TransitSoftwareLE");
             GlobalPaths.GamePath = ini.GetValue("main", "GamePath");
 
-            // BT同意弹窗集成
-            GlobalPaths.BTEnabled = ATC4_HQ.Utils.ConfigHelper.LoadBtConsent(GlobalPaths.InitiatorProfileName);
-            if (!GlobalPaths.BTEnabled)
-            {
-                var consentDialog = new BtConsentDialog();
-                var parentWindow = TopLevel.GetTopLevel(this) as Window;
-                bool agreed = await consentDialog.ShowDialogAsync(parentWindow!);
-                if (agreed)
-                {
-                    ATC4_HQ.Utils.ConfigHelper.SaveBtConsent(GlobalPaths.InitiatorProfileName, true);
-                    GlobalPaths.BTEnabled = true;
-                }
-                else
-                {
-                    // 用户未同意，按需处理（如退出或禁用BT功能）
-                    GlobalPaths.BTEnabled = false;
-                }
-            }
-            
             // 读取BT配置，默认为false
             string btEnabledValue = ini.GetValue("main", "BTEnabled");
             if (bool.TryParse(btEnabledValue, out bool btEnabled))
