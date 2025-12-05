@@ -3,11 +3,14 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Interactivity;
 using System;
 using ATC4_HQ.Views;
+using ATC4_HQ.ViewModels;
 
 namespace ATC4_HQ.Views
 {
     public partial class GameStartOptionsView : UserControl
     {
+        private MainWindowViewModel? _mainWindowViewModel;
+
         public GameStartOptionsView()
         {
             InitializeComponent();
@@ -18,20 +21,25 @@ namespace ATC4_HQ.Views
             AvaloniaXamlLoader.Load(this);
         }
 
-        private async void Button2(object? sender, RoutedEventArgs e)
+        private void Button2(object? sender, RoutedEventArgs e)
         {
-            Console.WriteLine("安装游戏按钮被点击了，准备打开对话框。");
-            //启动窗口
-            var dialogWindow = new GameListWindow();
-            // 修复 CS8604 警告：确保 owner 是可空类型或显式转换
-            Window? ownerWindow = TopLevel.GetTopLevel(this) as Window;
-            var selectedGame = await dialogWindow.ShowDialog<string>(ownerWindow);
-
-            if (selectedGame != null)
+            Console.WriteLine("列出全部游戏按钮被点击了，在右边区域显示游戏列表。");
+            
+            // 获取MainWindowViewModel的引用
+            if (this.DataContext is GameStartOptionsViewModel gameStartOptionsViewModel)
             {
-                // 如果选择了游戏，调用GameStart处理
-                var gameStart = new ViewModels.GameStart();
-                gameStart.StartGame(selectedGame);
+                // 通过反射获取MainWindowViewModel的私有字段
+                var fieldInfo = typeof(GameStartOptionsViewModel).GetField("_mainWindowViewModel", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (fieldInfo != null)
+                {
+                    _mainWindowViewModel = fieldInfo.GetValue(gameStartOptionsViewModel) as MainWindowViewModel;
+                }
+            }
+            
+            // 在右边区域显示游戏列表
+            if (_mainWindowViewModel != null)
+            {
+                _mainWindowViewModel.CurrentSubPage = new GameListViewModel();
             }
         }
     }
