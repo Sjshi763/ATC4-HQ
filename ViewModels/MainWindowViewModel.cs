@@ -93,7 +93,12 @@ namespace ATC4_HQ.ViewModels
         private void OnSetting()
         {
             Console.WriteLine("启动设置");
-            NavigateToPage(new SettingViewModel(), 4);
+            CurrentSubPage = new SettingViewModel();
+            // 更新导航按钮状态
+            IsNavBtn1Checked = false;
+            IsNavBtn2Checked = false;
+            IsNavBtn3Checked = false;
+            IsNavBtn4Checked = true;
         }
 
         private void OnDownloadMonitor()
