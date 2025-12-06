@@ -86,9 +86,14 @@ namespace ATC4_HQ.ViewModels
         private void OnInstallGame()
         {
             Console.WriteLine("ViewModel: 显示安装游戏界面。");
-            // 将 CurrentPage 设置为 InstallGameViewModel 的实例
-            NavigateToPage(new InstallGameViewModel(), 2);
-            Console.WriteLine("ViewModel: 已切换到安装游戏界面。");
+            // 将 CurrentSubPage 设置为 InstallGameViewModel 的实例，显示在右边
+            CurrentSubPage = new InstallGameViewModel();
+            // 更新导航按钮状态
+            IsNavBtn1Checked = false;
+            IsNavBtn2Checked = true;
+            IsNavBtn3Checked = false;
+            IsNavBtn4Checked = false;
+            Console.WriteLine("ViewModel: 已在右边显示安装游戏界面。");
         }
 
         private void OnSetting()
