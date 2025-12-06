@@ -7,6 +7,8 @@ using System.Net.Http; // ⭐️ 新增：用于网络请求
 using System.Threading.Tasks; // ⭐️ 新增：用于异步编程
 using ATC4_HQ.ViewModels; // 添加引用以使用DriveTypeService
 using ATC4_HQ.Models; // 引入 GameModel 的命名空间
+using System.Collections.Generic; // 用于List
+using System.Linq; // 用于LINQ查询
 
 namespace ATC4_HQ.ViewModels
 {
@@ -37,6 +39,7 @@ namespace ATC4_HQ.ViewModels
         public event EventHandler<SaveFileDialogEventArgs>? RequestSaveFileDialog; // ⭐️ 新增：用于请求保存文件对话框的事件
         public event EventHandler<InstallGameDataCompletedEventArgs>? InstallGameDataCompleted; // ⭐️ 新增：安装游戏数据完成事件
         public event EventHandler? ClearSubPageRequested; // ⭐️ 新增：请求清除右边区域的事件
+        public event EventHandler<BtDownloadEventArgs>? RequestBtDownload; // ⭐️ 新增：请求BT下载的事件
 
 
         public ICommand FindFileCommand { get; }
@@ -245,7 +248,7 @@ namespace ATC4_HQ.ViewModels
             }
         }
 
-        private void OnSave()
+        private async void OnSave()
         {
             // ⭐️ 新增：对 GameName 的验证
             if (string.IsNullOrWhiteSpace(GameName) || GameName == "取个名字方便找到它")
@@ -264,6 +267,23 @@ namespace ATC4_HQ.ViewModels
             
             // 即使检测到SSD也允许安装，只是显示警告
             // 这里不阻止安装，只显示信息性提示
+
+            // ⭐️ 新增：检查是否有BT下载链接
+            var btLink = await GetBtDownloadLinkAsync(GameName);
+            if (!string.IsNullOrEmpty(btLink))
+            {
+                Console.WriteLine($"发现游戏 {GameName} 的BT下载链接");
+                
+                // 触发BT下载事件
+                var btArgs = new BtDownloadEventArgs
+                {
+                    GameName = GameName,
+                    MagnetLink = btLink,
+                    DownloadPath = GamePath
+                };
+                
+                RequestBtDownload?.Invoke(this, btArgs);
+            }
 
             // ⭐️ 修改：创建 GameModel 对象并触发完成事件
             var gameData = new GameModel 
@@ -337,6 +357,59 @@ namespace ATC4_HQ.ViewModels
             
             return selectedPath;
         }
+
+        // ⭐️ 新增：获取游戏的BT下载链接
+        private async Task<string?> GetBtDownloadLinkAsync(string gameName)
+        {
+            try
+            {
+                // 读取files-link.json文件
+                string jsonFilePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ATC4-HQ-DATA", "install-files", "files-link.json");
+                
+                if (System.IO.File.Exists(jsonFilePath))
+                {
+                    string jsonContent = await System.IO.File.ReadAllTextAsync(jsonFilePath);
+                    
+                    // 解析JSON
+                    using (JsonDocument doc = JsonDocument.Parse(jsonContent))
+                    {
+                        JsonElement root = doc.RootElement;
+                        
+                        // 获取main-games数组
+                        if (root.TryGetProperty("main-games", out JsonElement mainGames))
+                        {
+                            // 遍历游戏列表
+                            foreach (JsonElement game in mainGames.EnumerateArray())
+                            {
+                                if (game.TryGetProperty("name", out JsonElement nameElement) &&
+                                    game.TryGetProperty("url", out JsonElement urlElement))
+                                {
+                                    string gameNameInJson = nameElement.GetString() ?? "";
+                                    string url = urlElement.GetString() ?? "";
+                                    
+                                    // 检查游戏名称是否匹配（不区分大小写）
+                                    if (string.Equals(gameNameInJson, gameName, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        Console.WriteLine($"找到游戏 {gameName} 的BT链接: {url}");
+                                        return url;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"BT链接文件不存在: {jsonFilePath}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"读取BT链接文件失败: {ex.Message}");
+            }
+            
+            return null;
+        }
     }
 
     // ⭐️ 新增：用于传递保存文件对话框参数的事件参数类
@@ -366,5 +439,13 @@ namespace ATC4_HQ.ViewModels
             Success = success;
             GameData = gameData;
         }
+    }
+
+    // ⭐️ 新增：用于传递BT下载事件参数的类
+    public class BtDownloadEventArgs : EventArgs
+    {
+        public string GameName { get; set; } = string.Empty;
+        public string MagnetLink { get; set; } = string.Empty;
+        public string DownloadPath { get; set; } = string.Empty;
     }
 }

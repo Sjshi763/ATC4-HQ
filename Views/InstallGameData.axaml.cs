@@ -22,6 +22,7 @@ namespace ATC4_HQ.Views
             {
                 viewModel.RequestOpenFilePicker += OnRequestOpenFilePicker;
                 viewModel.RequestSaveFileDialog += OnRequestSaveFileDialog; // 添加保存文件对话框事件处理
+                viewModel.RequestBtDownload += OnRequestBtDownload; // 添加BT下载事件处理
             }
         }
 
@@ -31,6 +32,7 @@ namespace ATC4_HQ.Views
             {
                 viewModel.RequestOpenFilePicker -= OnRequestOpenFilePicker;
                 viewModel.RequestSaveFileDialog -= OnRequestSaveFileDialog; // 取消订阅保存文件对话框事件
+                viewModel.RequestBtDownload -= OnRequestBtDownload; // 取消订阅BT下载事件
             }
         }
 
@@ -132,6 +134,46 @@ namespace ATC4_HQ.Views
                 }
             }
             return null;
+        }
+
+        // ⭐️ 新增：处理BT下载事件
+        private async void OnRequestBtDownload(object? sender, BtDownloadEventArgs e)
+        {
+            try
+            {
+                Console.WriteLine($"开始BT下载: {e.GameName}");
+                Console.WriteLine($"磁力链接: {e.MagnetLink}");
+                Console.WriteLine($"下载路径: {e.DownloadPath}");
+
+                // 创建BT下载服务
+                var btService = new BtService();
+                
+                // 初始化BT服务
+                bool initResult = await btService.InitAsync(e.DownloadPath);
+                if (!initResult)
+                {
+                    Console.WriteLine("BT服务初始化失败");
+                    return;
+                }
+
+                // 启动BT下载
+                bool downloadResult = await btService.StartTorrentAsync(e.MagnetLink, e.GameName);
+                if (downloadResult)
+                {
+                    Console.WriteLine($"BT下载已启动: {e.GameName}");
+                    
+                    // 可以在这里添加下载进度监控或显示下载状态的逻辑
+                    // 例如，可以打开一个下载进度窗口或更新UI显示下载状态
+                }
+                else
+                {
+                    Console.WriteLine($"BT下载启动失败: {e.GameName}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"BT下载异常: {ex.Message}");
+            }
         }
     }
 }
