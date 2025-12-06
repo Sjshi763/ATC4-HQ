@@ -42,53 +42,53 @@ namespace ATC4_HQ.Views
             }
         }
 
-        private async void OnRequestOpenInstallGameDataDialog(object? sender, EventArgs e)
+        private void OnRequestOpenInstallGameDataDialog(object? sender, EventArgs e)
         {
-            var dialogWindow = new InstallGameDataDialogWindow();
-            Window? ownerWindow = TopLevel.GetTopLevel(this) as Window;
-            bool? dialogResult = await dialogWindow.ShowDialog<bool?>(ownerWindow);
-
-            if (dialogResult == true && dialogWindow.DataContext is InstallGameDataViewModel dialogViewModel)
+            // 直接在右边区域显示安装游戏数据界面，而不是弹出对话框
+            if (TopLevel.GetTopLevel(this) is Window mainWindow && mainWindow.DataContext is MainWindowViewModel mainWindowViewModel)
             {
-                string? selectedGameDataJson = dialogViewModel.DialogResultData; // 确保使用 DialogResultData
-                if (!string.IsNullOrEmpty(selectedGameDataJson))
-                {
-                    Console.WriteLine($"从对话框中获取到的 JSON 数据: {selectedGameDataJson}");
-                    try
-                    {
-                        GameModel? gameData = JsonSerializer.Deserialize<GameModel>(selectedGameDataJson); // 反序列化为 GameModel
-                        if (gameData != null)
-                        {
-                            Console.WriteLine($"解析到的游戏名称: {gameData.Name}, 路径: {gameData.Path}");
+                var installGameDataViewModel = new InstallGameDataViewModel();
+                
+                // 订阅完成事件
+                installGameDataViewModel.InstallGameDataCompleted += OnInstallGameDataCompleted;
+                
+                // 订阅清除右边区域事件
+                installGameDataViewModel.ClearSubPageRequested += OnClearSubPageRequested;
+                
+                // 在右边区域显示
+                mainWindowViewModel.CurrentSubPage = installGameDataViewModel;
+                Console.WriteLine("已在右边显示安装游戏数据界面。");
+            }
+        }
 
-                            if (TopLevel.GetTopLevel(this) is Window mainWindow && mainWindow.DataContext is MainWindowViewModel mainWindowViewModel)
-                            {
-                                await mainWindowViewModel.HandleInstallGameAndUnzipAsync(gameData); // 确保传递 GameModel
-                                Console.WriteLine("游戏数据已成功传递给 MainWindowViewModel 进行处理。");
-                            }
-                            else
-                            {
-                                Console.WriteLine("错误：无法获取 MainWindowViewModel 来处理游戏数据。");
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine("错误：无法将 JSON 数据反序列化为 GameModel 对象。");
-                        }
-                    }
-                    catch (JsonException ex)
-                    {
-                        Console.WriteLine($"JSON 反序列化错误: {ex.Message}");
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"处理对话框结果时发生错误: {ex.Message}");
-                    }
+        private async void OnInstallGameDataCompleted(object? sender, InstallGameDataCompletedEventArgs e)
+        {
+            if (e.Success && e.GameData != null)
+            {
+                Console.WriteLine($"获取到的游戏数据 - 名称: {e.GameData.Name}, 路径: {e.GameData.Path}");
+
+                if (TopLevel.GetTopLevel(this) is Window mainWindow && mainWindow.DataContext is MainWindowViewModel mainWindowViewModel)
+                {
+                    await mainWindowViewModel.HandleInstallGameAndUnzipAsync(e.GameData);
+                    Console.WriteLine("游戏数据已成功传递给 MainWindowViewModel 进行处理。");
+                }
+                else
+                {
+                    Console.WriteLine("错误：无法获取 MainWindowViewModel 来处理游戏数据。");
                 }
             }
             else
             {
-                Console.WriteLine("用户取消了选择或对话框关闭。");
+                Console.WriteLine("用户取消了安装或安装失败。");
+            }
+        }
+
+        private void OnClearSubPageRequested(object? sender, EventArgs e)
+        {
+            if (TopLevel.GetTopLevel(this) is Window mainWindow && mainWindow.DataContext is MainWindowViewModel mainWindowViewModel)
+            {
+                mainWindowViewModel.ClearSubPage();
+                Console.WriteLine("已清除右边区域的内容。");
             }
         }
     }
