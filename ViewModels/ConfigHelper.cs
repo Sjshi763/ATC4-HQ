@@ -1,7 +1,7 @@
 using System.IO;
 using System.Linq;
 
-namespace ATC4_HQ.Utils
+namespace ATC4_HQ.ViewModels
 {
     public static class ConfigHelper
     {
