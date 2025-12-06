@@ -54,12 +54,32 @@ jobs:
         Start-Process -FilePath "wix311.exe" -ArgumentList "/quiet", "/norestart" -Wait
         echo "C:\Program Files (x86)\WiX Toolset v3.14\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
+    - name: Extract version from tag
+      if: github.event_name == 'release'
+      run: |
+        $tagVersion = "${{ github.event.release.tag_name }}"
+        # Remove 'v' prefix if present (e.g., v1.0.0 -> 1.0.0)
+        $version = $tagVersion -replace '^v', ''
+        # Ensure version has 4 parts for WiX (e.g., 1.0.0 -> 1.0.0.0)
+        $versionParts = $version.Split('.')
+        if ($versionParts.Length -lt 4) {
+          while ($versionParts.Length -lt 4) {
+            $versionParts += "0"
+          }
+          $wixVersion = $versionParts -join '.'
+        } else {
+          $wixVersion = $versionParts[0..3] -join '.'
+        }
+        echo "VERSION=$wixVersion" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        echo "Extracted version: $wixVersion from tag: $tagVersion"
+
     - name: Create WiX source file
       run: |
+        $version = if ($env:VERSION) { $env:VERSION } else { "1.0.0.0" }
         @"
         <?xml version="1.0" encoding="UTF-8"?>
         <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-          <Product Id="*" Name="ATC4-HQ" Language="1033" Version="1.0.0.0" Manufacturer="ATC4-HQ" UpgradeCode="12345678-1234-1234-1234-123456789012">
+          <Product Id="*" Name="ATC4-HQ" Language="1033" Version="$version" Manufacturer="ATC4-HQ" UpgradeCode="12345678-1234-1234-1234-123456789012">
             <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
             
             <MajorUpgrade DowngradeErrorMessage="A newer version of ATC4-HQ is already installed." />
