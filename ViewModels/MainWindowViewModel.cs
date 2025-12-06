@@ -85,9 +85,15 @@ namespace ATC4_HQ.ViewModels
 
         private void OnInstallGame()
         {
-            Console.WriteLine("ViewModel: 安装游戏按钮内部逻辑（如果需要）。");
-            // 备注：打开对话框的逻辑在 MainWindow.axaml.cs 的 InstallGame_Click 中
-            // 这个方法可以用于按钮的内部逻辑，或者当您把 InstallGame_Click 改为 Command 绑定时使用
+            Console.WriteLine("ViewModel: 显示安装游戏界面。");
+            // 将 CurrentSubPage 设置为 InstallGameViewModel 的实例，显示在右边
+            CurrentSubPage = new InstallGameViewModel();
+            // 更新导航按钮状态
+            IsNavBtn1Checked = false;
+            IsNavBtn2Checked = true;
+            IsNavBtn3Checked = false;
+            IsNavBtn4Checked = false;
+            Console.WriteLine("ViewModel: 已在右边显示安装游戏界面。");
         }
 
         private void OnSetting()
@@ -147,9 +153,8 @@ namespace ATC4_HQ.ViewModels
                     OnStartGame();
                     break;
                 case "2":
-                    // 安装游戏逻辑
-                    Console.WriteLine("导航到安装游戏");
-                    // 这里可以添加安装游戏的页面导航
+                    // 安装游戏逻辑 - 显示安装游戏界面
+                    OnInstallGame();
                     break;
                 case "3":
                     OnDownloadMonitor();
@@ -186,7 +191,7 @@ namespace ATC4_HQ.ViewModels
         private void UpdateNavButtonState(ViewModelBase page)
         {
             IsNavBtn1Checked = page is GameStartOptionsViewModel;
-            IsNavBtn2Checked = false; // 安装游戏页面暂未实现
+            IsNavBtn2Checked = page is InstallGameViewModel;
             IsNavBtn3Checked = page is DownloadMonitorViewModel;
             IsNavBtn4Checked = page is SettingViewModel;
         }
@@ -205,9 +210,40 @@ namespace ATC4_HQ.ViewModels
         // 处理游戏安装和解压的通用方法，现在接收 GameModel 对象
         public async Task HandleInstallGameAndUnzipAsync(GameModel gameData) // ⭐️ 确保方法是 public 且接收 GameModel
         {
-            string zipPath = @"B:\XIANGMU\ATC4-HQ\ATC4ALL.zip";
+            // 检查游戏路径是否包含zip文件
+            string zipPath = string.Empty;
+            if (gameData.Path.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+            {
+                zipPath = gameData.Path;
+                // 如果路径是zip文件，则使用其所在目录作为解压目标
+                gameData.Path = Path.GetDirectoryName(gameData.Path) ?? gameData.Path;
+            }
+            else
+            {
+                // 查找路径下的zip文件
+                var zipFiles = Directory.GetFiles(gameData.Path, "*.zip");
+                if (zipFiles.Length > 0)
+                {
+                    zipPath = zipFiles[0];
+                }
+                else
+                {
+                    Console.WriteLine("错误：在指定路径中未找到zip文件。");
+                    return;
+                }
+            }
+
+            if (!File.Exists(zipPath))
+            {
+                Console.WriteLine($"错误：zip文件不存在：{zipPath}");
+                return;
+            }
+
+            Console.WriteLine($"开始解压文件：{zipPath} 到目录：{gameData.Path}");
+            
             // 解压 .zip 文件到指定目录
             ZipFile.ExtractToDirectory(zipPath, gameData.Path);
+            Console.WriteLine("文件解压完成。");
 
             // 检查解压后的文件中是否有以~开头的zip文件，并再次解压
             var extractedFiles = Directory.GetFiles(gameData.Path, "*.zip", SearchOption.AllDirectories);
@@ -259,6 +295,18 @@ namespace ATC4_HQ.ViewModels
             ini = new IniFile(GlobalPaths.GamePath + @"\GameData.ini");
             ini.SetValue("GameSettings" , "GameName" , GlobalPaths.GameName);
             ini.Save();
+            
+            // 安装完成后清除右边区域的内容
+            ClearSubPage();
+        }
+        
+        /// <summary>
+        /// 清除右边区域的内容
+        /// </summary>
+        public void ClearSubPage()
+        {
+            CurrentSubPage = null;
+            Console.WriteLine("已清除右边区域的内容。");
         }
     }
 }

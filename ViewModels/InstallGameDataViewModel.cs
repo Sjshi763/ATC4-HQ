@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Net.Http; // ⭐️ 新增：用于网络请求
 using System.Threading.Tasks; // ⭐️ 新增：用于异步编程
 using ATC4_HQ.ViewModels; // 添加引用以使用DriveTypeService
+using ATC4_HQ.Models; // 引入 GameModel 的命名空间
 
 namespace ATC4_HQ.ViewModels
 {
@@ -34,6 +35,8 @@ namespace ATC4_HQ.ViewModels
         // 用于触发 View 执行文件选择操作的事件
         public event EventHandler? RequestOpenFilePicker; // ⭐️ 标记为可为 null 的事件，解决警告
         public event EventHandler<SaveFileDialogEventArgs>? RequestSaveFileDialog; // ⭐️ 新增：用于请求保存文件对话框的事件
+        public event EventHandler<InstallGameDataCompletedEventArgs>? InstallGameDataCompleted; // ⭐️ 新增：安装游戏数据完成事件
+        public event EventHandler? ClearSubPageRequested; // ⭐️ 新增：请求清除右边区域的事件
 
 
         public ICommand FindFileCommand { get; }
@@ -262,17 +265,15 @@ namespace ATC4_HQ.ViewModels
             // 即使检测到SSD也允许安装，只是显示警告
             // 这里不阻止安装，只显示信息性提示
 
-            // ⭐️ 修改：创建 GameModel 对象并序列化为 JSON 字符串
-            var gameData = new Models.GameModel // 明确指定命名空间和类名
+            // ⭐️ 修改：创建 GameModel 对象并触发完成事件
+            var gameData = new GameModel 
             {
                 Name = GameName,
                 Path = GamePath
             };
 
-            // 将 GameModel 对象序列化为 JSON 字符串，并赋值给 DialogResultData
-            DialogResultData = JsonSerializer.Serialize(gameData);
-            IsDialogOk = true; // 设置对话框结果为 OK
-            ShouldClose = true;
+            // 触发完成事件
+            InstallGameDataCompleted?.Invoke(this, new InstallGameDataCompletedEventArgs(true, gameData));
         }
 
         private void OnCancel()
@@ -291,9 +292,11 @@ namespace ATC4_HQ.ViewModels
                 Console.WriteLine($"[取消错误] 删除临时文件失败: {ex.Message}");
             }
 
-            DialogResultData = null; // 清空结果
-            IsDialogOk = false;      // 设置对话框结果为 Cancel
-            ShouldClose = true;
+            // 触发清除右边区域的事件
+            ClearSubPageRequested?.Invoke(this, EventArgs.Empty);
+            
+            // 触发完成事件（失败）
+            InstallGameDataCompleted?.Invoke(this, new InstallGameDataCompletedEventArgs(false, null));
         }
 
         // 显示保存文件对话框，让用户选择文件保存位置
@@ -349,6 +352,19 @@ namespace ATC4_HQ.ViewModels
         public Task<string?> GetResultAsync()
         {
             return _tcs.Task;
+        }
+    }
+
+    // ⭐️ 新增：用于传递安装游戏数据完成事件参数的类
+    public class InstallGameDataCompletedEventArgs : EventArgs
+    {
+        public bool Success { get; }
+        public GameModel? GameData { get; }
+
+        public InstallGameDataCompletedEventArgs(bool success, GameModel? gameData)
+        {
+            Success = success;
+            GameData = gameData;
         }
     }
 }
