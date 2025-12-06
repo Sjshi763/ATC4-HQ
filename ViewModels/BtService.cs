@@ -5,7 +5,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-namespace ATC4_HQ.Services
+namespace ATC4_HQ.ViewModels
 {
     public class BtService
     {
