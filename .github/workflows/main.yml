@@ -1,8 +1,6 @@
 name: Build Release for ATC4-HQ
 
 on:
-  push:
-    branches: [ main ] # 当代码推送到 main 分支时触发
   release:
     types: [ created ] # 当创建新的 GitHub Release 时触发
 
