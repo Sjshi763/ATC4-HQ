@@ -1,6 +1,7 @@
 using System;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 
 namespace ATC4_HQ.ViewModels;
 
@@ -21,13 +22,13 @@ public class GameStartOptionsViewModel : ViewModelBase
 
     private void OnLaunchLastGame()
     {
-        Console.WriteLine("Game Start Options: 第一个按钮被点击了！尝试启动上一次游戏。");
+        LoggerHelper.LogInformation("Game Start Options: 第一个按钮被点击了！尝试启动上一次游戏。");
             
     }
 
     private async void OnListAllGames()
     {
-        Console.WriteLine("Game Start Options: 第三个按钮被点击了！尝试启动选择的游戏。");
+        LoggerHelper.LogInformation("Game Start Options: 第三个按钮被点击了！尝试启动选择的游戏。");
             
     }
 }

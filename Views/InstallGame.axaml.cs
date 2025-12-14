@@ -7,6 +7,7 @@ using Avalonia.Interactivity;
 using ATC4_HQ.ViewModels;
 using ATC4_HQ.Models; // 引入 GameModel 的命名空间
 using System.Text.Json; // 用于 JSON 反序列化
+using Microsoft.Extensions.Logging;
 
 namespace ATC4_HQ.Views
 {
@@ -57,7 +58,7 @@ namespace ATC4_HQ.Views
                 
                 // 在右边区域显示
                 mainWindowViewModel.CurrentSubPage = installGameDataViewModel;
-                Console.WriteLine("已在右边显示安装游戏数据界面。");
+                LoggerHelper.LogInformation("已在右边显示安装游戏数据界面。");
             }
         }
 
@@ -65,21 +66,21 @@ namespace ATC4_HQ.Views
         {
             if (e.Success && e.GameData != null)
             {
-                Console.WriteLine($"获取到的游戏数据 - 名称: {e.GameData.Name}, 路径: {e.GameData.Path}");
+                LoggerHelper.LogInformation($"获取到的游戏数据 - 名称: {e.GameData.Name}, 路径: {e.GameData.Path}");
 
                 if (TopLevel.GetTopLevel(this) is Window mainWindow && mainWindow.DataContext is MainWindowViewModel mainWindowViewModel)
                 {
                     await mainWindowViewModel.HandleInstallGameAndUnzipAsync(e.GameData);
-                    Console.WriteLine("游戏数据已成功传递给 MainWindowViewModel 进行处理。");
+                    LoggerHelper.LogInformation("游戏数据已成功传递给 MainWindowViewModel 进行处理。");
                 }
                 else
                 {
-                    Console.WriteLine("错误：无法获取 MainWindowViewModel 来处理游戏数据。");
+                    LoggerHelper.LogError("错误：无法获取 MainWindowViewModel 来处理游戏数据。");
                 }
             }
             else
             {
-                Console.WriteLine("用户取消了安装或安装失败。");
+                LoggerHelper.LogInformation("用户取消了安装或安装失败。");
             }
         }
 
@@ -88,7 +89,7 @@ namespace ATC4_HQ.Views
             if (TopLevel.GetTopLevel(this) is Window mainWindow && mainWindow.DataContext is MainWindowViewModel mainWindowViewModel)
             {
                 mainWindowViewModel.ClearSubPage();
-                Console.WriteLine("已清除右边区域的内容。");
+                LoggerHelper.LogInformation("已清除右边区域的内容。");
             }
         }
     }

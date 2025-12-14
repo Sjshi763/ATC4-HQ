@@ -7,6 +7,8 @@ using System.Net.Http; // ⭐️ 新增：用于网络请求
 using System.Threading.Tasks; // ⭐️ 新增：用于异步编程
 using ATC4_HQ.ViewModels; // 添加引用以使用DriveTypeService
 using ATC4_HQ.Models; // 引入 GameModel 的命名空间
+using System.Collections.Generic; // 用于List
+using System.Linq; // 用于LINQ查询
 
 namespace ATC4_HQ.ViewModels
 {
@@ -37,6 +39,7 @@ namespace ATC4_HQ.ViewModels
         public event EventHandler<SaveFileDialogEventArgs>? RequestSaveFileDialog; // ⭐️ 新增：用于请求保存文件对话框的事件
         public event EventHandler<InstallGameDataCompletedEventArgs>? InstallGameDataCompleted; // ⭐️ 新增：安装游戏数据完成事件
         public event EventHandler? ClearSubPageRequested; // ⭐️ 新增：请求清除右边区域的事件
+        public event EventHandler<BtDownloadEventArgs>? RequestBtDownload; // ⭐️ 新增：请求BT下载的事件
 
 
         public ICommand FindFileCommand { get; }
@@ -56,52 +59,52 @@ namespace ATC4_HQ.ViewModels
 
         private async Task OnDownload()
         {
-            Console.WriteLine("=== 下载流程开始 ===");
+            LoggerHelper.LogInformation("=== 下载流程开始 ===");
             
             // 步骤1: 准备下载（生成临时文件路径）
-            Console.WriteLine("[步骤1] 准备下载到临时路径");
+            LoggerHelper.LogInformation("[步骤1] 准备下载到临时路径");
             _tempDownloadPath = System.IO.Path.GetTempFileName();
-            Console.WriteLine($"[步骤1] 临时文件路径: {_tempDownloadPath}");
+            LoggerHelper.LogInformation($"[步骤1] 临时文件路径: {_tempDownloadPath}");
 
             string tempPath = _tempDownloadPath; // 使用类级别变量
 
             try
             {
                 // 步骤2: 准备下载信息
-                Console.WriteLine("[步骤2] 准备下载文件信息");
+                LoggerHelper.LogInformation("[步骤2] 准备下载文件信息");
                 string fileName = "ATC4ALL.zip";
                 string url = $"http://localhost:8080/download?file={fileName}";
-                Console.WriteLine($"[步骤2] 下载文件名: {fileName}");
-                Console.WriteLine($"[步骤2] 最终下载URL: {url}");
+                LoggerHelper.LogInformation($"[步骤2] 下载文件名: {fileName}");
+                LoggerHelper.LogInformation($"[步骤2] 最终下载URL: {url}");
 
                 // 步骤3: 发送HTTP请求（添加超时和重试机制）
-                Console.WriteLine("[步骤3] 发送HTTP GET请求...");
+                LoggerHelper.LogInformation("[步骤3] 发送HTTP GET请求...");
                 using (var httpClient = new HttpClient())
                 {
                     // 设置请求超时
                     httpClient.Timeout = TimeSpan.FromMinutes(10);
                     
                     var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-                    Console.WriteLine($"[步骤3] HTTP响应状态码: {response.StatusCode}");
+                    LoggerHelper.LogInformation($"[步骤3] HTTP响应状态码: {response.StatusCode}");
                     
                     if (!response.IsSuccessStatusCode)
                     {
-                        Console.WriteLine($"[步骤3] HTTP请求失败: {response.StatusCode} - {response.ReasonPhrase}");
+                        LoggerHelper.LogError($"[步骤3] HTTP请求失败: {response.StatusCode} - {response.ReasonPhrase}");
                         throw new HttpRequestException($"HTTP请求失败: {response.StatusCode}");
                     }
-                    Console.WriteLine("[步骤3] HTTP请求成功");
+                    LoggerHelper.LogInformation("[步骤3] HTTP请求成功");
 
                     // 步骤4: 获取文件信息
-                    Console.WriteLine("[步骤4] 获取文件信息");
+                    LoggerHelper.LogInformation("[步骤4] 获取文件信息");
                     long? totalBytes = response.Content.Headers.ContentLength;
-                    Console.WriteLine($"[步骤4] 文件总大小: {(totalBytes.HasValue ? $"{totalBytes.Value} 字节 ({totalBytes.Value / 1024.0 / 1024.0:F2} MB)" : "未知")}");
+                    LoggerHelper.LogInformation($"[步骤4] 文件总大小: {(totalBytes.HasValue ? $"{totalBytes.Value} 字节 ({totalBytes.Value / 1024.0 / 1024.0:F2} MB)" : "未知")}");
 
                     // 步骤5: 下载并写入临时文件
-                    Console.WriteLine("[步骤5] 开始下载并写入临时文件");
+                    LoggerHelper.LogInformation("[步骤5] 开始下载并写入临时文件");
                     using (var stream = await response.Content.ReadAsStreamAsync())
                     using (var fileStream = new System.IO.FileStream(tempPath, System.IO.FileMode.Create, System.IO.FileAccess.Write, System.IO.FileShare.None))
                     {
-                        Console.WriteLine($"[步骤5] 目标临时文件路径: {tempPath}");
+                        LoggerHelper.LogInformation($"[步骤5] 目标临时文件路径: {tempPath}");
                         
                         // 缓冲区大小
                         byte[] buffer = new byte[8192];
@@ -109,7 +112,7 @@ namespace ATC4_HQ.ViewModels
                         int bytesRead;
                         int progressPercentage = 0;
 
-                        Console.WriteLine("[步骤5] 开始下载文件内容...");
+                        LoggerHelper.LogInformation("[步骤5] 开始下载文件内容...");
                         while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
                         {
                             await fileStream.WriteAsync(buffer, 0, bytesRead);
@@ -122,7 +125,7 @@ namespace ATC4_HQ.ViewModels
                                 if (newProgress >= progressPercentage + 5 || newProgress == 100)
                                 {
                                     progressPercentage = newProgress;
-                                    Console.WriteLine($"[步骤5] 下载进度: {progressPercentage}% ({totalBytesRead}/{totalBytes.Value} 字节)");
+                                    LoggerHelper.LogInformation($"[步骤5] 下载进度: {progressPercentage}% ({totalBytesRead}/{totalBytes.Value} 字节)");
                                 }
                             }
                             else
@@ -130,38 +133,38 @@ namespace ATC4_HQ.ViewModels
                                 // 每下载1MB打印一次进度
                                 if (totalBytesRead % (1024 * 1024) == 0)
                                 {
-                                    Console.WriteLine($"[步骤5] 已下载: {totalBytesRead} 字节 ({totalBytesRead / 1024.0 / 1024.0:F2} MB)");
+                                    LoggerHelper.LogInformation($"[步骤5] 已下载: {totalBytesRead} 字节 ({totalBytesRead / 1024.0 / 1024.0:F2} MB)");
                                 }
                             }
                         }
                         
-                        Console.WriteLine($"[步骤5] 文件下载完成，总字节数: {totalBytesRead} ({totalBytesRead / 1024.0 / 1024.0:F2} MB)");
+                        LoggerHelper.LogInformation($"[步骤5] 文件下载完成，总字节数: {totalBytesRead} ({totalBytesRead / 1024.0 / 1024.0:F2} MB)");
                     }
 
                     // 步骤6: 下载完成 - 提示用户选择保存位置
-                    Console.WriteLine("[步骤6] 下载流程完成");
+                    LoggerHelper.LogInformation("[步骤6] 下载流程完成");
                     
                     // 触发保存文件对话框，让用户选择保存位置
                     string? finalPath = await ShowSaveFileDialog(tempPath);
                     if (!string.IsNullOrEmpty(finalPath))
                     {
                         GamePath = finalPath; 
-                        Console.WriteLine($"[步骤6] 文件已保存到用户指定路径: {finalPath}");
+                        LoggerHelper.LogInformation($"[步骤6] 文件已保存到用户指定路径: {finalPath}");
                     }
                     else
                     {
                         // 如果用户取消了保存对话框，仍然使用临时路径
                         GamePath = tempPath; 
-                        Console.WriteLine($"[步骤6] 用户取消保存，文件保留在临时路径: {tempPath}");
+                        LoggerHelper.LogInformation($"[步骤6] 用户取消保存，文件保留在临时路径: {tempPath}");
                     }
-                    Console.WriteLine("=== 下载流程结束 ===");
+                    LoggerHelper.LogInformation("=== 下载流程结束 ===");
                 }
             }
             catch (HttpRequestException httpEx)
             {
-                Console.WriteLine($"[网络错误] 下载失败: {httpEx.Message}");
-                Console.WriteLine($"[网络错误] 请检查网络连接或服务器状态");
-                Console.WriteLine("=== 下载流程结束（失败） ===");
+                LoggerHelper.LogError($"[网络错误] 下载失败: {httpEx.Message}");
+                LoggerHelper.LogError($"[网络错误] 请检查网络连接或服务器状态");
+                LoggerHelper.LogInformation("=== 下载流程结束（失败） ===");
                 
                 // 清理临时文件
                 try
@@ -169,18 +172,18 @@ namespace ATC4_HQ.ViewModels
                     if (System.IO.File.Exists(tempPath))
                     {
                         System.IO.File.Delete(tempPath);
-                        Console.WriteLine("[清理] 已删除临时文件");
+                        LoggerHelper.LogInformation("[清理] 已删除临时文件");
                     }
                 }
                 catch (Exception cleanupEx)
                 {
-                    Console.WriteLine($"[清理错误] 删除临时文件失败: {cleanupEx.Message}");
+                    LoggerHelper.LogError($"[清理错误] 删除临时文件失败: {cleanupEx.Message}");
                 }
             }
             catch (TaskCanceledException tcEx) when (tcEx.InnerException is System.TimeoutException)
             {
-                Console.WriteLine($"[超时错误] 下载超时: 请求超时，请检查网络连接");
-                Console.WriteLine("=== 下载流程结束（失败） ===");
+                LoggerHelper.LogError($"[超时错误] 下载超时: 请求超时，请检查网络连接");
+                LoggerHelper.LogInformation("=== 下载流程结束（失败） ===");
                 
                 // 清理临时文件
                 try
@@ -188,19 +191,19 @@ namespace ATC4_HQ.ViewModels
                     if (System.IO.File.Exists(tempPath))
                     {
                         System.IO.File.Delete(tempPath);
-                        Console.WriteLine("[清理] 已删除临时文件");
+                        LoggerHelper.LogInformation("[清理] 已删除临时文件");
                     }
                 }
                 catch (Exception cleanupEx)
                 {
-                    Console.WriteLine($"[清理错误] 删除临时文件失败: {cleanupEx.Message}");
+                    LoggerHelper.LogError($"[清理错误] 删除临时文件失败: {cleanupEx.Message}");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[错误] 下载失败: {ex.Message}");
-                Console.WriteLine($"[错误] 异常类型: {ex.GetType().Name}");
-                Console.WriteLine("=== 下载流程结束（失败） ===");
+                LoggerHelper.LogError($"[错误] 下载失败: {ex.Message}");
+                LoggerHelper.LogError($"[错误] 异常类型: {ex.GetType().Name}");
+                LoggerHelper.LogInformation("=== 下载流程结束（失败） ===");
                 
                 // 清理临时文件
                 try
@@ -208,12 +211,12 @@ namespace ATC4_HQ.ViewModels
                     if (System.IO.File.Exists(tempPath))
                     {
                         System.IO.File.Delete(tempPath);
-                        Console.WriteLine("[清理] 已删除临时文件");
+                        LoggerHelper.LogInformation("[清理] 已删除临时文件");
                     }
                 }
                 catch (Exception cleanupEx)
                 {
-                    Console.WriteLine($"[清理错误] 删除临时文件失败: {cleanupEx.Message}");
+                    LoggerHelper.LogError($"[清理错误] 删除临时文件失败: {cleanupEx.Message}");
                 }
             }
         }
@@ -245,12 +248,12 @@ namespace ATC4_HQ.ViewModels
             }
         }
 
-        private void OnSave()
+        private async void OnSave()
         {
             // ⭐️ 新增：对 GameName 的验证
             if (string.IsNullOrWhiteSpace(GameName) || GameName == "取个名字方便找到它")
             {
-                Console.WriteLine("请为游戏输入一个名称！");
+                LoggerHelper.LogError("请为游戏输入一个名称！");
                 // 可以在 UI 上显示错误提示
                 return;
             }
@@ -258,12 +261,29 @@ namespace ATC4_HQ.ViewModels
             // 在这里可以添加验证逻辑，确保 GamePath 是有效的
             if (string.IsNullOrWhiteSpace(GamePath) || GamePath == "未选择任何文件夹")
             {
-                Console.WriteLine("请选择一个有效的游戏路径！");
+                LoggerHelper.LogError("请选择一个有效的游戏路径！");
                 return;
             }
             
             // 即使检测到SSD也允许安装，只是显示警告
             // 这里不阻止安装，只显示信息性提示
+
+            // ⭐️ 新增：检查是否有BT下载链接
+            var btLink = await GetBtDownloadLinkAsync(GameName);
+            if (!string.IsNullOrEmpty(btLink))
+            {
+                LoggerHelper.LogInformation($"发现游戏 {GameName} 的BT下载链接");
+                
+                // 触发BT下载事件
+                var btArgs = new BtDownloadEventArgs
+                {
+                    GameName = GameName,
+                    MagnetLink = btLink,
+                    DownloadPath = GamePath
+                };
+                
+                RequestBtDownload?.Invoke(this, btArgs);
+            }
 
             // ⭐️ 修改：创建 GameModel 对象并触发完成事件
             var gameData = new GameModel 
@@ -284,12 +304,12 @@ namespace ATC4_HQ.ViewModels
                 if (!string.IsNullOrEmpty(_tempDownloadPath) && System.IO.File.Exists(_tempDownloadPath))
                 {
                     System.IO.File.Delete(_tempDownloadPath);
-                    Console.WriteLine("[取消] 已删除临时下载文件");
+                    LoggerHelper.LogInformation("[取消] 已删除临时下载文件");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[取消错误] 删除临时文件失败: {ex.Message}");
+                LoggerHelper.LogError($"[取消错误] 删除临时文件失败: {ex.Message}");
             }
 
             // 触发清除右边区域的事件
@@ -325,17 +345,70 @@ namespace ATC4_HQ.ViewModels
                         
                         // 移动文件
                         System.IO.File.Move(tempFilePath, selectedPath);
-                        Console.WriteLine($"[保存] 文件已移动到: {selectedPath}");
+                        LoggerHelper.LogInformation($"[保存] 文件已移动到: {selectedPath}");
                         return selectedPath;
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[保存错误] 移动文件失败: {ex.Message}");
+                    LoggerHelper.LogError($"[保存错误] 移动文件失败: {ex.Message}");
                 }
             }
             
             return selectedPath;
+        }
+
+        // ⭐️ 新增：获取游戏的BT下载链接
+        private async Task<string?> GetBtDownloadLinkAsync(string gameName)
+        {
+            try
+            {
+                // 读取files-link.json文件
+                string jsonFilePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ATC4-HQ-DATA", "install-files", "files-link.json");
+                
+                if (System.IO.File.Exists(jsonFilePath))
+                {
+                    string jsonContent = await System.IO.File.ReadAllTextAsync(jsonFilePath);
+                    
+                    // 解析JSON
+                    using (JsonDocument doc = JsonDocument.Parse(jsonContent))
+                    {
+                        JsonElement root = doc.RootElement;
+                        
+                        // 获取main-games数组
+                        if (root.TryGetProperty("main-games", out JsonElement mainGames))
+                        {
+                            // 遍历游戏列表
+                            foreach (JsonElement game in mainGames.EnumerateArray())
+                            {
+                                if (game.TryGetProperty("name", out JsonElement nameElement) &&
+                                    game.TryGetProperty("url", out JsonElement urlElement))
+                                {
+                                    string gameNameInJson = nameElement.GetString() ?? "";
+                                    string url = urlElement.GetString() ?? "";
+                                    
+                                    // 检查游戏名称是否匹配（不区分大小写）
+                                    if (string.Equals(gameNameInJson, gameName, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        LoggerHelper.LogInformation($"找到游戏 {gameName} 的BT链接: {url}");
+                                        return url;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    LoggerHelper.LogError($"BT链接文件不存在: {jsonFilePath}");
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggerHelper.LogError($"读取BT链接文件失败: {ex.Message}");
+            }
+            
+            return null;
         }
     }
 
@@ -366,5 +439,13 @@ namespace ATC4_HQ.ViewModels
             Success = success;
             GameData = gameData;
         }
+    }
+
+    // ⭐️ 新增：用于传递BT下载事件参数的类
+    public class BtDownloadEventArgs : EventArgs
+    {
+        public string GameName { get; set; } = string.Empty;
+        public string MagnetLink { get; set; } = string.Empty;
+        public string DownloadPath { get; set; } = string.Empty;
     }
 }

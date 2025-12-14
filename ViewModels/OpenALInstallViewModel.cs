@@ -9,6 +9,7 @@ using System.Diagnostics;
 using Avalonia.Controls;
 using Avalonia;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace ATC4_HQ.ViewModels
 {
@@ -144,7 +145,7 @@ namespace ATC4_HQ.ViewModels
                 }
                 catch (Exception cleanupEx)
                 {
-                    Console.WriteLine($"清理临时文件时发生错误: {cleanupEx.Message}");
+                    LoggerHelper.LogError($"清理临时文件时发生错误: {cleanupEx.Message}");
                 }
                 
                 IsInstalling = false;
@@ -154,7 +155,7 @@ namespace ATC4_HQ.ViewModels
         private void TestInstall()
         {
             // 测试安装逻辑
-            System.Console.WriteLine("用户点击测试安装按钮");
+            LoggerHelper.LogInformation("用户点击测试安装按钮");
             
             // 检查OpenAL是否已安装
             if (IsOpenALInstalled())
@@ -179,7 +180,7 @@ namespace ATC4_HQ.ViewModels
         private void OnBack()
         {
             // 返回逻辑
-            System.Console.WriteLine("用户选择返回");
+            LoggerHelper.LogInformation("用户选择返回");
             RequestClose?.Invoke(this, EventArgs.Empty);
         }
     }

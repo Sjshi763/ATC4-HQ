@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace ATC4_HQ.ViewModels
 {
@@ -55,7 +56,7 @@ namespace ATC4_HQ.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"启动BT下载失败: {ex.Message}");
+                LoggerHelper.LogError($"启动BT下载失败: {ex.Message}");
                 return false;
             }
         }

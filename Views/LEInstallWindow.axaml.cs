@@ -5,6 +5,7 @@ using Avalonia.Markup.Xaml;
 using ATC4_HQ.ViewModels;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace ATC4_HQ.Views;
 
@@ -34,7 +35,7 @@ public partial class LEInstallWindow : Window
                 ? desktop.MainWindow 
                 : null;
             // 简单的控制台输出，实际项目中可能需要更好的消息显示方式
-            Console.WriteLine($"消息: {message}");
+            LoggerHelper.LogInformation($"消息: {message}");
         };
         
 #if DEBUG
