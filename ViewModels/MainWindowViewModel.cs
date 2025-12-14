@@ -66,12 +66,12 @@ namespace ATC4_HQ.ViewModels
 
         private void OnStartGame()
         {
-            Console.WriteLine("ViewModel: 启动游戏逻辑。");
+            LoggerHelper.LogInformation("ViewModel: 启动游戏逻辑。");
             
             // 检查OPENAL是否安装
             if (!IsOpenALInstalled())
             {
-                Console.WriteLine("ViewModel: OPENAL未安装，触发显示安装界面事件。");
+                LoggerHelper.LogWarning("ViewModel: OPENAL未安装，触发显示安装界面事件。");
                 // 触发事件通知View显示OpenAL安装界面
                 ShowOpenALInstallView?.Invoke(this, EventArgs.Empty);
                 return; // 不继续执行后续逻辑
@@ -80,12 +80,12 @@ namespace ATC4_HQ.ViewModels
             // 实现启动游戏的业务逻辑
             // 将 CurrentPage 设置为 GameStartOptionsViewModel 的实例
             NavigateToPage(new GameStartOptionsViewModel(this), 1);
-            Console.WriteLine("ViewModel: 已切换到游戏启动选项界面。");
+            LoggerHelper.LogInformation("ViewModel: 已切换到游戏启动选项界面。");
         }
 
         private void OnInstallGame()
         {
-            Console.WriteLine("ViewModel: 显示安装游戏界面。");
+            LoggerHelper.LogInformation("ViewModel: 显示安装游戏界面。");
             // 将 CurrentSubPage 设置为 InstallGameViewModel 的实例，显示在右边
             CurrentSubPage = new InstallGameViewModel();
             // 更新导航按钮状态
@@ -93,12 +93,12 @@ namespace ATC4_HQ.ViewModels
             IsNavBtn2Checked = true;
             IsNavBtn3Checked = false;
             IsNavBtn4Checked = false;
-            Console.WriteLine("ViewModel: 已在右边显示安装游戏界面。");
+            LoggerHelper.LogInformation("ViewModel: 已在右边显示安装游戏界面。");
         }
 
         private void OnSetting()
         {
-            Console.WriteLine("启动设置");
+            LoggerHelper.LogInformation("启动设置");
             CurrentSubPage = new SettingViewModel();
             // 更新导航按钮状态
             IsNavBtn1Checked = false;
@@ -109,7 +109,7 @@ namespace ATC4_HQ.ViewModels
 
         private void OnDownloadMonitor()
         {
-            Console.WriteLine("打开下载监视器");
+            LoggerHelper.LogInformation("打开下载监视器");
             NavigateToPage(new DownloadMonitorViewModel(), 3);
         }
         
@@ -228,22 +228,22 @@ namespace ATC4_HQ.ViewModels
                 }
                 else
                 {
-                    Console.WriteLine("错误：在指定路径中未找到zip文件。");
+                    LoggerHelper.LogError("错误：在指定路径中未找到zip文件。");
                     return;
                 }
             }
 
             if (!File.Exists(zipPath))
             {
-                Console.WriteLine($"错误：zip文件不存在：{zipPath}");
+                LoggerHelper.LogError($"错误：zip文件不存在：{zipPath}");
                 return;
             }
 
-            Console.WriteLine($"开始解压文件：{zipPath} 到目录：{gameData.Path}");
+            LoggerHelper.LogInformation($"开始解压文件：{zipPath} 到目录：{gameData.Path}");
             
             // 解压 .zip 文件到指定目录
             ZipFile.ExtractToDirectory(zipPath, gameData.Path);
-            Console.WriteLine("文件解压完成。");
+            LoggerHelper.LogInformation("文件解压完成。");
 
             // 检查解压后的文件中是否有以~开头的zip文件，并再次解压
             var extractedFiles = Directory.GetFiles(gameData.Path, "*.zip", SearchOption.AllDirectories);
@@ -306,7 +306,7 @@ namespace ATC4_HQ.ViewModels
         public void ClearSubPage()
         {
             CurrentSubPage = null;
-            Console.WriteLine("已清除右边区域的内容。");
+            LoggerHelper.LogInformation("已清除右边区域的内容。");
         }
     }
 }

@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 using System.Threading.Tasks;
 using ATC4_HQ.ViewModels;
 using System; // 添加此 using 引用，用于 EventArgs 和 Console
+using Microsoft.Extensions.Logging;
 
 namespace ATC4_HQ.Views
 {
@@ -72,18 +73,18 @@ namespace ATC4_HQ.Views
                     try
                     {
                         var selectedPath = selectedFolderUri.LocalPath;
-                        Console.WriteLine($"已选择文件夹: {selectedPath}"); // Console 错误会解决
+                        LoggerHelper.LogInformation($"已选择文件夹: {selectedPath}"); // Console 错误会解决
                         return selectedPath;
                     }
                     catch (InvalidOperationException)
                     {
-                        Console.WriteLine("选定的位置不是本地文件路径。"); // Console 错误会解决
+                        LoggerHelper.LogError("选定的位置不是本地文件路径。"); // Console 错误会解决
                         return null;
                     }
                 }
                 else
                 {
-                    Console.WriteLine("未选择任何文件夹"); // Console 错误会解决
+                    LoggerHelper.LogInformation("未选择任何文件夹"); // Console 错误会解决
                     return null;
                 }
             }
@@ -118,18 +119,18 @@ namespace ATC4_HQ.Views
                     try
                     {
                         var selectedPath = file.Path.LocalPath;
-                        Console.WriteLine($"已选择保存路径: {selectedPath}");
+                        LoggerHelper.LogInformation($"已选择保存路径: {selectedPath}");
                         return selectedPath;
                     }
                     catch (InvalidOperationException)
                     {
-                        Console.WriteLine("选定的位置不是本地文件路径。");
+                        LoggerHelper.LogError("选定的位置不是本地文件路径。");
                         return null;
                     }
                 }
                 else
                 {
-                    Console.WriteLine("未选择保存位置");
+                    LoggerHelper.LogInformation("未选择保存位置");
                     return null;
                 }
             }
@@ -141,9 +142,9 @@ namespace ATC4_HQ.Views
         {
             try
             {
-                Console.WriteLine($"开始BT下载: {e.GameName}");
-                Console.WriteLine($"磁力链接: {e.MagnetLink}");
-                Console.WriteLine($"下载路径: {e.DownloadPath}");
+                LoggerHelper.LogInformation($"开始BT下载: {e.GameName}");
+                LoggerHelper.LogDebug($"磁力链接: {e.MagnetLink}");
+                LoggerHelper.LogDebug($"下载路径: {e.DownloadPath}");
 
                 // 创建BT下载服务
                 var btService = new BtService();
@@ -152,7 +153,7 @@ namespace ATC4_HQ.Views
                 bool initResult = await btService.InitAsync(e.DownloadPath);
                 if (!initResult)
                 {
-                    Console.WriteLine("BT服务初始化失败");
+                    LoggerHelper.LogError("BT服务初始化失败");
                     return;
                 }
 
@@ -160,19 +161,19 @@ namespace ATC4_HQ.Views
                 bool downloadResult = await btService.StartTorrentAsync(e.MagnetLink, e.GameName);
                 if (downloadResult)
                 {
-                    Console.WriteLine($"BT下载已启动: {e.GameName}");
+                    LoggerHelper.LogInformation($"BT下载已启动: {e.GameName}");
                     
                     // 可以在这里添加下载进度监控或显示下载状态的逻辑
                     // 例如，可以打开一个下载进度窗口或更新UI显示下载状态
                 }
                 else
                 {
-                    Console.WriteLine($"BT下载启动失败: {e.GameName}");
+                    LoggerHelper.LogError($"BT下载启动失败: {e.GameName}");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"BT下载异常: {ex.Message}");
+                LoggerHelper.LogError($"BT下载异常: {ex.Message}");
             }
         }
     }

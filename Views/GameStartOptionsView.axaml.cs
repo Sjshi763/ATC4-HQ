@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 using System;
 using ATC4_HQ.Views;
 using ATC4_HQ.ViewModels;
+using Microsoft.Extensions.Logging;
 
 namespace ATC4_HQ.Views
 {
@@ -23,7 +24,7 @@ namespace ATC4_HQ.Views
 
         private void Button2(object? sender, RoutedEventArgs e)
         {
-            Console.WriteLine("列出全部游戏按钮被点击了，在右边区域显示游戏列表。");
+            LoggerHelper.LogInformation("列出全部游戏按钮被点击了，在右边区域显示游戏列表。");
             
             // 获取MainWindowViewModel的引用
             if (this.DataContext is GameStartOptionsViewModel gameStartOptionsViewModel)

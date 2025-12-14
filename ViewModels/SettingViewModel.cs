@@ -8,6 +8,7 @@ using Avalonia.Controls;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using ATC4_HQ.Views;
+using Microsoft.Extensions.Logging;
 
 namespace ATC4_HQ.ViewModels;
 
@@ -52,7 +53,7 @@ public partial class SettingViewModel : ViewModelBase
         GlobalPaths.TransitSoftwareLE = LE_address;
         _ini.SetValue("main", "TransitSoftwareLE", GlobalPaths.TransitSoftwareLE);
         _ini.Save();
-        Console.WriteLine($"设置已保存。{GlobalPaths.TransitSoftwareLE}");
+        LoggerHelper.LogInformation($"设置已保存。{GlobalPaths.TransitSoftwareLE}");
     }
 
     public IAsyncRelayCommand BrowseLECommand => new AsyncRelayCommand(async () => 

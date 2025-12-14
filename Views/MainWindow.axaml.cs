@@ -13,6 +13,7 @@ using System.Threading.Tasks; // 添加Task支持
 using Avalonia;
 using Avalonia.Media;
 using Avalonia.Input;
+using Microsoft.Extensions.Logging;
 
 namespace ATC4_HQ.Views
 {
@@ -92,7 +93,7 @@ namespace ATC4_HQ.Views
         {
             if (DataContext is MainWindowViewModel viewModel) // 确保 ViewModel 已设置
             {
-                Console.WriteLine("安装游戏按钮被点击了，准备打开对话框。");
+                LoggerHelper.LogInformation("安装游戏按钮被点击了，准备打开对话框。");
 
                 var dialogWindow = new InstallGameDataDialogWindow();
                 // 修复 CS8604 警告：确保 owner 是可空类型或显式转换
@@ -106,35 +107,35 @@ namespace ATC4_HQ.Views
                     string? selectedGameDataJson = dialogViewModel.DialogResultData;
                     if (!string.IsNullOrEmpty(selectedGameDataJson))
                     {
-                        Console.WriteLine($"从对话框中获取到的 JSON 数据: {selectedGameDataJson}");
+                        LoggerHelper.LogInformation($"从对话框中获取到的 JSON 数据: {selectedGameDataJson}");
                         try
                         {
                             // ⭐️ 反序列化 JSON 字符串为 GameModel 对象
                             GameModel? gameData = JsonSerializer.Deserialize<GameModel>(selectedGameDataJson);
                             if (gameData != null)
                             {
-                                Console.WriteLine($"解析到的游戏名称: {gameData.Name}, 路径: {gameData.Path}");
+                                LoggerHelper.LogInformation($"解析到的游戏名称: {gameData.Name}, 路径: {gameData.Path}");
                                 // ⭐️ 关键修改：调用 MainWindowViewModel 中的 HandleInstallGameAndUnzipAsync
                                 await viewModel.HandleInstallGameAndUnzipAsync(gameData);
                             }
                             else
                             {
-                                Console.WriteLine("错误：无法将 JSON 数据反序列化为 GameModel 对象。");
+                                LoggerHelper.LogError("错误：无法将 JSON 数据反序列化为 GameModel 对象。");
                             }
                         }
                         catch (JsonException ex)
                         {
-                            Console.WriteLine($"JSON 反序列化错误: {ex.Message}");
+                            LoggerHelper.LogError($"JSON 反序列化错误: {ex.Message}");
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"处理对话框结果时发生错误: {ex.Message}");
+                            LoggerHelper.LogError($"处理对话框结果时发生错误: {ex.Message}");
                         }
                     }
                 }
                 else
                 {
-                    Console.WriteLine("用户取消了选择或对话框关闭。");
+                    LoggerHelper.LogInformation("用户取消了选择或对话框关闭。");
                 }
             }
         }
@@ -143,7 +144,7 @@ namespace ATC4_HQ.Views
         {
             if (DataContext is MainWindowViewModel viewModel)
             {
-                Console.WriteLine("设置按钮被点击了！");
+                LoggerHelper.LogInformation("设置按钮被点击了！");
                 viewModel.SettingCommand.Execute(null);
             }
         }
@@ -152,7 +153,7 @@ namespace ATC4_HQ.Views
         {
             if (DataContext is MainWindowViewModel viewModel)
             {
-                Console.WriteLine("下载监视按钮被点击了！");
+                LoggerHelper.LogInformation("下载监视按钮被点击了！");
                 viewModel.DownloadMonitorCommand.Execute(null);
             }
         }
@@ -164,22 +165,22 @@ namespace ATC4_HQ.Views
             {
                 if (!File.Exists(GlobalPaths.InitiatorProfileName))
                 {
-                    Console.WriteLine("错误：配置文件不存在，请检查路径。");
+                    LoggerHelper.LogError("错误：配置文件不存在，请检查路径。");
                     PrimaryProfile();
                     return;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"错误：无法访问配置文件 - {ex.Message}");
+                LoggerHelper.LogError($"错误：无法访问配置文件 - {ex.Message}");
                 return;
             }
-            Console.WriteLine("配置文件存在，正在加载...");
+            LoggerHelper.LogInformation("配置文件存在，正在加载...");
             IniFile ini = new IniFile(GlobalPaths.InitiatorProfileName);
             var PrimaryProfileVersion = ini.GetValue("main", "Version");
             if (PrimaryProfileVersion != GlobalPaths.Version)
             {
-                Console.WriteLine($"配置文件版本不匹配，当前版本：{GlobalPaths.Version}，配置文件版本：{PrimaryProfileVersion}");
+                LoggerHelper.LogWarning($"配置文件版本不匹配，当前版本：{GlobalPaths.Version}，配置文件版本：{PrimaryProfileVersion}");
                 return;
             }
             GlobalPaths.TransitSoftwareLE = ini.GetValue("main", "TransitSoftwareLE");
@@ -202,26 +203,26 @@ namespace ATC4_HQ.Views
         private void PrimaryProfile()
         {
             // 获取时间
-            Console.WriteLine("配置文件不存在，正在创建初始配置文件...");
+            LoggerHelper.LogInformation("配置文件不存在，正在创建初始配置文件...");
             DateTimeOffset now = DateTimeOffset.UtcNow;
-            Console.WriteLine($"当前时间（UTC）：{now}");
+            LoggerHelper.LogDebug($"当前时间（UTC）：{now}");
             string generalShort = now.ToString("g");
-            Console.WriteLine($"当前时间：{generalShort}");
+            LoggerHelper.LogDebug($"当前时间：{generalShort}");
 
             // 获取加密时间
             string encryptedText = generalShort.AESEncrypt(GlobalPaths.Keys);;
-            Console.WriteLine($"加密后的时间：{encryptedText}");
+            LoggerHelper.LogDebug($"加密后的时间：{encryptedText}");
 
             //返回值
             GlobalPaths.FirstRun = encryptedText;
 
-            Console.WriteLine("创建初始配置文件...");
+            LoggerHelper.LogInformation("创建初始配置文件...");
             IniFile ini=new IniFile(GlobalPaths.InitiatorProfileName);
             ini.SetValue("main", "Version", GlobalPaths.Version);
             ini.SetValue("main", "FirstRun", GlobalPaths.FirstRun);
             ini.SetValue("main", "TransitSoftwareLE" , "null");
             ini.SetValue("main", "BTEnabled", "false");
-            Console.WriteLine("初始配置文件已创建。");
+            LoggerHelper.LogInformation("初始配置文件已创建。");
             ini.Save();
         }
         
@@ -245,7 +246,7 @@ namespace ATC4_HQ.Views
         /// <param name="e">事件参数</param>
         private async void OnShowOpenALInstallView(object? sender, EventArgs e)
         {
-            Console.WriteLine("直接显示OpenAL安装界面");
+            LoggerHelper.LogInformation("直接显示OpenAL安装界面");
             await ShowOpenALInstallView();
         }
 
@@ -432,11 +433,11 @@ namespace ATC4_HQ.Views
                 IniFile ini = new IniFile(GlobalPaths.InitiatorProfileName);
                 ini.SetValue("main", "BTEnabled", enabled.ToString());
                 ini.Save();
-                Console.WriteLine($"BT配置已保存: {enabled}");
+                LoggerHelper.LogInformation($"BT配置已保存: {enabled}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"保存BT配置时发生错误: {ex.Message}");
+                LoggerHelper.LogError($"保存BT配置时发生错误: {ex.Message}");
             }
         }
     }

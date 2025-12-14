@@ -134,13 +134,13 @@ namespace ATC4_HQ.ViewModels
                             item.Status = "解压完成";
                         }
                         
-                        Console.WriteLine($"游戏 {gameName} 解压完成: {extractPath}");
+                        LoggerHelper.LogInformation($"游戏 {gameName} 解压完成: {extractPath}");
                     });
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"解压游戏 {gameName} 失败: {ex.Message}");
+                LoggerHelper.LogError($"解压游戏 {gameName} 失败: {ex.Message}");
                 
                 Avalonia.Threading.Dispatcher.UIThread.Post(() =>
                 {
@@ -158,7 +158,7 @@ namespace ATC4_HQ.ViewModels
         {
             try
             {
-                Console.WriteLine("正在从GitHub获取游戏列表...");
+                LoggerHelper.LogInformation("正在从GitHub获取游戏列表...");
                 
                 // 尝试从GitHub获取JSON文件
                 var response = await _httpClient.GetAsync(GitHubJsonUrl);
@@ -181,31 +181,31 @@ namespace ATC4_HQ.ViewModels
                                 {
                                     var newItem = new DownloadItemViewModel(name, url);
                                     DownloadItems.Add(newItem);
-                                    Console.WriteLine($"添加游戏到下载列表: {name}");
+                                    LoggerHelper.LogInformation($"添加游戏到下载列表: {name}");
                                 }
                             }
                             
                             // 自动开始下载
                             if (GlobalPaths.BTEnabled)
                             {
-                                Console.WriteLine("自动开始下载游戏...");
+                                LoggerHelper.LogInformation("自动开始下载游戏...");
                                 StartAllDownloads();
                             }
                         });
                         
-                        Console.WriteLine("从GitHub获取游戏列表成功");
+                        LoggerHelper.LogInformation("从GitHub获取游戏列表成功");
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"从GitHub获取游戏列表失败: {response.StatusCode}");
+                    LoggerHelper.LogError($"从GitHub获取游戏列表失败: {response.StatusCode}");
                     // 如果GitHub获取失败，使用本地文件
                     LoadDefaultDownloads();
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"从GitHub获取游戏列表失败: {ex.Message}");
+                LoggerHelper.LogError($"从GitHub获取游戏列表失败: {ex.Message}");
                 // 如果GitHub获取失败，使用本地文件
                 LoadDefaultDownloads();
             }
@@ -239,7 +239,7 @@ namespace ATC4_HQ.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"加载默认下载列表失败: {ex.Message}");
+                LoggerHelper.LogError($"加载默认下载列表失败: {ex.Message}");
             }
         }
 
@@ -260,7 +260,7 @@ namespace ATC4_HQ.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"加载下载配置失败: {ex.Message}");
+                LoggerHelper.LogError($"加载下载配置失败: {ex.Message}");
             }
         }
 
@@ -274,7 +274,7 @@ namespace ATC4_HQ.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"保存下载配置失败: {ex.Message}");
+                LoggerHelper.LogError($"保存下载配置失败: {ex.Message}");
             }
         }
 
@@ -333,7 +333,7 @@ namespace ATC4_HQ.ViewModels
         {
             if (!GlobalPaths.BTEnabled)
             {
-                Console.WriteLine("BT功能未启用，无法开始下载");
+                LoggerHelper.LogError("BT功能未启用，无法开始下载");
                 return;
             }
             
@@ -367,7 +367,7 @@ namespace ATC4_HQ.ViewModels
         {
             if (!GlobalPaths.BTEnabled)
             {
-                Console.WriteLine("BT功能未启用，无法添加下载");
+                LoggerHelper.LogError("BT功能未启用，无法添加下载");
                 return;
             }
             
@@ -396,14 +396,14 @@ namespace ATC4_HQ.ViewModels
                         else
                         {
                             // 可以添加一个提示，说明该下载已存在
-                            Console.WriteLine("该磁力链接已存在于下载列表中");
+                            LoggerHelper.LogInformation("该磁力链接已存在于下载列表中");
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"添加下载失败: {ex.Message}");
+                LoggerHelper.LogError($"添加下载失败: {ex.Message}");
             }
         }
 
@@ -411,7 +411,7 @@ namespace ATC4_HQ.ViewModels
         {
             if (!GlobalPaths.BTEnabled)
             {
-                Console.WriteLine("BT功能未启用，无法开始下载");
+                LoggerHelper.LogError("BT功能未启用，无法开始下载");
                 return;
             }
             
