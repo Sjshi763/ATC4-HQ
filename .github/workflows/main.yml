@@ -32,7 +32,7 @@ jobs:
         name: ATC4-HQ-Publish # 产物的名称
         path: publish # 上传publish目录
 
-  release: # 用于创建/更新 GitHub Release
+  build-msi: # 用于构建msi
     needs: build # 此作业依赖于 'build' 作业
     runs-on: windows-latest # 在最新的 Windows 环境下运行
 
@@ -151,6 +151,11 @@ jobs:
         name: ATC4-HQ-MSI
         path: msi
 
+  Release:
+    needs: build-msi
+    runs-on: windows-latest
+
+    steps:
     - name: Upload MSI to Release
       if: github.event_name == 'release'
       uses: actions/upload-release-asset@v1
