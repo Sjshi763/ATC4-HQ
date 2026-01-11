@@ -26,3 +26,7 @@
 # 这个项目的更新
 ## 2.0
 1. 大改UI
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Sjshi763/ATC4-HQ&type=date&legend=top-left)](https://www.star-history.com/#Sjshi763/ATC4-HQ&type=date&legend=top-left)
