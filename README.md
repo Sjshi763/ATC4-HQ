@@ -34,5 +34,3 @@
 <a href="https://github.com/Sjshi763/ATC4-HQ/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=Sjshi763/ATC4-HQ" />
 </a>
-
-Made with [contrib.rocks](https://contrib.rocks).
