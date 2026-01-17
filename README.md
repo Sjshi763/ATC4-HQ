@@ -30,3 +30,5 @@
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Sjshi763/ATC4-HQ&type=date&legend=top-left)](https://www.star-history.com/#Sjshi763/ATC4-HQ&type=date&legend=top-left)
+
+[![Contributors](https://opencollective.com/ATC4-HQ/contributors.svg?width=890&button=false)](https://github.com/Sjshi763/ATC4-HQ/graphs/contributors)
