@@ -60,25 +60,44 @@ namespace ATC4_HQ.ViewModels
         private async Task OnDownload()
         {
             LoggerHelper.LogInformation("=== 下载流程开始 ===");
-            
-            // 步骤1: 准备下载（生成临时文件路径）
-            LoggerHelper.LogInformation("[步骤1] 准备下载到临时路径");
+
+            // 步骤1: 检查是否存在BT下载链接
+            LoggerHelper.LogInformation("[步骤1] 检查BT下载链接");
+            var btLink = await GetBtDownloadLinkAsync(GameName);
+            if (!string.IsNullOrEmpty(btLink))
+            {
+                LoggerHelper.LogInformation($"[步骤1] 找到BT链接，启动BT下载: {btLink}");
+                
+                // 触发BT下载事件
+                var btArgs = new BtDownloadEventArgs
+                {
+                    GameName = GameName,
+                    MagnetLink = btLink,
+                    DownloadPath = GamePath
+                };
+                
+                RequestBtDownload?.Invoke(this, btArgs);
+                return; // 跳过后续HTTP下载流程
+            }
+
+            // 步骤2: 准备下载（生成临时文件路径）
+            LoggerHelper.LogInformation("[步骤2] 准备下载到临时路径");
             _tempDownloadPath = System.IO.Path.GetTempFileName();
-            LoggerHelper.LogInformation($"[步骤1] 临时文件路径: {_tempDownloadPath}");
+            LoggerHelper.LogInformation($"[步骤2] 临时文件路径: {_tempDownloadPath}");
 
             string tempPath = _tempDownloadPath; // 使用类级别变量
 
             try
             {
-                // 步骤2: 准备下载信息
-                LoggerHelper.LogInformation("[步骤2] 准备下载文件信息");
+                // 步骤3: 准备下载信息
+                LoggerHelper.LogInformation("[步骤3] 准备下载文件信息");
                 string fileName = "ATC4ALL.zip";
-                string url = $"http://localhost:8080/download?file={fileName}";
-                LoggerHelper.LogInformation($"[步骤2] 下载文件名: {fileName}");
-                LoggerHelper.LogInformation($"[步骤2] 最终下载URL: {url}");
+                string url = $"http://9191991.top:8080/download?file={fileName}";
+                LoggerHelper.LogInformation($"[步骤3] 下载文件名: {fileName}");
+                LoggerHelper.LogInformation($"[步骤3] 最终下载URL: {url}");
 
-                // 步骤3: 发送HTTP请求（添加超时和重试机制）
-                LoggerHelper.LogInformation("[步骤3] 发送HTTP GET请求...");
+                // 步骤4: 发送HTTP请求（添加超时和重试机制）
+                LoggerHelper.LogInformation("[步骤4] 发送HTTP GET请求...");
                 using (var httpClient = new HttpClient())
                 {
                     // 设置请求超时
