@@ -1,4 +1,5 @@
-using System.Linq;
+using System;
+
 namespace master
 {
     namespace Globals
@@ -13,6 +14,7 @@ namespace master
             public static string? GamePath;
             public static string? GameName;
             public static bool BTEnabled;
+            public static string LogPath = System.IO.Path.Combine(AppContext.BaseDirectory, "logs");
         }
     }
 }

@@ -34,7 +34,7 @@ sealed class Program
     {
         var services = new ServiceCollection();
         
-        var logPath = System.IO.Path.Combine(AppContext.BaseDirectory, "logs");
+        var logPath = master.Globals.GlobalPaths.LogPath;
         
         services.AddLogging(builder =>
         {
