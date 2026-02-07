@@ -14,7 +14,7 @@ namespace master
             public static string? GamePath;
             public static string? GameName;
             public static bool BTEnabled;
-            public static string LogPath = System.IO.Path.Combine(AppContext.BaseDirectory, "logs");
+            public static string LogPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ATC4-HQ", "logs");
         }
     }
 }
