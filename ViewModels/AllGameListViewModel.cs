@@ -1,7 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
-using Masuit.Tools.Files;
+using SoftCircuits.IniFileParser;
 using master.Globals;
+using System.IO;
 
 namespace ATC4_HQ.ViewModels;
 
@@ -25,8 +26,13 @@ public class AllGameListViewModel : ObservableObject
     public AllGameListViewModel()
     {
         //从配置文件找要显示的东西
-        IniFile ini = new IniFile(GlobalPaths.GamePath + @"\GameData.ini");
-        var GameName = ini.GetValue("GameSettings", "GameName");
+        var gameDataIniPath = GlobalPaths.GamePath + @"\GameData.ini";
+        IniFile ini = new IniFile();
+        if (File.Exists(gameDataIniPath))
+        {
+            ini.Load(gameDataIniPath);
+        }
+        var GameName = ini.GetSetting("GameSettings", "GameName", string.Empty) ?? string.Empty;
                 
         //显示的内容
         AllGames = new ObservableCollection<string>

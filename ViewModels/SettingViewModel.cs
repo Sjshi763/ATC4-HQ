@@ -1,9 +1,10 @@
 using System;
+using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Windows.Input;
 using master.Globals;
-using Masuit.Tools.Files;
+using SoftCircuits.IniFileParser;
 using Avalonia.Controls;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -22,7 +23,11 @@ public partial class SettingViewModel : ViewModelBase
 
     public SettingViewModel()
     {
-        _ini = new IniFile(GlobalPaths.InitiatorProfileName);
+        _ini = new IniFile();
+        if (File.Exists(GlobalPaths.InitiatorProfileName))
+        {
+            _ini.Load(GlobalPaths.InitiatorProfileName);
+        }
         _LE_address = GlobalPaths.TransitSoftwareLE;
         if (_LE_address == null)
         {
@@ -51,8 +56,8 @@ public partial class SettingViewModel : ViewModelBase
     private void SaveSetting()
     {
         GlobalPaths.TransitSoftwareLE = LE_address;
-        _ini.SetValue("main", "TransitSoftwareLE", GlobalPaths.TransitSoftwareLE);
-        _ini.Save();
+        _ini.SetSetting("main", "TransitSoftwareLE", GlobalPaths.TransitSoftwareLE ?? string.Empty);
+        _ini.Save(GlobalPaths.InitiatorProfileName);
         LoggerHelper.LogInformation($"设置已保存。{GlobalPaths.TransitSoftwareLE}");
     }
 

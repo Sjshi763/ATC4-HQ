@@ -7,6 +7,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.IO.Compression;
+using SoftCircuits.IniFileParser;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -147,9 +148,13 @@ namespace ATC4_HQ.ViewModels
                         
                         // 保存到配置文件
                         LoggerHelper.LogInformation("[LE安装] 保存配置到INI文件...");
-                        var iniFile = new Masuit.Tools.Files.IniFile(master.Globals.GlobalPaths.InitiatorProfileName);
-                        iniFile.SetValue("main", "TransitSoftwareLE", master.Globals.GlobalPaths.TransitSoftwareLE);
-                        iniFile.Save();
+                        var iniFile = new IniFile();
+                        if (File.Exists(master.Globals.GlobalPaths.InitiatorProfileName))
+                        {
+                            iniFile.Load(master.Globals.GlobalPaths.InitiatorProfileName);
+                        }
+                        iniFile.SetSetting("main", "TransitSoftwareLE", master.Globals.GlobalPaths.TransitSoftwareLE ?? string.Empty);
+                        iniFile.Save(master.Globals.GlobalPaths.InitiatorProfileName);
                         LoggerHelper.LogInformation("[LE安装] 配置文件保存完成");
                         
                         InstallStatus = $"安装完成！已保存到: {targetPath}";

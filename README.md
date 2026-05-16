@@ -9,6 +9,8 @@
 [eazyx](https://easyx.cn/)
 
 [python](https://www.python.org/)
+
+[Masuit.Tools](https://github.com/ldqk/Masuit.Tools)
 > [!WARNING]
 > 以上库已经在最新版本被移除
 
@@ -16,7 +18,7 @@
 - 抄的UI和部分代码
 </br>
 
-[Masuit.Tools](https://github.com/ldqk/Masuit.Tools)
+[SoftCircuits.IniFileParser](https://www.nuget.org/packages/SoftCircuits.IniFileParser/)
 
 [Avalonia](https://avaloniaui.net/)
 

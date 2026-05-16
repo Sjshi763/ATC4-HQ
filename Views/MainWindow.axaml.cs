@@ -7,8 +7,8 @@ using ATC4_HQ.Models; // ⭐️ 新增：引入 GameModel 的命名空间
 using master.Globals;
 using System.IO;
 using System.Text;
-using Masuit.Tools.Security;
-using Masuit.Tools.Files;
+using System.Security.Cryptography;
+using SoftCircuits.IniFileParser;
 using System.Threading.Tasks; // 添加Task支持
 using Avalonia;
 using Avalonia.Media;
@@ -176,18 +176,19 @@ namespace ATC4_HQ.Views
                 return;
             }
             LoggerHelper.LogInformation("配置文件存在，正在加载...");
-            IniFile ini = new IniFile(GlobalPaths.InitiatorProfileName);
-            var PrimaryProfileVersion = ini.GetValue("main", "Version");
+            IniFile ini = new IniFile();
+            ini.Load(GlobalPaths.InitiatorProfileName);
+            var PrimaryProfileVersion = ini.GetSetting("main", "Version", string.Empty);
             if (PrimaryProfileVersion != GlobalPaths.Version)
             {
                 LoggerHelper.LogWarning($"配置文件版本不匹配，当前版本：{GlobalPaths.Version}，配置文件版本：{PrimaryProfileVersion}");
                 return;
             }
-            GlobalPaths.TransitSoftwareLE = ini.GetValue("main", "TransitSoftwareLE");
-            GlobalPaths.GamePath = ini.GetValue("main", "GamePath");
+            GlobalPaths.TransitSoftwareLE = ini.GetSetting("main", "TransitSoftwareLE", string.Empty);
+            GlobalPaths.GamePath = ini.GetSetting("main", "GamePath", string.Empty);
 
             // 读取BT配置，默认为false
-            string btEnabledValue = ini.GetValue("main", "BTEnabled");
+            string btEnabledValue = ini.GetSetting("main", "BTEnabled", string.Empty) ?? string.Empty;
             if (bool.TryParse(btEnabledValue, out bool btEnabled))
             {
                 GlobalPaths.BTEnabled = btEnabled;
@@ -210,20 +211,24 @@ namespace ATC4_HQ.Views
             LoggerHelper.LogDebug($"当前时间：{generalShort}");
 
             // 获取加密时间
-            string encryptedText = generalShort.AESEncrypt(GlobalPaths.Keys);;
+            byte[] encryptedBytes = ProtectedData.Protect(
+                Encoding.UTF8.GetBytes(generalShort),
+                Encoding.UTF8.GetBytes(GlobalPaths.Keys),
+                DataProtectionScope.CurrentUser);
+            string encryptedText = Convert.ToBase64String(encryptedBytes);
             LoggerHelper.LogDebug($"加密后的时间：{encryptedText}");
 
             //返回值
             GlobalPaths.FirstRun = encryptedText;
 
             LoggerHelper.LogInformation("创建初始配置文件...");
-            IniFile ini=new IniFile(GlobalPaths.InitiatorProfileName);
-            ini.SetValue("main", "Version", GlobalPaths.Version);
-            ini.SetValue("main", "FirstRun", GlobalPaths.FirstRun);
-            ini.SetValue("main", "TransitSoftwareLE" , "null");
-            ini.SetValue("main", "BTEnabled", "false");
+            IniFile ini = new IniFile();
+            ini.SetSetting("main", "Version", GlobalPaths.Version);
+            ini.SetSetting("main", "FirstRun", GlobalPaths.FirstRun ?? string.Empty);
+            ini.SetSetting("main", "TransitSoftwareLE", "null");
+            ini.SetSetting("main", "BTEnabled", "false");
             LoggerHelper.LogInformation("初始配置文件已创建。");
-            ini.Save();
+            ini.Save(GlobalPaths.InitiatorProfileName);
         }
         
         /// <summary>
@@ -430,9 +435,13 @@ namespace ATC4_HQ.Views
         {
             try
             {
-                IniFile ini = new IniFile(GlobalPaths.InitiatorProfileName);
-                ini.SetValue("main", "BTEnabled", enabled.ToString());
-                ini.Save();
+                IniFile ini = new IniFile();
+                if (File.Exists(GlobalPaths.InitiatorProfileName))
+                {
+                    ini.Load(GlobalPaths.InitiatorProfileName);
+                }
+                ini.SetSetting("main", "BTEnabled", enabled.ToString());
+                ini.Save(GlobalPaths.InitiatorProfileName);
                 LoggerHelper.LogInformation($"BT配置已保存: {enabled}");
             }
             catch (Exception ex)
