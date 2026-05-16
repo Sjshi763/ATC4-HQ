@@ -7,7 +7,6 @@ using ATC4_HQ.Models; // ⭐️ 新增：引入 GameModel 的命名空间
 using master.Globals;
 using System.IO;
 using System.Text;
-using System.Security.Cryptography;
 using SoftCircuits.IniFileParser;
 using System.Threading.Tasks; // 添加Task支持
 using Avalonia;
@@ -211,11 +210,12 @@ namespace ATC4_HQ.Views
             LoggerHelper.LogDebug($"当前时间：{generalShort}");
 
             // 获取加密时间
-            byte[] encryptedBytes = ProtectedData.Protect(
-                Encoding.UTF8.GetBytes(generalShort),
-                Encoding.UTF8.GetBytes(GlobalPaths.Keys),
-                DataProtectionScope.CurrentUser);
-            string encryptedText = Convert.ToBase64String(encryptedBytes);
+            if (!ATC4_HQ.ConfigProtector.TryProtect(generalShort, out string? encryptedText, GlobalPaths.Keys))
+            {
+                LoggerHelper.LogError("加密初始配置时间失败，已取消创建初始配置文件。");
+                return;
+            }
+
             LoggerHelper.LogDebug($"加密后的时间：{encryptedText}");
 
             //返回值
