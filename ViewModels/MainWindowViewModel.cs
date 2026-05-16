@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Threading.Tasks;
@@ -6,7 +6,7 @@ using System.Windows.Input;
 using ATC4_HQ.Models; // 引入 GameModel 的命名空间
 using System.IO.Compression; // 用于解压缩功能
 using master.Globals;
-using Masuit.Tools.Files;
+using SoftCircuits.IniFileParser;
 using System.IO; // 用于检查文件是否存在
 using System.Collections.Generic; // 用于Stack
 
@@ -288,13 +288,23 @@ namespace ATC4_HQ.ViewModels
             }
 
             GlobalPaths.GamePath = gameData.Path; // 更新全局路径
-            IniFile ini = new IniFile(GlobalPaths.InitiatorProfileName);
-            ini.SetValue("main", "GamePath", GlobalPaths.GamePath);
-            ini.Save();
+            IniFile ini = new IniFile();
+            if (File.Exists(GlobalPaths.InitiatorProfileName))
+            {
+                ini.Load(GlobalPaths.InitiatorProfileName);
+            }
+            ini.SetSetting("main", "GamePath", GlobalPaths.GamePath ?? string.Empty);
+            ini.Save(GlobalPaths.InitiatorProfileName);
+
             GlobalPaths.GameName = gameData.Name;
-            ini = new IniFile(GlobalPaths.GamePath + @"\GameData.ini");
-            ini.SetValue("GameSettings" , "GameName" , GlobalPaths.GameName);
-            ini.Save();
+            var gameDataIniPath = GlobalPaths.GamePath + @"\GameData.ini";
+            ini = new IniFile();
+            if (File.Exists(gameDataIniPath))
+            {
+                ini.Load(gameDataIniPath);
+            }
+            ini.SetSetting("GameSettings", "GameName", GlobalPaths.GameName ?? string.Empty);
+            ini.Save(gameDataIniPath);
             
             // 安装完成后清除右边区域的内容
             ClearSubPage();

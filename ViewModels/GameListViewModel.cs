@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
-using Masuit.Tools.Files;
+using SoftCircuits.IniFileParser;
 using master.Globals;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
@@ -50,21 +50,21 @@ public partial class GameListViewModel : ViewModelBase
     public GameListViewModel()
     {
         //从配置文件找要显示的东西
-        IniFile ini = new IniFile(GlobalPaths.InitiatorProfileName);
+        IniFile ini = new IniFile();
+        if (File.Exists(GlobalPaths.InitiatorProfileName))
+        {
+            ini.Load(GlobalPaths.InitiatorProfileName);
+        }
         var games = new ObservableCollection<GameInfo>();
         
         //读取游戏目录配置
-        var gameDirs = ini.GetSection("GameDirectories");
-        if (gameDirs != null)
+        foreach (var setting in ini.GetSectionSettings("GameDirectories"))
         {
-            foreach (var key in gameDirs.Keys)
+            var path = setting.Value;
+            if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
             {
-                var path = gameDirs[key];
-                if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
-                {
-                    var gameName = Path.GetFileName(path);
-                    games.Add(new GameInfo { Name = gameName, Path = path });
-                }
+                var gameName = Path.GetFileName(path);
+                games.Add(new GameInfo { Name = gameName, Path = path });
             }
         }
         
