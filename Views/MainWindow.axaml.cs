@@ -13,7 +13,7 @@ using Avalonia;
 using Avalonia.Media;
 using Avalonia.Input;
 using Microsoft.Extensions.Logging;
-using System.Net.Http;
+using System.Diagnostics;
 
 namespace ATC4_HQ.Views
 {
@@ -178,55 +178,11 @@ namespace ATC4_HQ.Views
             GlobalPaths.TransitSoftwareLE = ini.GetSetting("main", "TransitSoftwareLE", string.Empty);
             GlobalPaths.GamePath = ini.GetSetting("main", "GamePath", string.Empty);
 
-            await CheckForUpdatesAsync();
-
-        }
-
-        private async Task CheckForUpdatesAsync()
-        {
-            const string latestReleaseApi = "https://api.github.com/repos/Sjshi763/PicaComic/releases/latest";
-            const string releasesPage = "https://github.com/Sjshi763/PicaComic/releases";
-
-            try
+            if (DataContext is MainWindowViewModel viewModel)
             {
-                using var client = new HttpClient();
-                client.DefaultRequestHeaders.UserAgent.ParseAdd("ATC4-HQ-UpdateChecker");
-
-                var response = await client.GetAsync(latestReleaseApi);
-                if (!response.IsSuccessStatusCode)
-                {
-                    LoggerHelper.LogWarning($"检查更新失败，状态码：{response.StatusCode}");
-                    return;
-                }
-
-                var json = await response.Content.ReadAsStringAsync();
-                using var doc = JsonDocument.Parse(json);
-
-                var latestTag = doc.RootElement.GetProperty("tag_name").GetString() ?? string.Empty;
-                var latestVersionText = latestTag.Trim().TrimStart('v', 'V');
-                var currentVersionText = GlobalPaths.Version.Trim().TrimStart('v', 'V');
-
-                if (!Version.TryParse(latestVersionText, out var latestVersion) ||
-                    !Version.TryParse(currentVersionText, out var currentVersion))
-                {
-                    LoggerHelper.LogWarning($"版本号解析失败，当前版本：{GlobalPaths.Version}，远程版本：{latestTag}");
-                    return;
-                }
-
-                if (latestVersion > currentVersion)
-                {
-                    ShowMessageDialog(this,
-                        $"发现新版本\n当前版本：{GlobalPaths.Version}\n最新版本：{latestTag}\n请前往下载：{releasesPage}");
-                }
-                else
-                {
-                    LoggerHelper.LogInformation($"当前已是最新版本：{GlobalPaths.Version}");
-                }
+                await viewModel.CheckForUpdatesAsync();
             }
-            catch (Exception ex)
-            {
-                LoggerHelper.LogWarning($"检查更新时发生异常：{ex.Message}");
-            }
+
         }
 
         private void PrimaryProfile()
@@ -269,6 +225,33 @@ namespace ATC4_HQ.Views
             if (DataContext is MainWindowViewModel viewModel)
             {
                 viewModel.ShowOpenALInstallView += OnShowOpenALInstallView;
+                viewModel.UpdateAvailable += OnUpdateAvailable;
+            }
+        }
+
+        private async void OnUpdateAvailable(object? sender, UpdateAvailableEventArgs e)
+        {
+            var shouldUpdate = await ShowConfirmDialog(
+                this,
+                "发现新版本",
+                $"当前版本：{e.CurrentVersion}\n最新版本：{e.LatestVersion}\n是否前往更新页面？");
+
+            if (!shouldUpdate)
+            {
+                return;
+            }
+
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = e.ReleasesPageUrl,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                LoggerHelper.LogWarning($"打开更新页面失败：{ex.Message}");
             }
         }
         
@@ -369,6 +352,48 @@ namespace ATC4_HQ.Views
             
             // 显示对话框
             await resultWindow.ShowDialog(parentWindow);
+        }
+
+        private async Task<bool> ShowConfirmDialog(Window parentWindow, string title, string message)
+        {
+            var dialogWindow = new Window
+            {
+                Title = title,
+                Width = 450,
+                Height = 220,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                CanResize = false
+            };
+
+            var stackPanel = new StackPanel { Margin = new Thickness(20) };
+            stackPanel.Children.Add(new TextBlock
+            {
+                Text = message,
+                FontSize = 16,
+                TextWrapping = TextWrapping.Wrap,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 20)
+            });
+
+            var buttonsPanel = new StackPanel
+            {
+                Orientation = Avalonia.Layout.Orientation.Horizontal,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                Spacing = 12
+            };
+
+            var noButton = new Button { Content = "暂不更新", Width = 100, Height = 35 };
+            var yesButton = new Button { Content = "前往更新", Width = 100, Height = 35 };
+
+            noButton.Click += (_, __) => dialogWindow.Close(false);
+            yesButton.Click += (_, __) => dialogWindow.Close(true);
+
+            buttonsPanel.Children.Add(noButton);
+            buttonsPanel.Children.Add(yesButton);
+            stackPanel.Children.Add(buttonsPanel);
+
+            dialogWindow.Content = stackPanel;
+            return await dialogWindow.ShowDialog<bool>(parentWindow);
         }
         
         /// <summary>
