@@ -109,8 +109,7 @@ namespace ATC4_HQ.ViewModels
 
         private void OnDownloadMonitor()
         {
-            LoggerHelper.LogInformation("打开下载监视器");
-            NavigateToPage(new DownloadMonitorViewModel(), 3);
+            LoggerHelper.LogInformation("下载监视功能已关闭，忽略导航请求。");
         }
         
         /// <summary>
@@ -157,7 +156,7 @@ namespace ATC4_HQ.ViewModels
                     OnInstallGame();
                     break;
                 case "3":
-                    OnDownloadMonitor();
+                    // 下载监视入口已关闭
                     break;
                 case "4":
                     OnSetting();
@@ -192,7 +191,7 @@ namespace ATC4_HQ.ViewModels
         {
             IsNavBtn1Checked = page is GameStartOptionsViewModel;
             IsNavBtn2Checked = page is InstallGameViewModel;
-            IsNavBtn3Checked = page is DownloadMonitorViewModel;
+            IsNavBtn3Checked = false;
             IsNavBtn4Checked = page is SettingViewModel;
         }
 
