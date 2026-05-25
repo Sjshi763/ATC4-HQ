@@ -8,6 +8,7 @@ namespace ATC4_HQ.ViewModels
     /// <summary>
     /// 下载项视图模型 - 符合MVVM模式，负责UI绑定和业务逻辑
     /// </summary>
+    [Obsolete("BT 下载项功能已弃用，请勿在新代码中使用。")]
     public partial class DownloadItemViewModel : ViewModelBase
     {
         private readonly DownloadItemModel _model;

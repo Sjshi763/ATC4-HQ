@@ -16,6 +16,7 @@ using System.IO.Compression;
 
 namespace ATC4_HQ.ViewModels
 {
+    [Obsolete("BT 下载监视功能已弃用，请勿在新代码中使用。")]
     public partial class DownloadMonitorViewModel : ViewModelBase
     {
         [ObservableProperty]

@@ -6,6 +6,7 @@ using System;
 
 namespace ATC4_HQ.ViewModels
 {
+    [Obsolete("BT 功能已弃用，请勿在新代码中使用。")]
     public partial class BtViewModel : ObservableObject
     {
         private readonly BtService _btService = new BtService();

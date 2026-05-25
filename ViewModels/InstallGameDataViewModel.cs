@@ -461,6 +461,7 @@ namespace ATC4_HQ.ViewModels
     }
 
     // ⭐️ 新增：用于传递BT下载事件参数的类
+    [Obsolete("BT 下载事件已弃用，请勿在新代码中使用。")]
     public class BtDownloadEventArgs : EventArgs
     {
         public string GameName { get; set; } = string.Empty;

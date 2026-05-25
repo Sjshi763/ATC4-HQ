@@ -44,11 +44,6 @@
                         Height="25"
                         Margin="5"
                         Command="{Binding FindFileCommand}" />
-                <Button Content="下载"
-                        Command="{Binding DownloadCommand}"
-                        Width="60"
-                        Height="25"
-                        Margin="5" />
             </StackPanel>
         </Grid>
         <!-- SSD警告 -->

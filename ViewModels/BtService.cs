@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ATC4_HQ.ViewModels
 {
+    [Obsolete("BT 功能已弃用，请勿在新代码中使用。")]
     public class BtService
     {
         private ClientEngine? _engine;
@@ -117,6 +118,7 @@ namespace ATC4_HQ.ViewModels
         }
     }
 
+    [Obsolete("BT 功能已弃用，请勿在新代码中使用。")]
     public class DownloadProgressEventArgs : EventArgs
     {
         public string GameName { get; set; } = string.Empty;
@@ -126,6 +128,7 @@ namespace ATC4_HQ.ViewModels
         public long TotalBytes { get; set; }
     }
 
+    [Obsolete("BT 功能已弃用，请勿在新代码中使用。")]
     public class DownloadCompletedEventArgs : EventArgs
     {
         public string GameName { get; set; } = string.Empty;
