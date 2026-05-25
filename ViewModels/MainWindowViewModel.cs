@@ -9,6 +9,8 @@ using master.Globals;
 using SoftCircuits.IniFileParser;
 using System.IO; // 用于检查文件是否存在
 using System.Collections.Generic; // 用于Stack
+using System.Net.Http;
+using System.Text.Json;
 
 namespace ATC4_HQ.ViewModels
 {
@@ -41,6 +43,9 @@ namespace ATC4_HQ.ViewModels
         // 事件：当需要显示OPENAL安装界面时触发
         public event EventHandler? ShowOpenALInstallView;
         
+        // 事件：当检测到有新版本时触发（由 View 层决定是否弹窗与后续操作）
+        public event EventHandler<UpdateAvailableEventArgs>? UpdateAvailable;
+        
         public ICommand StartGameCommand { get; }
         public ICommand InstallGameCommand { get; } // 用于 ViewModel 内部逻辑或未来绑定
         public ICommand SettingCommand { get; }
@@ -57,6 +62,55 @@ namespace ATC4_HQ.ViewModels
             
             // 初始化默认页面
             OnStartGame();
+        }
+
+        public async Task CheckForUpdatesAsync()
+        {
+            const string latestReleaseApi = "https://api.github.com/repos/Sjshi763/ATC4-HQ/releases/latest";
+            const string releasesPage = "https://github.com/Sjshi763/ATC4-HQ/releases";
+
+            try
+            {
+                LoggerHelper.LogInformation($"开始检查更新，当前版本：{GlobalPaths.Version}");
+                using var client = new HttpClient();
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("ATC4-HQ-UpdateChecker");
+
+                var response = await client.GetAsync(latestReleaseApi);
+                if (!response.IsSuccessStatusCode)
+                {
+                    LoggerHelper.LogWarning($"检查更新失败，状态码：{response.StatusCode}");
+                    return;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+
+                var latestTag = doc.RootElement.GetProperty("tag_name").GetString() ?? string.Empty;
+                var latestVersionText = latestTag.Trim().TrimStart('v', 'V');
+                var currentVersionText = GlobalPaths.Version.Trim().TrimStart('v', 'V');
+                LoggerHelper.LogInformation($"更新检查返回版本信息，当前：{currentVersionText}，远程：{latestVersionText}");
+
+                if (!Version.TryParse(latestVersionText, out var latestVersion) ||
+                    !Version.TryParse(currentVersionText, out var currentVersion))
+                {
+                    LoggerHelper.LogWarning($"版本号解析失败，当前版本：{GlobalPaths.Version}，远程版本：{latestTag}");
+                    return;
+                }
+
+                if (latestVersion > currentVersion)
+                {
+                    LoggerHelper.LogInformation($"检测到新版本，当前：{GlobalPaths.Version}，最新：{latestTag}，准备通知界面层。");
+                    UpdateAvailable?.Invoke(this, new UpdateAvailableEventArgs(GlobalPaths.Version, latestTag, releasesPage));
+                }
+                else
+                {
+                    LoggerHelper.LogInformation($"当前已是最新版本：{GlobalPaths.Version}");
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggerHelper.LogWarning($"检查更新时发生异常：{ex.Message}");
+            }
         }
 
         private void OnStartGame()
@@ -299,6 +353,20 @@ namespace ATC4_HQ.ViewModels
         {
             CurrentSubPage = null;
             LoggerHelper.LogInformation("已清除右边区域的内容。");
+        }
+    }
+
+    public sealed class UpdateAvailableEventArgs : EventArgs
+    {
+        public string CurrentVersion { get; }
+        public string LatestVersion { get; }
+        public string ReleasesPageUrl { get; }
+
+        public UpdateAvailableEventArgs(string currentVersion, string latestVersion, string releasesPageUrl)
+        {
+            CurrentVersion = currentVersion;
+            LatestVersion = latestVersion;
+            ReleasesPageUrl = releasesPageUrl;
         }
     }
 }

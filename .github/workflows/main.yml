@@ -7,6 +7,8 @@ on:
 jobs:
   build:
     runs-on: windows-latest # 在最新的 Windows 环境下运行
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name }}
 
     steps:
     - name: Checkout code # 步骤1: 检出仓库代码
@@ -20,11 +22,23 @@ jobs:
     - name: Restore dependencies # 步骤3: 恢复 NuGet 包依赖
       run: dotnet restore ./ATC4-HQ.csproj # 修复路径：假设 ATC4-HQ 文件夹在仓库根目录
 
+    - name: Extract build version from release tag
+      run: |
+        $tagVersion = "${{ env.RELEASE_TAG }}"
+        if ([string]::IsNullOrWhiteSpace($tagVersion)) {
+          $appVersion = "0.0.0"
+        } else {
+          $appVersion = $tagVersion -replace '^[vV]', ''
+        }
+
+        echo "APP_VERSION=$appVersion" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        echo "Build version: $appVersion"
+
     - name: Build project # 步骤4: 构建项目 (Release 配置)
-      run: dotnet build ./ATC4-HQ.csproj --configuration Release --no-restore # 修复路径
+      run: dotnet build ./ATC4-HQ.csproj --configuration Release --no-restore /p:Version=${{ env.APP_VERSION }} /p:AssemblyVersion=${{ env.APP_VERSION }} /p:FileVersion=${{ env.APP_VERSION }} /p:InformationalVersion=${{ env.APP_VERSION }} # 修复路径
 
     - name: Publish application # 步骤5: 发布应用程序 (生成可执行文件)
-      run: dotnet publish ./ATC4-HQ.csproj --configuration Release --no-build -o publish # 修复路径
+      run: dotnet publish ./ATC4-HQ.csproj --configuration Release --no-build -o publish /p:Version=${{ env.APP_VERSION }} /p:AssemblyVersion=${{ env.APP_VERSION }} /p:FileVersion=${{ env.APP_VERSION }} /p:InformationalVersion=${{ env.APP_VERSION }} # 修复路径
 
     - name: Upload build artifact # 步骤6: 上传构建产物 (publish目录)
       uses: actions/upload-artifact@v4

@@ -13,6 +13,7 @@ using Avalonia;
 using Avalonia.Media;
 using Avalonia.Input;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace ATC4_HQ.Views
 {
@@ -172,10 +173,18 @@ namespace ATC4_HQ.Views
             if (PrimaryProfileVersion != GlobalPaths.Version)
             {
                 LoggerHelper.LogWarning($"配置文件版本不匹配，当前版本：{GlobalPaths.Version}，配置文件版本：{PrimaryProfileVersion}");
-                return;
+                LoggerHelper.LogInformation("继续执行启动流程，并使用当前程序版本更新配置文件中的 Version 字段。");
+                ini.SetSetting("main", "Version", GlobalPaths.Version);
+                ini.Save(GlobalPaths.InitiatorProfileName);
             }
             GlobalPaths.TransitSoftwareLE = ini.GetSetting("main", "TransitSoftwareLE", string.Empty);
             GlobalPaths.GamePath = ini.GetSetting("main", "GamePath", string.Empty);
+
+            if (DataContext is MainWindowViewModel viewModel)
+            {
+                LoggerHelper.LogInformation("准备调用 ViewModel.CheckForUpdatesAsync() 执行更新检测。");
+                await viewModel.CheckForUpdatesAsync();
+            }
 
         }
 
@@ -219,6 +228,40 @@ namespace ATC4_HQ.Views
             if (DataContext is MainWindowViewModel viewModel)
             {
                 viewModel.ShowOpenALInstallView += OnShowOpenALInstallView;
+                viewModel.UpdateAvailable += OnUpdateAvailable;
+            }
+        }
+
+        private async void OnUpdateAvailable(object? sender, UpdateAvailableEventArgs e)
+        {
+            LoggerHelper.LogInformation($"收到更新通知事件，当前版本：{e.CurrentVersion}，最新版本：{e.LatestVersion}");
+            var shouldUpdate = await ShowConfirmDialog(
+                this,
+                "发现新版本",
+                $"当前版本：{e.CurrentVersion}\n最新版本：{e.LatestVersion}\n是否前往更新页面？");
+
+            LoggerHelper.LogInformation(shouldUpdate
+                ? "用户选择前往更新页面。"
+                : "用户选择暂不更新。");
+
+            if (!shouldUpdate)
+            {
+                return;
+            }
+
+            try
+            {
+                LoggerHelper.LogInformation($"正在打开更新页面：{e.ReleasesPageUrl}");
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = e.ReleasesPageUrl,
+                    UseShellExecute = true
+                });
+                LoggerHelper.LogInformation("更新页面已发起打开请求。");
+            }
+            catch (Exception ex)
+            {
+                LoggerHelper.LogWarning($"打开更新页面失败：{ex.Message}");
             }
         }
         
@@ -319,6 +362,48 @@ namespace ATC4_HQ.Views
             
             // 显示对话框
             await resultWindow.ShowDialog(parentWindow);
+        }
+
+        private async Task<bool> ShowConfirmDialog(Window parentWindow, string title, string message)
+        {
+            var dialogWindow = new Window
+            {
+                Title = title,
+                Width = 450,
+                Height = 220,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                CanResize = false
+            };
+
+            var stackPanel = new StackPanel { Margin = new Thickness(20) };
+            stackPanel.Children.Add(new TextBlock
+            {
+                Text = message,
+                FontSize = 16,
+                TextWrapping = TextWrapping.Wrap,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 20)
+            });
+
+            var buttonsPanel = new StackPanel
+            {
+                Orientation = Avalonia.Layout.Orientation.Horizontal,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                Spacing = 12
+            };
+
+            var noButton = new Button { Content = "暂不更新", Width = 100, Height = 35 };
+            var yesButton = new Button { Content = "前往更新", Width = 100, Height = 35 };
+
+            noButton.Click += (_, __) => dialogWindow.Close(false);
+            yesButton.Click += (_, __) => dialogWindow.Close(true);
+
+            buttonsPanel.Children.Add(noButton);
+            buttonsPanel.Children.Add(yesButton);
+            stackPanel.Children.Add(buttonsPanel);
+
+            dialogWindow.Content = stackPanel;
+            return await dialogWindow.ShowDialog<bool>(parentWindow);
         }
         
         /// <summary>
