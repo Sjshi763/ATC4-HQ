@@ -13,6 +13,7 @@ using Avalonia;
 using Avalonia.Media;
 using Avalonia.Input;
 using Microsoft.Extensions.Logging;
+using System.Net.Http;
 
 namespace ATC4_HQ.Views
 {
@@ -177,6 +178,55 @@ namespace ATC4_HQ.Views
             GlobalPaths.TransitSoftwareLE = ini.GetSetting("main", "TransitSoftwareLE", string.Empty);
             GlobalPaths.GamePath = ini.GetSetting("main", "GamePath", string.Empty);
 
+            await CheckForUpdatesAsync();
+
+        }
+
+        private async Task CheckForUpdatesAsync()
+        {
+            const string latestReleaseApi = "https://api.github.com/repos/Sjshi763/PicaComic/releases/latest";
+            const string releasesPage = "https://github.com/Sjshi763/PicaComic/releases";
+
+            try
+            {
+                using var client = new HttpClient();
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("ATC4-HQ-UpdateChecker");
+
+                var response = await client.GetAsync(latestReleaseApi);
+                if (!response.IsSuccessStatusCode)
+                {
+                    LoggerHelper.LogWarning($"检查更新失败，状态码：{response.StatusCode}");
+                    return;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+
+                var latestTag = doc.RootElement.GetProperty("tag_name").GetString() ?? string.Empty;
+                var latestVersionText = latestTag.Trim().TrimStart('v', 'V');
+                var currentVersionText = GlobalPaths.Version.Trim().TrimStart('v', 'V');
+
+                if (!Version.TryParse(latestVersionText, out var latestVersion) ||
+                    !Version.TryParse(currentVersionText, out var currentVersion))
+                {
+                    LoggerHelper.LogWarning($"版本号解析失败，当前版本：{GlobalPaths.Version}，远程版本：{latestTag}");
+                    return;
+                }
+
+                if (latestVersion > currentVersion)
+                {
+                    ShowMessageDialog(this,
+                        $"发现新版本\n当前版本：{GlobalPaths.Version}\n最新版本：{latestTag}\n请前往下载：{releasesPage}");
+                }
+                else
+                {
+                    LoggerHelper.LogInformation($"当前已是最新版本：{GlobalPaths.Version}");
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggerHelper.LogWarning($"检查更新时发生异常：{ex.Message}");
+            }
         }
 
         private void PrimaryProfile()
