@@ -173,13 +173,16 @@ namespace ATC4_HQ.Views
             if (PrimaryProfileVersion != GlobalPaths.Version)
             {
                 LoggerHelper.LogWarning($"配置文件版本不匹配，当前版本：{GlobalPaths.Version}，配置文件版本：{PrimaryProfileVersion}");
-                return;
+                LoggerHelper.LogInformation("继续执行启动流程，并使用当前程序版本更新配置文件中的 Version 字段。");
+                ini.SetSetting("main", "Version", GlobalPaths.Version);
+                ini.Save(GlobalPaths.InitiatorProfileName);
             }
             GlobalPaths.TransitSoftwareLE = ini.GetSetting("main", "TransitSoftwareLE", string.Empty);
             GlobalPaths.GamePath = ini.GetSetting("main", "GamePath", string.Empty);
 
             if (DataContext is MainWindowViewModel viewModel)
             {
+                LoggerHelper.LogInformation("准备调用 ViewModel.CheckForUpdatesAsync() 执行更新检测。");
                 await viewModel.CheckForUpdatesAsync();
             }
 
