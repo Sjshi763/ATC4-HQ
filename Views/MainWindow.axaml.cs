@@ -148,15 +148,6 @@ namespace ATC4_HQ.Views
             }
         }
 
-        private void DownloadMonitor_Click(object? sender, RoutedEventArgs e)
-        {
-            if (DataContext is MainWindowViewModel viewModel)
-            {
-                LoggerHelper.LogInformation("下载监视按钮被点击了！");
-                viewModel.DownloadMonitorCommand.Execute(null);
-            }
-        }
-
 
         private async Task StartUp()
         {
@@ -186,18 +177,6 @@ namespace ATC4_HQ.Views
             GlobalPaths.TransitSoftwareLE = ini.GetSetting("main", "TransitSoftwareLE", string.Empty);
             GlobalPaths.GamePath = ini.GetSetting("main", "GamePath", string.Empty);
 
-            // 读取BT配置，默认为false
-            string btEnabledValue = ini.GetSetting("main", "BTEnabled", string.Empty) ?? string.Empty;
-            if (bool.TryParse(btEnabledValue, out bool btEnabled))
-            {
-                GlobalPaths.BTEnabled = btEnabled;
-            }
-            else
-            {
-                GlobalPaths.BTEnabled = false;
-                // 如果配置文件中没有BTEnabled项，显示弹窗询问用户
-                await ShowBTConsentDialog();
-            }
         }
 
         private void PrimaryProfile()
@@ -226,7 +205,6 @@ namespace ATC4_HQ.Views
             ini.SetSetting("main", "Version", GlobalPaths.Version);
             ini.SetSetting("main", "FirstRun", GlobalPaths.FirstRun ?? string.Empty);
             ini.SetSetting("main", "TransitSoftwareLE", "null");
-            ini.SetSetting("main", "BTEnabled", "false");
             LoggerHelper.LogInformation("初始配置文件已创建。");
             ini.Save(GlobalPaths.InitiatorProfileName);
         }
@@ -346,108 +324,10 @@ namespace ATC4_HQ.Views
         /// <summary>
         /// 显示BT功能同意对话框
         /// </summary>
-        private async Task ShowBTConsentDialog()
-        {
-            var consentWindow = new Window
-            {
-                Title = "BT功能设置",
-                Width = 450,
-                Height = 300,
-                WindowStartupLocation = WindowStartupLocation.CenterScreen,
-                CanResize = false
-            };
-
-            var stackPanel = new StackPanel { Margin = new Thickness(20) };
-
-            var titleTextBlock = new TextBlock
-            {
-                Text = "BT下载功能",
-                FontSize = 18,
-                FontWeight = FontWeight.Bold,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                Margin = new Thickness(0, 0, 0, 15)
-            };
-
-            var messageTextBlock = new TextBlock
-            {
-                Text = "ATC4-HQ支持使用BT技术进行数据上传和下载，\n可以加快下载速度并帮助其他用户。\n\n是否启用BT功能？\n\n启用后，您将同时作为下载者和上传者\n参与文件分发。",
-                FontSize = 14,
-                TextWrapping = TextWrapping.Wrap,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                Margin = new Thickness(0, 0, 0, 20)
-            };
-
-            var buttonPanel = new StackPanel
-            {
-                Orientation = Avalonia.Layout.Orientation.Horizontal,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                Spacing = 20
-            };
-
-            var enableButton = new Button
-            {
-                Content = "启用BT",
-                Width = 100,
-                Height = 35,
-                Background = Brushes.LightGreen
-            };
-
-            var disableButton = new Button
-            {
-                Content = "禁用BT",
-                Width = 100,
-                Height = 35,
-                Background = Brushes.LightCoral
-            };
-
-            buttonPanel.Children.Add(enableButton);
-            buttonPanel.Children.Add(disableButton);
-
-            stackPanel.Children.Add(titleTextBlock);
-            stackPanel.Children.Add(messageTextBlock);
-            stackPanel.Children.Add(buttonPanel);
-
-            consentWindow.Content = stackPanel;
-
-            // 处理用户选择
-            enableButton.Click += (s, e) =>
-            {
-                GlobalPaths.BTEnabled = true;
-                SaveBTConfig(true);
-                consentWindow.Close();
-            };
-
-            disableButton.Click += (s, e) =>
-            {
-                GlobalPaths.BTEnabled = false;
-                SaveBTConfig(false);
-                consentWindow.Close();
-            };
-
-            await consentWindow.ShowDialog(this);
-        }
         
         /// <summary>
         /// 保存BT配置到配置文件
         /// </summary>
         /// <param name="enabled">是否启用BT</param>
-        private void SaveBTConfig(bool enabled)
-        {
-            try
-            {
-                IniFile ini = new IniFile();
-                if (File.Exists(GlobalPaths.InitiatorProfileName))
-                {
-                    ini.Load(GlobalPaths.InitiatorProfileName);
-                }
-                ini.SetSetting("main", "BTEnabled", enabled.ToString());
-                ini.Save(GlobalPaths.InitiatorProfileName);
-                LoggerHelper.LogInformation($"BT配置已保存: {enabled}");
-            }
-            catch (Exception ex)
-            {
-                LoggerHelper.LogError($"保存BT配置时发生错误: {ex.Message}");
-            }
-        }
     }
 }

@@ -27,9 +27,6 @@ namespace ATC4_HQ.ViewModels
         private bool _isNavBtn2Checked;
         
         [ObservableProperty]
-        private bool _isNavBtn3Checked;
-        
-        [ObservableProperty]
         private bool _isNavBtn4Checked;
         
         [ObservableProperty]
@@ -47,7 +44,6 @@ namespace ATC4_HQ.ViewModels
         public ICommand StartGameCommand { get; }
         public ICommand InstallGameCommand { get; } // 用于 ViewModel 内部逻辑或未来绑定
         public ICommand SettingCommand { get; }
-        public ICommand DownloadMonitorCommand { get; }
         public ICommand NavigateCommand { get; } // 新增导航命令
         public ICommand GoBackCommand { get; } // 新增返回命令
 
@@ -56,7 +52,6 @@ namespace ATC4_HQ.ViewModels
             StartGameCommand = new RelayCommand(OnStartGame);
             InstallGameCommand = new RelayCommand(OnInstallGame); 
             SettingCommand = new RelayCommand(OnSetting);
-            DownloadMonitorCommand = new RelayCommand(OnDownloadMonitor);
             NavigateCommand = new RelayCommand<string>(OnNavigate);
             GoBackCommand = new RelayCommand(OnGoBack, () => CanGoBack);
             
@@ -91,7 +86,6 @@ namespace ATC4_HQ.ViewModels
             // 更新导航按钮状态
             IsNavBtn1Checked = false;
             IsNavBtn2Checked = true;
-            IsNavBtn3Checked = false;
             IsNavBtn4Checked = false;
             LoggerHelper.LogInformation("ViewModel: 已在右边显示安装游戏界面。");
         }
@@ -103,16 +97,9 @@ namespace ATC4_HQ.ViewModels
             // 更新导航按钮状态
             IsNavBtn1Checked = false;
             IsNavBtn2Checked = false;
-            IsNavBtn3Checked = false;
             IsNavBtn4Checked = true;
         }
 
-        private void OnDownloadMonitor()
-        {
-            LoggerHelper.LogInformation("打开下载监视器");
-            NavigateToPage(new DownloadMonitorViewModel(), 3);
-        }
-        
         /// <summary>
         /// 导航到指定页面
         /// </summary>
@@ -132,7 +119,6 @@ namespace ATC4_HQ.ViewModels
             // 更新导航按钮状态
             IsNavBtn1Checked = navButtonIndex == 1;
             IsNavBtn2Checked = navButtonIndex == 2;
-            IsNavBtn3Checked = navButtonIndex == 3;
             IsNavBtn4Checked = navButtonIndex == 4;
             
             // 更新返回按钮状态
@@ -155,9 +141,6 @@ namespace ATC4_HQ.ViewModels
                 case "2":
                     // 安装游戏逻辑 - 显示安装游戏界面
                     OnInstallGame();
-                    break;
-                case "3":
-                    OnDownloadMonitor();
                     break;
                 case "4":
                     OnSetting();
@@ -192,7 +175,6 @@ namespace ATC4_HQ.ViewModels
         {
             IsNavBtn1Checked = page is GameStartOptionsViewModel;
             IsNavBtn2Checked = page is InstallGameViewModel;
-            IsNavBtn3Checked = page is DownloadMonitorViewModel;
             IsNavBtn4Checked = page is SettingViewModel;
         }
 
