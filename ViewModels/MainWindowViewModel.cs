@@ -71,6 +71,7 @@ namespace ATC4_HQ.ViewModels
 
             try
             {
+                LoggerHelper.LogInformation($"开始检查更新，当前版本：{GlobalPaths.Version}");
                 using var client = new HttpClient();
                 client.DefaultRequestHeaders.UserAgent.ParseAdd("ATC4-HQ-UpdateChecker");
 
@@ -87,6 +88,7 @@ namespace ATC4_HQ.ViewModels
                 var latestTag = doc.RootElement.GetProperty("tag_name").GetString() ?? string.Empty;
                 var latestVersionText = latestTag.Trim().TrimStart('v', 'V');
                 var currentVersionText = GlobalPaths.Version.Trim().TrimStart('v', 'V');
+                LoggerHelper.LogInformation($"更新检查返回版本信息，当前：{currentVersionText}，远程：{latestVersionText}");
 
                 if (!Version.TryParse(latestVersionText, out var latestVersion) ||
                     !Version.TryParse(currentVersionText, out var currentVersion))
@@ -97,6 +99,7 @@ namespace ATC4_HQ.ViewModels
 
                 if (latestVersion > currentVersion)
                 {
+                    LoggerHelper.LogInformation($"检测到新版本，当前：{GlobalPaths.Version}，最新：{latestTag}，准备通知界面层。");
                     UpdateAvailable?.Invoke(this, new UpdateAvailableEventArgs(GlobalPaths.Version, latestTag, releasesPage));
                 }
                 else

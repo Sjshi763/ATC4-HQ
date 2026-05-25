@@ -231,10 +231,15 @@ namespace ATC4_HQ.Views
 
         private async void OnUpdateAvailable(object? sender, UpdateAvailableEventArgs e)
         {
+            LoggerHelper.LogInformation($"收到更新通知事件，当前版本：{e.CurrentVersion}，最新版本：{e.LatestVersion}");
             var shouldUpdate = await ShowConfirmDialog(
                 this,
                 "发现新版本",
                 $"当前版本：{e.CurrentVersion}\n最新版本：{e.LatestVersion}\n是否前往更新页面？");
+
+            LoggerHelper.LogInformation(shouldUpdate
+                ? "用户选择前往更新页面。"
+                : "用户选择暂不更新。");
 
             if (!shouldUpdate)
             {
@@ -243,11 +248,13 @@ namespace ATC4_HQ.Views
 
             try
             {
+                LoggerHelper.LogInformation($"正在打开更新页面：{e.ReleasesPageUrl}");
                 Process.Start(new ProcessStartInfo
                 {
                     FileName = e.ReleasesPageUrl,
                     UseShellExecute = true
                 });
+                LoggerHelper.LogInformation("更新页面已发起打开请求。");
             }
             catch (Exception ex)
             {
