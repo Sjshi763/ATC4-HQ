@@ -66,8 +66,8 @@ namespace ATC4_HQ.ViewModels
 
         public async Task CheckForUpdatesAsync()
         {
-            const string latestReleaseApi = "https://api.github.com/repos/Sjshi763/PicaComic/releases/latest";
-            const string releasesPage = "https://github.com/Sjshi763/PicaComic/releases";
+            const string latestReleaseApi = "https://api.github.com/repos/Sjshi763/ATC4-HQ/releases/latest";
+            const string releasesPage = "https://github.com/Sjshi763/ATC4-HQ/releases";
 
             try
             {
