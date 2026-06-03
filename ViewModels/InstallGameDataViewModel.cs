@@ -9,6 +9,8 @@ using ATC4_HQ.ViewModels; // 添加引用以使用DriveTypeService
 using ATC4_HQ.Models; // 引入 GameModel 的命名空间
 using System.Collections.Generic; // 用于List
 using System.Linq; // 用于LINQ查询
+using System.IO;
+using master.Globals;
 
 namespace ATC4_HQ.ViewModels
 {
@@ -31,6 +33,14 @@ namespace ATC4_HQ.ViewModels
 
         [ObservableProperty]
         private string _ssdWarning = string.Empty; // 用于显示SSD警告
+
+        [ObservableProperty]
+        private string _archiveValidationMessage = "请选择包含 ATC4.z01 到 ATC4.z08 以及 ATC4.zip 的完整文件夹。";
+
+        [ObservableProperty]
+        private bool _isArchiveFolderValid;
+
+        public string RequiredArchivePartsText => string.Join("、", GlobalPaths.RequiredAtc4ArchiveParts);
 
         private string? _tempDownloadPath; // 用于存储下载过程中的临时文件路径
 
@@ -65,6 +75,8 @@ namespace ATC4_HQ.ViewModels
 
         partial void OnGamePathChanged(string value)
         {
+            ValidateArchiveFolder(value);
+
             // 检测路径是否在SSD上并更新警告
             if (!string.IsNullOrWhiteSpace(value) && value != "未选择任何文件夹")
             {
@@ -83,7 +95,37 @@ namespace ATC4_HQ.ViewModels
             }
         }
 
-        private async void OnSave()
+        private void ValidateArchiveFolder(string? folderPath)
+        {
+            IsArchiveFolderValid = false;
+
+            if (string.IsNullOrWhiteSpace(folderPath) || folderPath == "未选择任何文件夹")
+            {
+                ArchiveValidationMessage = "请选择包含 ATC4.z01 到 ATC4.z08 以及 ATC4.zip 的完整文件夹。";
+                return;
+            }
+
+            if (!Directory.Exists(folderPath))
+            {
+                ArchiveValidationMessage = "所选路径不是有效文件夹，请重新选择。";
+                return;
+            }
+
+            var missingParts = GlobalPaths.RequiredAtc4ArchiveParts
+                .Where(part => !File.Exists(Path.Combine(folderPath, part)))
+                .ToArray();
+
+            if (missingParts.Length > 0)
+            {
+                ArchiveValidationMessage = $"文件夹缺少必要分卷：{string.Join("、", missingParts)}";
+                return;
+            }
+
+            IsArchiveFolderValid = true;
+            ArchiveValidationMessage = "已检测到完整 ATC4 分卷压缩包，可以开始安装。";
+        }
+
+        private void OnSave()
         {
             // ⭐️ 新增：对 GameName 的验证
             if (string.IsNullOrWhiteSpace(GameName) || GameName == "取个名字方便找到它")
@@ -97,6 +139,13 @@ namespace ATC4_HQ.ViewModels
             if (string.IsNullOrWhiteSpace(GamePath) || GamePath == "未选择任何文件夹")
             {
                 LoggerHelper.LogError("请选择一个有效的游戏路径！");
+                return;
+            }
+
+            ValidateArchiveFolder(GamePath);
+            if (!IsArchiveFolderValid)
+            {
+                LoggerHelper.LogError(ArchiveValidationMessage);
                 return;
             }
             

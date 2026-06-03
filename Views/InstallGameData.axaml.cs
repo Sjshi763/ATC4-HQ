@@ -61,7 +61,7 @@ namespace ATC4_HQ.Views
             {
                 var folders = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
                 {
-                    Title = "请选择游戏使用路径",
+                    Title = "请选择包含 ATC4.z01 到 ATC4.z08 和 ATC4.zip 的完整文件夹",
                     AllowMultiple = false
                 });
 

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace master
@@ -13,6 +14,19 @@ namespace master
             public static string? GamePath;
             public static string? GameName;
             public static string LogPath = AppPaths.LogDirectory;
+            public static string Atc4ArchiveBaseName = "ATC4";
+            public static IReadOnlyList<string> RequiredAtc4ArchiveParts { get; } = new[]
+            {
+                "ATC4.z01",
+                "ATC4.z02",
+                "ATC4.z03",
+                "ATC4.z04",
+                "ATC4.z05",
+                "ATC4.z06",
+                "ATC4.z07",
+                "ATC4.z08",
+                "ATC4.zip"
+            };
 
             private static string GetAppVersion()
             {

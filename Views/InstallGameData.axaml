@@ -4,89 +4,208 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewmodels="clr-namespace:ATC4_HQ.ViewModels"
              mc:Ignorable="d"
-             d:DesignWidth="600"
-             d:DesignHeight="200"
+             d:DesignWidth="680"
+             d:DesignHeight="520"
              x:Class="ATC4_HQ.Views.InstallGameData"
              x:DataType="viewmodels:InstallGameDataViewModel">
 
-    <Grid ColumnDefinitions="Auto,*"
-          RowDefinitions="Auto,Auto,Auto,Auto"
-          Margin="15">
-
-        <!-- 标题 -->
-        <TextBlock Grid.ColumnSpan="2"
-                   Text="安装游戏数据"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   FontSize="20"
-                   Margin="0,0,0,20" />
-
-        <!-- 游戏数据路径 -->
-        <Label Grid.Row="1"
-               Content="游戏路径:"
-               VerticalAlignment="Center"
-               Margin="5" />
-        <Grid Grid.Row="1"
-              Grid.Column="1"
-              ColumnDefinitions="*,Auto">
-            <TextBox x:Name="WhereIsTheGames"
-                     Grid.Column="0"
-                     Width="250"
-                     Height="25"
-                     Margin="5"
-                     Watermark="请输入游戏路径"
-                     Text="{Binding GamePath}"
-                     VerticalAlignment="Center"/>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5">
-                <Button x:Name="BrowseButton"
-                        Content="浏览"
-                        Width="60"
-                        Height="25"
-                        Margin="5"
-                        Command="{Binding FindFileCommand}" />
+    <Border Margin="18"
+            Padding="24"
+            CornerRadius="18"
+            Background="#101827"
+            BorderBrush="#223047"
+            BorderThickness="1">
+        <Grid RowDefinitions="Auto,*">
+            <StackPanel Spacing="6">
+                <TextBlock Text="安装"
+                           FontSize="28"
+                           FontWeight="SemiBold"
+                           Foreground="#F8FAFC" />
+                <TextBlock Text="选择完整 ATC4 分卷压缩包文件夹，并按步骤创建可启动的服务器。"
+                           FontSize="13"
+                           Foreground="#94A3B8" />
             </StackPanel>
+
+            <Grid Grid.Row="1"
+                  Margin="0,26,0,0"
+                  ColumnDefinitions="48,*"
+                  RowDefinitions="Auto,Auto,Auto">
+                <Border Grid.Column="0"
+                        Grid.RowSpan="3"
+                        Width="2"
+                        Margin="23,18,0,18"
+                        HorizontalAlignment="Left"
+                        Background="#334155" />
+
+                <!-- 步骤 1 -->
+                <Grid Grid.Row="0"
+                      Grid.ColumnSpan="2"
+                      ColumnDefinitions="48,*"
+                      Margin="0,0,0,24">
+                    <Border Grid.Column="0"
+                            Width="34"
+                            Height="34"
+                            CornerRadius="17"
+                            Background="#2563EB"
+                            BorderBrush="#93C5FD"
+                            BorderThickness="2"
+                            HorizontalAlignment="Left">
+                        <TextBlock Text="1"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontWeight="Bold"
+                                   Foreground="White" />
+                    </Border>
+
+                    <Border Grid.Column="1"
+                            Padding="18"
+                            CornerRadius="14"
+                            Background="#172033"
+                            BorderBrush="#2B3A55"
+                            BorderThickness="1">
+                        <StackPanel Spacing="12">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="选择完整安装包文件夹"
+                                           FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Foreground="#E2E8F0" />
+                                <TextBlock Text="该文件夹必须包含全部分卷，缺少任意一个都会阻止安装。"
+                                           TextWrapping="Wrap"
+                                           Foreground="#94A3B8" />
+                                <TextBlock Text="{Binding RequiredArchivePartsText}"
+                                           TextWrapping="Wrap"
+                                           FontFamily="Consolas"
+                                           FontSize="12"
+                                           Foreground="#CBD5E1" />
+                            </StackPanel>
+
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBox x:Name="WhereIsTheGames"
+                                         Grid.Column="0"
+                                         Height="34"
+                                         Watermark="请选择包含 ATC4 分卷压缩包的文件夹"
+                                         Text="{Binding GamePath}"
+                                         VerticalAlignment="Center" />
+                                <Button x:Name="BrowseButton"
+                                        Grid.Column="1"
+                                        Content="浏览文件夹"
+                                        Height="34"
+                                        Margin="10,0,0,0"
+                                        Padding="16,0"
+                                        Command="{Binding FindFileCommand}" />
+                            </Grid>
+
+                            <TextBlock Text="{Binding ArchiveValidationMessage}"
+                                       TextWrapping="Wrap"
+                                       Foreground="#38BDF8"
+                                       FontSize="12" />
+
+                            <TextBlock Text="{Binding SsdWarning}"
+                                       Foreground="OrangeRed"
+                                       FontSize="12" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- 步骤 2 -->
+                <Grid Grid.Row="1"
+                      Grid.ColumnSpan="2"
+                      ColumnDefinitions="48,*"
+                      Margin="0,0,0,24">
+                    <Border Grid.Column="0"
+                            Width="34"
+                            Height="34"
+                            CornerRadius="17"
+                            Background="#1E293B"
+                            BorderBrush="#38BDF8"
+                            BorderThickness="2"
+                            HorizontalAlignment="Left">
+                        <TextBlock Text="2"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontWeight="Bold"
+                                   Foreground="#E0F2FE" />
+                    </Border>
+
+                    <Border Grid.Column="1"
+                            Padding="18"
+                            CornerRadius="14"
+                            Background="#172033"
+                            BorderBrush="#2B3A55"
+                            BorderThickness="1">
+                        <StackPanel Spacing="12">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="命名服务器"
+                                           FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Foreground="#E2E8F0" />
+                                <TextBlock Text="安装完成后会将名称写入 GameData.ini，方便后续在启动器内识别。"
+                                           TextWrapping="Wrap"
+                                           Foreground="#94A3B8" />
+                            </StackPanel>
+
+                            <TextBox x:Name="TheGameName"
+                                     Height="34"
+                                     Watermark="取个名字方便找到它"
+                                     Text="{Binding GameName}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- 步骤 3 -->
+                <Grid Grid.Row="2"
+                      Grid.ColumnSpan="2"
+                      ColumnDefinitions="48,*">
+                    <Border Grid.Column="0"
+                            Width="34"
+                            Height="34"
+                            CornerRadius="17"
+                            Background="#1E293B"
+                            BorderBrush="#38BDF8"
+                            BorderThickness="2"
+                            HorizontalAlignment="Left">
+                        <TextBlock Text="3"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontWeight="Bold"
+                                   Foreground="#E0F2FE" />
+                    </Border>
+
+                    <Border Grid.Column="1"
+                            Padding="18"
+                            CornerRadius="14"
+                            Background="#172033"
+                            BorderBrush="#2B3A55"
+                            BorderThickness="1">
+                        <StackPanel Spacing="12">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="解压并写入配置"
+                                           FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Foreground="#E2E8F0" />
+                                <TextBlock Text="启动器会使用支持分卷 ZIP 的解压库，从 ATC4.zip 读取全部分段并保存公共路径配置。"
+                                           TextWrapping="Wrap"
+                                           Foreground="#94A3B8" />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="12"
+                                        HorizontalAlignment="Right">
+                                <Button Content="清除"
+                                        Command="{Binding CancelCommand}"
+                                        Width="96"
+                                        Height="36" />
+                                <Button Content="开始安装"
+                                        Command="{Binding SaveCommand}"
+                                        Width="120"
+                                        Height="36"
+                                        Background="#2563EB"
+                                        Foreground="White" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
         </Grid>
-        <!-- SSD警告 -->
-        <TextBlock Grid.Row="1"
-                   Grid.Column="1"
-                   Text="{Binding SsdWarning}"
-                   Foreground="OrangeRed"
-                   Margin="5,35,0,0"
-                   FontSize="12"
-                   VerticalAlignment="Top"
-                   HorizontalAlignment="Left"/>
-
-        <!-- 游戏名称 -->
-        <Label Grid.Row="2"
-               Content="游戏名称:"
-               VerticalAlignment="Center"
-               Margin="5" />
-        <TextBox Grid.Row="2"
-                 Grid.Column="1"
-                 x:Name="TheGameName"
-                 Width="350"
-                 Height="25"
-                 Margin="5"
-                 Watermark="取个名字方便找到它"
-                 Text="{Binding GameName}" 
-				 HorizontalAlignment="Left"/>
-
-        <!-- 操作按钮 -->
-        <StackPanel Grid.Row="3"
-                    Grid.ColumnSpan="2"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Center"
-                    Margin="0,10,0,0">
-            <Button Content="安装游戏"
-                    Command="{Binding SaveCommand}"
-                    Width="120"
-                    Height="35"
-                    Margin="0,0,15,0" />
-            <Button Content="清除"
-                    Command="{Binding CancelCommand}"
-                    Width="100"
-                    Height="35"
-                    Margin="15,0,0,0" />
-        </StackPanel>
-    </Grid>
+    </Border>
 </UserControl>
