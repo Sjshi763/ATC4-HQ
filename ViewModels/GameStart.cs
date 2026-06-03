@@ -1,93 +1,30 @@
 using System;
-using master.Globals;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using ATC4_HQ.Views;
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
 
 namespace ATC4_HQ.ViewModels;
 
 public class GameStart
 {
-    public async Task StartGame(string selectedGame)
+    public Task StartGame(string selectedGame)
     {
         try
         {
             LoggerHelper.LogInformation($"准备启动游戏: {selectedGame}");
 
-            // 设置游戏需要的路径
-            // if (1==1) // 测试条件
-            // 正式条件：
-            if (string.IsNullOrEmpty(GlobalPaths.TransitSoftwareLE))
-            {
-                LoggerHelper.LogError("爷LE呢！？");
-                var dialogWindow = new ATC4_HQ.Views.LEInstallWindow();
-                var mainWindow = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop 
-                    ? desktop.MainWindow 
-                    : null;
-                bool result = await dialogWindow.ShowDialog(mainWindow);
-                if (!result)
-                {
-                    LoggerHelper.LogInformation("用户取消了操作，停止启动游戏。");
-                    return; // 用户取消操作
-                }
-                LoggerHelper.LogInformation("对话框已确认，继续执行");
-                LoggerHelper.LogInformation($"");
-                //TODO: 这里可以添加代码来打开设置界面，或者直接当场配置
-            }
-            string gamePath = selectedGame + @"\AXA.exe";
-            string LEin = GlobalPaths.TransitSoftwareLE;
-
-            // 如果LE路径为空，使用默认路径
-            if (string.IsNullOrEmpty(LEin))
-            {
-                LEin = @"B:\Locale-Emulator-2.5.0.1\LEProc.exe";
-            }
-            
-            if (LEin == null || gamePath == null)
-            {
-                LoggerHelper.LogError("错误: LEin 或 gamePath 为空");
-                return;
-            }
-
-            LoggerHelper.LogInformation($"使用LE: {LEin}");
+            string gamePath = Path.Combine(selectedGame, "AXA.exe");
             LoggerHelper.LogInformation($"游戏路径: {gamePath}");
-
-            // 检查文件是否存在
-            if (!File.Exists(LEin))
-            {
-                LoggerHelper.LogError($"错误: 本地模拟器不存在于路径: {LEin}");
-                throw new FileNotFoundException("找不到本地LE", LEin);
-                // 可选：显示友好的错误提示
-                // var dialogWindow = new WarningPop_up();
-                // if (dialogWindow.Content is TextBlock contentBlock)
-                // {
-                //     contentBlock.Text = $"找不到 Locale Emulator，请检查路径：{LEin}";
-                // }
-                // dialogWindow.ShowDialog(mainWindow);
-                // return;
-            }
 
             if (!File.Exists(gamePath))
             {
                 LoggerHelper.LogError($"错误: 游戏可执行文件不存在于路径: {gamePath}");
                 throw new FileNotFoundException("找不到游戏程序", gamePath);
-                // 可选：显示友好的错误提示
-                // var dialogWindow = new WarningPop_up();
-                // if (dialogWindow.Content is TextBlock contentBlock)
-                // {
-                //     contentBlock.Text = $"找不到游戏程序，请检查路径：{gamePath}";
-                // }
-                // dialogWindow.ShowDialog(mainWindow);
-                // return;
             }
 
             ProcessStartInfo psi = new ProcessStartInfo
             {
-                FileName = LEin,
-                Arguments = gamePath, // 可选改进：Arguments = $"\"{gamePath}\"", // 处理包含空格的路径
+                FileName = gamePath,
                 UseShellExecute = true,
                 CreateNoWindow = false
             };
@@ -103,19 +40,14 @@ public class GameStart
 
                 LoggerHelper.LogInformation($"游戏已成功启动，进程ID: {process.Id}");
             }
+
+            return Task.CompletedTask;
         }
         catch (Exception ex)
         {
             LoggerHelper.LogError($"启动游戏时发生错误: {ex.Message}");
             LoggerHelper.LogError($"错误详情: {ex.StackTrace}");
             throw;
-            // 可选：显示友好的错误提示
-            // var dialogWindow = new WarningPop_up();
-            // if (dialogWindow.Content is TextBlock contentBlock)
-            // {
-            //     contentBlock.Text = $"启动游戏时发生错误：{ex.Message}";
-            // }
-            // dialogWindow.ShowDialog(mainWindow);
         }
     }
 }

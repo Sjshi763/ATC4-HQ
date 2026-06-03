@@ -177,7 +177,6 @@ namespace ATC4_HQ.Views
                 ini.SetSetting("main", "Version", GlobalPaths.Version);
                 ini.Save(GlobalPaths.InitiatorProfileName);
             }
-            GlobalPaths.TransitSoftwareLE = ini.GetSetting("main", "TransitSoftwareLE", string.Empty);
             GlobalPaths.GamePath = ini.GetSetting("main", "GamePath", string.Empty);
 
             if (DataContext is MainWindowViewModel viewModel)
@@ -213,7 +212,6 @@ namespace ATC4_HQ.Views
             IniFile ini = new IniFile();
             ini.SetSetting("main", "Version", GlobalPaths.Version);
             ini.SetSetting("main", "FirstRun", GlobalPaths.FirstRun ?? string.Empty);
-            ini.SetSetting("main", "TransitSoftwareLE", "null");
             LoggerHelper.LogInformation("初始配置文件已创建。");
             ini.Save(GlobalPaths.InitiatorProfileName);
         }
