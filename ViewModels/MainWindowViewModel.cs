@@ -319,7 +319,7 @@ namespace ATC4_HQ.ViewModels
         {
             Directory.CreateDirectory(destinationDirectory);
 
-            using var archive = ArchiveFactory.Open(archivePath);
+            using var archive = ArchiveFactory.OpenArchive(archivePath);
             foreach (var entry in archive.Entries)
             {
                 if (entry.IsDirectory)
