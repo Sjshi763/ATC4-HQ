@@ -12,6 +12,7 @@ using System.IO; // 用于检查文件是否存在
 using System.Collections.Generic; // 用于Stack
 using System.Net.Http;
 using System.Text.Json;
+using Avalonia.Media; // 引入 IBrush
 
 namespace ATC4_HQ.ViewModels
 {
@@ -34,6 +35,18 @@ namespace ATC4_HQ.ViewModels
         
         [ObservableProperty]
         private bool _canGoBack; // 是否可以返回
+
+        /// <summary>
+        /// Windows 个性化主色调 Brush，用于导航栏背景、ATC4 logo 文字等。
+        /// </summary>
+        [ObservableProperty]
+        private IBrush _accentBrush = new SolidColorBrush(Color.Parse(GlobalPaths.AccentColor));
+
+        /// <summary>
+        /// 主色调的浅色变体 Brush，用于辅助标签（如 HQ 标签）背景。
+        /// </summary>
+        [ObservableProperty]
+        private IBrush _accentLightBrush = new SolidColorBrush(Color.Parse(GlobalPaths.AccentColorLight));
         
         // 导航历史记录
         private Stack<ViewModelBase> _navigationHistory = new Stack<ViewModelBase>();

@@ -156,13 +156,13 @@
                                 UseLayoutRounding="False"
                                 Width="32">
                                 <TextBlock
-                                    Foreground="#2196F3"
+                                    Foreground="{Binding AccentBrush}"
                                     HorizontalAlignment="Center"
                                     Text="ATC4"
                                     VerticalAlignment="Center" />
                             </Border>
                             <Border
-                                Background="#4CAF50"
+                                Background="{Binding AccentLightBrush}"
                                 CornerRadius="5"
                                 Height="20"
                                 HorizontalAlignment="Left"
@@ -215,11 +215,16 @@
 
                     <!--  navbar  -->
                     <Border
-                        Background="#2196F3"
+                        Background="{Binding AccentBrush}"
                         Grid.Row="0"
                         Height="48"
                         Name="NavBackgroundBorder"
                         ZIndex="2">
+                        <Border.Transitions>
+                            <Transitions>
+                                <BrushTransition Duration="0:0:0.3" Property="Background" />
+                            </Transitions>
+                        </Border.Transitions>
                         <Grid>
                             <Image
                                 IsHitTestVisible="False"
