@@ -9,13 +9,15 @@
              x:Class="ATC4_HQ.Views.InstallGameData"
              x:DataType="viewmodels:InstallGameDataViewModel">
 
-    <Border Margin="18"
-            Padding="24"
-            CornerRadius="18"
-            Background="#101827"
-            BorderBrush="#223047"
-            BorderThickness="1">
-        <Grid RowDefinitions="Auto,*">
+    <ScrollViewer VerticalScrollBarVisibility="Visible"
+                  HorizontalScrollBarVisibility="Disabled">
+        <Border Margin="18"
+                Padding="24"
+                CornerRadius="18"
+                Background="#101827"
+                BorderBrush="#223047"
+                BorderThickness="1">
+            <Grid RowDefinitions="Auto,*">
             <StackPanel Spacing="6">
                 <TextBlock Text="安装"
                            FontSize="28"
@@ -206,6 +208,7 @@
                     </Border>
                 </Grid>
             </Grid>
-        </Grid>
-    </Border>
+            </Grid>
+        </Border>
+    </ScrollViewer>
 </UserControl>
