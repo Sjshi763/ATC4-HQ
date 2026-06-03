@@ -1,4 +1,3 @@
-using System;
 using System.Reflection;
 
 namespace master
@@ -7,14 +6,14 @@ namespace master
     {
         public static class GlobalPaths
         {
-            public static string InitiatorProfileName = @".\ATC4-HQ.ini";
+            public static string InitiatorProfileName = AppPaths.InitiatorProfilePath;
             public static string Version = GetAppVersion();
             public static string? TransitSoftwareLE;
             public static string? FirstRun;
             public static string Keys = "0x5A";
             public static string? GamePath;
             public static string? GameName;
-            public static string LogPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ATC4-HQ", "logs");
+            public static string LogPath = AppPaths.LogDirectory;
 
             private static string GetAppVersion()
             {
