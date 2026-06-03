@@ -5,6 +5,7 @@ using master.Globals;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace ATC4_HQ.ViewModels;
 
@@ -37,13 +38,13 @@ public partial class GameListViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void GameSelected()
+    private async Task GameSelected()
     {
         if (SelectedGame != null)
         {
             // 用户选择了一个游戏项目，调用GameStart处理
             var gameStart = new GameStart();
-            gameStart.StartGame(SelectedGame.Path);
+            await gameStart.StartGame(SelectedGame.Path);
         }
     }
 

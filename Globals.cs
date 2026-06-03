@@ -9,7 +9,6 @@ namespace master
         {
             public static string InitiatorProfileName = @".\ATC4-HQ.ini";
             public static string Version = GetAppVersion();
-            public static string? TransitSoftwareLE;
             public static string? FirstRun;
             public static string Keys = "0x5A";
             public static string? GamePath;
