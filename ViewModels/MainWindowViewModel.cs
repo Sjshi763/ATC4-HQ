@@ -135,14 +135,13 @@ namespace ATC4_HQ.ViewModels
 
         private void OnInstallGame()
         {
-            LoggerHelper.LogInformation("ViewModel: 显示安装游戏界面。");
-            // 将 CurrentSubPage 设置为 InstallGameViewModel 的实例，显示在右边
-            CurrentSubPage = new InstallGameViewModel();
+            LoggerHelper.LogInformation("ViewModel: 显示安装数据界面。");
+            CurrentSubPage = new InstallGameDataViewModel();
             // 更新导航按钮状态
             IsNavBtn1Checked = false;
             IsNavBtn2Checked = true;
             IsNavBtn4Checked = false;
-            LoggerHelper.LogInformation("ViewModel: 已在右边显示安装游戏界面。");
+            LoggerHelper.LogInformation("ViewModel: 已在右边显示安装数据界面。");
         }
 
         private void OnSetting()
@@ -229,7 +228,7 @@ namespace ATC4_HQ.ViewModels
         private void UpdateNavButtonState(ViewModelBase page)
         {
             IsNavBtn1Checked = page is GameStartOptionsViewModel;
-            IsNavBtn2Checked = page is InstallGameViewModel;
+            IsNavBtn2Checked = page is InstallGameDataViewModel;
             IsNavBtn4Checked = page is SettingViewModel;
         }
 
