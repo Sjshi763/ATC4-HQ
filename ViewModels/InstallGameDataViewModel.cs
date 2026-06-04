@@ -53,13 +53,11 @@ namespace ATC4_HQ.ViewModels
 
         public ICommand FindFileCommand { get; }
         public ICommand SaveCommand { get; }
-        public ICommand CancelCommand { get; }
 
         public InstallGameDataViewModel()
         {
             FindFileCommand = new RelayCommand(OnFindFile);
             SaveCommand = new RelayCommand(OnSave);
-            CancelCommand = new RelayCommand(OnCancel);
         }
 
         // --- 命令的实现 ---

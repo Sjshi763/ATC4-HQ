@@ -167,10 +167,6 @@
                             <StackPanel Orientation="Horizontal"
                                         Spacing="12"
                                         HorizontalAlignment="Right">
-                                <Button Content="清除"
-                                        Command="{Binding CancelCommand}"
-                                        Width="96"
-                                        Height="36" />
                                 <Button Content="开始安装"
                                         Command="{Binding SaveCommand}"
                                         Width="120"
