@@ -125,27 +125,31 @@ namespace ATC4_HQ.ViewModels
 
         private void OnSave()
         {
+            LoggerHelper.LogInformation($"[用户点击安装] 准备安装游戏: {GameName}, 路径: {GamePath} 喵");
+
             // ⭐️ 新增：对 GameName 的验证
             if (string.IsNullOrWhiteSpace(GameName) || GameName == "取个名字方便找到它")
             {
-                LoggerHelper.LogError("请为游戏输入一个名称！");
-                // 可以在 UI 上显示错误提示
+                LoggerHelper.LogError("[安装失败] 游戏名称为空或未修改 喵");
                 return;
             }
 
             // 在这里可以添加验证逻辑，确保 GamePath 是有效的
             if (string.IsNullOrWhiteSpace(GamePath) || GamePath == "未选择任何文件夹")
             {
-                LoggerHelper.LogError("请选择一个有效的游戏路径！");
+                LoggerHelper.LogError("[安装失败] 未选择有效的游戏安装路径 喵");
                 return;
             }
 
+            LoggerHelper.LogInformation("[安装校验] 正在验证压缩包分卷完整性... 喵");
             ValidateArchiveFolder(GamePath);
             if (!IsArchiveFolderValid)
             {
-                LoggerHelper.LogError(ArchiveValidationMessage);
+                LoggerHelper.LogError($"[安装失败] 压缩包校验未通过: {ArchiveValidationMessage} 喵");
                 return;
             }
+
+            LoggerHelper.LogInformation("[安装校验] 校验成功，正在准备游戏数据模型... 喵");
             
             // 即使检测到SSD也允许安装，只是显示警告
             // 这里不阻止安装，只显示信息性提示
@@ -156,6 +160,8 @@ namespace ATC4_HQ.ViewModels
                 Name = GameName,
                 Path = GamePath
             };
+
+            LoggerHelper.LogInformation($"[安装成功] 已成功记录安装信息：{GameName} -> {GamePath} 喵");
 
             // 触发完成事件
             InstallGameDataCompleted?.Invoke(this, new InstallGameDataCompletedEventArgs(true, gameData));
