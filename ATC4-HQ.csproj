@@ -34,5 +34,6 @@
     <PackageReference Include="System.Management" Version="9.0.10" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.0" />
+    <PackageReference Include="SharpCompress" Version="0.48.1" />
   </ItemGroup>
 </Project>

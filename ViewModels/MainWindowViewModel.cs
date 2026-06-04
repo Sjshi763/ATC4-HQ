@@ -4,13 +4,15 @@ using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using ATC4_HQ.Models; // 引入 GameModel 的命名空间
-using System.IO.Compression; // 用于解压缩功能
+using SharpCompress.Archives;
+using SharpCompress.Common;
 using master.Globals;
 using SoftCircuits.IniFileParser;
 using System.IO; // 用于检查文件是否存在
 using System.Collections.Generic; // 用于Stack
 using System.Net.Http;
 using System.Text.Json;
+using Avalonia.Media; // 引入 IBrush
 
 namespace ATC4_HQ.ViewModels
 {
@@ -33,6 +35,18 @@ namespace ATC4_HQ.ViewModels
         
         [ObservableProperty]
         private bool _canGoBack; // 是否可以返回
+
+        /// <summary>
+        /// Windows 个性化主色调 Brush，用于导航栏背景、ATC4 logo 文字等。
+        /// </summary>
+        [ObservableProperty]
+        private IBrush _accentBrush = new SolidColorBrush(Color.Parse(GlobalPaths.AccentColor.main));
+
+        /// <summary>
+        /// 主色调的浅色变体 Brush，用于辅助标签（如 HQ 标签）背景。
+        /// </summary>
+        [ObservableProperty]
+        private IBrush _accentLightBrush = new SolidColorBrush(Color.Parse(GlobalPaths.AccentColor.Light));
         
         // 导航历史记录
         private Stack<ViewModelBase> _navigationHistory = new Stack<ViewModelBase>();
@@ -134,14 +148,13 @@ namespace ATC4_HQ.ViewModels
 
         private void OnInstallGame()
         {
-            LoggerHelper.LogInformation("ViewModel: 显示安装游戏界面。");
-            // 将 CurrentSubPage 设置为 InstallGameViewModel 的实例，显示在右边
-            CurrentSubPage = new InstallGameViewModel();
+            LoggerHelper.LogInformation("ViewModel: 显示安装数据界面。");
+            CurrentSubPage = new InstallGameDataViewModel();
             // 更新导航按钮状态
             IsNavBtn1Checked = false;
             IsNavBtn2Checked = true;
             IsNavBtn4Checked = false;
-            LoggerHelper.LogInformation("ViewModel: 已在右边显示安装游戏界面。");
+            LoggerHelper.LogInformation("ViewModel: 已在右边显示安装数据界面。");
         }
 
         private void OnSetting()
@@ -228,7 +241,7 @@ namespace ATC4_HQ.ViewModels
         private void UpdateNavButtonState(ViewModelBase page)
         {
             IsNavBtn1Checked = page is GameStartOptionsViewModel;
-            IsNavBtn2Checked = page is InstallGameViewModel;
+            IsNavBtn2Checked = page is InstallGameDataViewModel;
             IsNavBtn4Checked = page is SettingViewModel;
         }
 
@@ -246,79 +259,33 @@ namespace ATC4_HQ.ViewModels
         // 处理游戏安装和解压的通用方法，现在接收 GameModel 对象
         public async Task HandleInstallGameAndUnzipAsync(GameModel gameData) // ⭐️ 确保方法是 public 且接收 GameModel
         {
-            // 检查游戏路径是否包含zip文件
-            string zipPath = string.Empty;
-            if (gameData.Path.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrWhiteSpace(gameData.Path) || !Directory.Exists(gameData.Path))
             {
-                zipPath = gameData.Path;
-                // 如果路径是zip文件，则使用其所在目录作为解压目标
-                gameData.Path = Path.GetDirectoryName(gameData.Path) ?? gameData.Path;
-            }
-            else
-            {
-                // 查找路径下的zip文件
-                var zipFiles = Directory.GetFiles(gameData.Path, "*.zip");
-                if (zipFiles.Length > 0)
-                {
-                    zipPath = zipFiles[0];
-                }
-                else
-                {
-                    LoggerHelper.LogError("错误：在指定路径中未找到zip文件。");
-                    return;
-                }
-            }
-
-            if (!File.Exists(zipPath))
-            {
-                LoggerHelper.LogError($"错误：zip文件不存在：{zipPath}");
+                LoggerHelper.LogError($"错误：安装包文件夹不存在：{gameData.Path}");
                 return;
             }
 
-            LoggerHelper.LogInformation($"开始解压文件：{zipPath} 到目录：{gameData.Path}");
-            
-            // 解压 .zip 文件到指定目录
-            ZipFile.ExtractToDirectory(zipPath, gameData.Path);
-            LoggerHelper.LogInformation("文件解压完成。");
+            var missingParts = GetMissingArchiveParts(gameData.Path);
+            if (missingParts.Count > 0)
+            {
+                LoggerHelper.LogError($"错误：安装包文件夹不完整，缺少：{string.Join("、", missingParts)}");
+                return;
+            }
+
+            var zipPath = Path.Combine(gameData.Path, $"{GlobalPaths.Atc4ArchiveBaseName}.zip");
+            LoggerHelper.LogInformation($"开始分卷解压文件：{zipPath} 到目录：{gameData.Path}");
+
+            await Task.Run(() => ExtractArchiveToDirectory(zipPath, gameData.Path));
+            LoggerHelper.LogInformation("ATC4 分卷压缩包解压完成。");
 
             // 检查解压后的文件中是否有以~开头的zip文件，并再次解压
             var extractedFiles = Directory.GetFiles(gameData.Path, "*.zip", SearchOption.AllDirectories);
             foreach (var file in extractedFiles)
             {
                 var fileName = Path.GetFileName(file);
-                if (fileName.StartsWith("~"))
+                if (fileName.StartsWith("~", StringComparison.Ordinal))
                 {
-                    // 使用一个新的 MemoryStream 来读取和解压，避免文件占用问题
-                    using (var fileStream = new FileStream(file, FileMode.Open, FileAccess.Read))
-                    {
-                        using (var memoryStream = new MemoryStream())
-                        {
-                            await fileStream.CopyToAsync(memoryStream);
-                            memoryStream.Position = 0; // 重置流的位置
-
-                            using (ZipArchive archive = new ZipArchive(memoryStream, ZipArchiveMode.Read))
-                            {
-                                foreach (ZipArchiveEntry entry in archive.Entries)
-                                {
-                                    // 去掉条目前面的波浪号，构造正确的目标路径
-                                    string destinationPath = Path.Combine(gameData.Path, entry.FullName.TrimStart('~'));
-                                    
-                                    // 确保目标目录存在
-                                    string? destinationDirectory = Path.GetDirectoryName(destinationPath);
-                                    if (destinationDirectory != null)
-                                    {
-                                        Directory.CreateDirectory(destinationDirectory);
-                                    }
-
-                                    // 如果不是目录，则解压文件
-                                    if (!string.IsNullOrEmpty(entry.Name))
-                                    {
-                                        entry.ExtractToFile(destinationPath, true);
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    await Task.Run(() => ExtractArchiveToDirectory(file, gameData.Path, trimLeadingTilde: true));
                     File.Delete(file); // 解压完成后删除这个临时的zip文件
                 }
             }
@@ -333,7 +300,7 @@ namespace ATC4_HQ.ViewModels
             ini.Save(GlobalPaths.InitiatorProfileName);
 
             GlobalPaths.GameName = gameData.Name;
-            var gameDataIniPath = GlobalPaths.GamePath + @"\GameData.ini";
+            var gameDataIniPath = Path.Combine(GlobalPaths.GamePath ?? gameData.Path, "GameData.ini");
             ini = new IniFile();
             if (File.Exists(gameDataIniPath))
             {
@@ -344,6 +311,71 @@ namespace ATC4_HQ.ViewModels
             
             // 安装完成后清除右边区域的内容
             ClearSubPage();
+        }
+
+        private static List<string> GetMissingArchiveParts(string folderPath)
+        {
+            var missingParts = new List<string>();
+            foreach (var archivePart in GlobalPaths.RequiredAtc4ArchiveParts)
+            {
+                if (!File.Exists(Path.Combine(folderPath, archivePart)))
+                {
+                    missingParts.Add(archivePart);
+                }
+            }
+
+            return missingParts;
+        }
+
+        private static void ExtractArchiveToDirectory(string archivePath, string destinationDirectory, bool trimLeadingTilde = false)
+        {
+            Directory.CreateDirectory(destinationDirectory);
+
+            using var archive = ArchiveFactory.OpenArchive(archivePath);
+            foreach (var entry in archive.Entries)
+            {
+                if (entry.IsDirectory)
+                {
+                    continue;
+                }
+
+                if (!trimLeadingTilde)
+                {
+                    entry.WriteToDirectory(destinationDirectory, new ExtractionOptions
+                    {
+                        ExtractFullPath = true,
+                        Overwrite = true
+                    });
+                    continue;
+                }
+
+                var normalizedEntryPath = entry.Key?.TrimStart('~');
+                if (string.IsNullOrWhiteSpace(normalizedEntryPath))
+                {
+                    continue;
+                }
+
+                var destinationPath = Path.GetFullPath(Path.Combine(destinationDirectory, normalizedEntryPath));
+                var destinationRoot = Path.GetFullPath(destinationDirectory)
+                    .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                    + Path.DirectorySeparatorChar;
+
+                if (!destinationPath.StartsWith(destinationRoot, StringComparison.OrdinalIgnoreCase))
+                {
+                    LoggerHelper.LogWarning($"跳过不安全的压缩包条目：{entry.Key}");
+                    continue;
+                }
+
+                var destinationParent = Path.GetDirectoryName(destinationPath);
+                if (!string.IsNullOrWhiteSpace(destinationParent))
+                {
+                    Directory.CreateDirectory(destinationParent);
+                }
+
+                using var entryStream = entry.OpenEntryStream();
+                using var destinationStream = File.Create(destinationPath);
+                entryStream.CopyTo(destinationStream);
+            }
         }
         
         /// <summary>
