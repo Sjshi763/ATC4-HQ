@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewmodels="clr-namespace:ATC4_HQ.ViewModels"
+             xmlns:vm="clr-namespace:ATC4_HQ.ViewModels"
              mc:Ignorable="d"
              d:DesignWidth="680"
              d:DesignHeight="520"
@@ -13,31 +14,22 @@
                   HorizontalScrollBarVisibility="Disabled">
         <Border Margin="18"
                 Padding="24"
-                CornerRadius="18"
-                Background="#101827"
-                BorderBrush="#223047"
-                BorderThickness="1">
+                CornerRadius="18">
             <Grid RowDefinitions="Auto,*">
             <StackPanel Spacing="6">
                 <TextBlock Text="安装"
                            FontSize="28"
                            FontWeight="SemiBold"
-                           Foreground="#F8FAFC" />
+                           Foreground="#000000" />
                 <TextBlock Text="选择完整 ATC4 分卷压缩包文件夹，并按步骤创建可启动的服务器。"
                            FontSize="13"
-                           Foreground="#94A3B8" />
+                           Foreground="#000000" />
             </StackPanel>
 
             <Grid Grid.Row="1"
                   Margin="0,26,0,0"
                   ColumnDefinitions="48,*"
                   RowDefinitions="Auto,Auto,Auto">
-                <Border Grid.Column="0"
-                        Grid.RowSpan="3"
-                        Width="2"
-                        Margin="23,18,0,18"
-                        HorizontalAlignment="Left"
-                        Background="#334155" />
 
                 <!-- 步骤 1 -->
                 <Grid Grid.Row="0"
@@ -48,37 +40,31 @@
                             Width="34"
                             Height="34"
                             CornerRadius="17"
-                            Background="#2563EB"
-                            BorderBrush="#93C5FD"
-                            BorderThickness="2"
                             HorizontalAlignment="Left">
                         <TextBlock Text="1"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
                                    FontWeight="Bold"
-                                   Foreground="White" />
+                                   Foreground="#000000" />
                     </Border>
 
                     <Border Grid.Column="1"
                             Padding="18"
-                            CornerRadius="14"
-                            Background="#172033"
-                            BorderBrush="#2B3A55"
-                            BorderThickness="1">
+                            CornerRadius="14">
                         <StackPanel Spacing="12">
                             <StackPanel Spacing="4">
                                 <TextBlock Text="选择完整安装包文件夹"
                                            FontSize="18"
                                            FontWeight="SemiBold"
-                                           Foreground="#E2E8F0" />
+                                           Foreground="#000000" />
                                 <TextBlock Text="该文件夹必须包含全部分卷，缺少任意一个都会阻止安装。"
                                            TextWrapping="Wrap"
-                                           Foreground="#94A3B8" />
+                                           Foreground="#000000" />
                                 <TextBlock Text="{Binding RequiredArchivePartsText}"
                                            TextWrapping="Wrap"
                                            FontFamily="Consolas"
                                            FontSize="12"
-                                           Foreground="#CBD5E1" />
+                                           Foreground="#000000" />
                             </StackPanel>
 
                             <Grid ColumnDefinitions="*,Auto">
@@ -99,11 +85,11 @@
 
                             <TextBlock Text="{Binding ArchiveValidationMessage}"
                                        TextWrapping="Wrap"
-                                       Foreground="#38BDF8"
-                                       FontSize="12" />
+                                Foreground="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).AccentLightBrush}"
+                                FontSize="12" />
 
                             <TextBlock Text="{Binding SsdWarning}"
-                                       Foreground="OrangeRed"
+                                       Foreground="#000000"
                                        FontSize="12" />
                         </StackPanel>
                     </Border>
@@ -118,32 +104,26 @@
                             Width="34"
                             Height="34"
                             CornerRadius="17"
-                            Background="#1E293B"
-                            BorderBrush="#38BDF8"
-                            BorderThickness="2"
                             HorizontalAlignment="Left">
                         <TextBlock Text="2"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
                                    FontWeight="Bold"
-                                   Foreground="#E0F2FE" />
+                                   Foreground="#000000" />
                     </Border>
 
                     <Border Grid.Column="1"
                             Padding="18"
-                            CornerRadius="14"
-                            Background="#172033"
-                            BorderBrush="#2B3A55"
-                            BorderThickness="1">
+                            CornerRadius="14">
                         <StackPanel Spacing="12">
                             <StackPanel Spacing="4">
-                                <TextBlock Text="命名服务器"
+                                <TextBlock Text="命名游戏"
                                            FontSize="18"
                                            FontWeight="SemiBold"
-                                           Foreground="#E2E8F0" />
+                                           Foreground="#000000" />
                                 <TextBlock Text="安装完成后会将名称写入 GameData.ini，方便后续在启动器内识别。"
                                            TextWrapping="Wrap"
-                                           Foreground="#94A3B8" />
+                                           Foreground="#000000" />
                             </StackPanel>
 
                             <TextBox x:Name="TheGameName"
@@ -162,32 +142,26 @@
                             Width="34"
                             Height="34"
                             CornerRadius="17"
-                            Background="#1E293B"
-                            BorderBrush="#38BDF8"
-                            BorderThickness="2"
                             HorizontalAlignment="Left">
                         <TextBlock Text="3"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
                                    FontWeight="Bold"
-                                   Foreground="#E0F2FE" />
+                                   Foreground="#000000" />
                     </Border>
 
                     <Border Grid.Column="1"
                             Padding="18"
-                            CornerRadius="14"
-                            Background="#172033"
-                            BorderBrush="#2B3A55"
-                            BorderThickness="1">
+                            CornerRadius="14">
                         <StackPanel Spacing="12">
                             <StackPanel Spacing="4">
                                 <TextBlock Text="解压并写入配置"
                                            FontSize="18"
                                            FontWeight="SemiBold"
-                                           Foreground="#E2E8F0" />
+                                           Foreground="#000000" />
                                 <TextBlock Text="启动器会使用支持分卷 ZIP 的解压库，从 ATC4.zip 读取全部分段并保存公共路径配置。"
                                            TextWrapping="Wrap"
-                                           Foreground="#94A3B8" />
+                                           Foreground="#000000" />
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal"
@@ -201,8 +175,8 @@
                                         Command="{Binding SaveCommand}"
                                         Width="120"
                                         Height="36"
-                                        Background="#2563EB"
-                                        Foreground="White" />
+                                         Background="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).AccentBrush}"
+                                         Foreground="#000000" />
                             </StackPanel>
                         </StackPanel>
                     </Border>

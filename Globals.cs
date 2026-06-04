@@ -16,19 +16,20 @@ namespace master
             public static string? GameName;
             public static string LogPath = AppPaths.LogDirectory;
             public static string Atc4ArchiveBaseName = "ATC4";
+            public static class AccentColor
+            {
+                /// <summary>
+                /// Windows 个性化主色调（从注册表读取 AccentColor）。
+                /// 格式为 "#RRGGBB"，默认回退 "#2196F3"。
+                /// </summary>
+                public static string main = GetWindowsAccentColor();
 
-            /// <summary>
-            /// Windows 个性化主色调（从注册表读取 AccentColor）。
-            /// 格式为 "#RRGGBB"，默认回退 "#2196F3"。
-            /// </summary>
-            public static string AccentColor = GetWindowsAccentColor();
-
-            /// <summary>
-            /// 主色调的浅色变体，用于辅助标签等。
-            /// 默认回退 "#4CAF50"。
-            /// </summary>
-            public static string AccentColorLight = GetWindowsAccentColorLight();
-
+                /// <summary>
+                /// 主色调的浅色变体，用于辅助标签等。
+                /// 默认回退 "#4CAF50"。
+                /// </summary>
+                public static string Light = GetWindowsAccentColorLight();
+            }
             private static string GetWindowsAccentColor()
             {
                 try
