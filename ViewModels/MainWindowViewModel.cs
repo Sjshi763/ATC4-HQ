@@ -13,6 +13,8 @@ using System.Collections.Generic; // 用于Stack
 using System.Net.Http;
 using System.Text.Json;
 using Avalonia.Media; // 引入 IBrush
+using Avalonia.Controls; // 用于 Window 弹窗
+using ATC4_HQ.Views; // 引入 ExtractProgressWindow
 
 namespace ATC4_HQ.ViewModels
 {
@@ -59,6 +61,12 @@ namespace ATC4_HQ.ViewModels
         
         // 事件：当检测到有新版本时触发（由 View 层决定是否弹窗与后续操作）
         public event EventHandler<UpdateAvailableEventArgs>? UpdateAvailable;
+        
+        // 事件：当需要显示进度窗口时触发，参数为 ExtractProgressViewModel
+        public event EventHandler<ShowProgressWindowEventArgs>? ShowProgressWindowRequested;
+        
+        // 事件：当需要关闭进度窗口时触发
+        public event EventHandler? CloseProgressWindowRequested;
         
         public ICommand StartGameCommand { get; }
         public ICommand InstallGameCommand { get; } // 用于 ViewModel 内部逻辑或未来绑定
@@ -287,8 +295,186 @@ namespace ATC4_HQ.ViewModels
             // 创建安装目录
             Directory.CreateDirectory(gameData.Path);
 
-            await Task.Run(() => ExtractArchiveToDirectory(zipPath, gameData.Path));
-            LoggerHelper.LogInformation("ATC4 分卷压缩包解压完成。");
+            // 显示进度窗口
+            var progressViewModel = new ExtractProgressViewModel();
+            
+            // 通过事件通知 View 层显示窗口
+            ShowProgressWindowRequested?.Invoke(this, new ShowProgressWindowEventArgs(progressViewModel, gameData));
+
+            // 计算所有分卷压缩包的总大小
+            long totalBytes = 0;
+            foreach (var part in GlobalPaths.RequiredAtc4ArchiveParts)
+            {
+                string partPath = Path.Combine(gameData.ArchivePath, part);
+                if (File.Exists(partPath))
+                {
+                    var info = new FileInfo(partPath);
+                    totalBytes += info.Length;
+                }
+            }
+
+            // 用于跟踪已处理的字节数和上次报告的进度百分比
+            long processedBytes = 0;
+            int lastReportedPercent = 0;
+
+            // 解压函数，带进度报告
+            async Task ExtractWithProgress()
+            {
+                try
+                {
+                    progressViewModel.AddLog("开始解压...");
+                    
+                    // 先解压第一个 ZIP（包含进度追踪）
+                    using var archive = SharpCompress.Archives.ArchiveFactory.OpenArchive(zipPath);
+                    foreach (var entry in archive.Entries)
+                    {
+                        if (entry.IsDirectory)
+                            continue;
+
+                        // 读取条目数据
+                        using var entryStream = entry.OpenEntryStream();
+                        using var memoryStream = new MemoryStream();
+                        await entryStream.CopyToAsync(memoryStream);
+                        byte[] entryData = memoryStream.ToArray();
+
+                        // 计算目标路径
+                        string relativePath = entry.Key?.TrimStart('~') ?? entry.Key ?? string.Empty;
+                        if (string.IsNullOrWhiteSpace(relativePath))
+                            continue;
+
+                        string destinationPath = Path.GetFullPath(Path.Combine(gameData.Path, relativePath));
+                        string destinationRoot = Path.GetFullPath(gameData.Path)
+                            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                            + Path.DirectorySeparatorChar;
+
+                        if (!destinationPath.StartsWith(destinationRoot, StringComparison.OrdinalIgnoreCase))
+                        {
+                            LoggerHelper.LogWarning($"跳过不安全的压缩包条目：{entry.Key}");
+                            continue;
+                        }
+
+                        string? destinationParent = Path.GetDirectoryName(destinationPath);
+                        if (!string.IsNullOrWhiteSpace(destinationParent))
+                        {
+                            Directory.CreateDirectory(destinationParent);
+                        }
+
+                        // 写入文件
+                        await File.WriteAllBytesAsync(destinationPath, entryData);
+
+                        // 更新进度
+                        processedBytes += entry.Size;
+                        int currentPercent = totalBytes > 0 ? (int)((processedBytes * 100) / totalBytes) : 0;
+                        
+                        // 每增加1%记录日志
+                        if (currentPercent - lastReportedPercent >= 1)
+                        {
+                            lastReportedPercent = currentPercent;
+                            progressViewModel.UpdateProgress(currentPercent, $"解压中... {currentPercent}%");
+                            progressViewModel.AddLog($"解压进度：{currentPercent}%");
+                            LoggerHelper.LogInformation($"解压进度：{currentPercent}%");
+                        }
+                    }
+
+                    progressViewModel.AddLog("主压缩包解压完成");
+                    LoggerHelper.LogInformation("ATC4 主压缩包解压完成。");
+
+                    // 检查并解压 ~ 开头的 ZIP 文件
+                    var extractedFiles = Directory.GetFiles(gameData.Path, "*.zip", SearchOption.AllDirectories);
+                    progressViewModel.AddLog($"发现 {extractedFiles.Length} 个 ZIP 文件需要处理");
+                    
+                    foreach (var file in extractedFiles)
+                    {
+                        var fileName = Path.GetFileName(file);
+                        if (fileName.StartsWith("~", StringComparison.Ordinal))
+                        {
+                            progressViewModel.AddLog($"正在解压：{fileName}");
+                            LoggerHelper.LogInformation($"发现~开头压缩包：{file}");
+                            
+                            // 计算这个文件的大小
+                            long fileSize = new FileInfo(file).Length;
+                            long subProcessed = 0;
+                            int subLastPercent = 0;
+
+                            using var subArchive = SharpCompress.Archives.ArchiveFactory.OpenArchive(file);
+                            foreach (var entry in subArchive.Entries)
+                            {
+                                if (entry.IsDirectory)
+                                    continue;
+
+                                using var entryStream = entry.OpenEntryStream();
+                                using var memoryStream = new MemoryStream();
+                                await entryStream.CopyToAsync(memoryStream);
+                                byte[] entryData = memoryStream.ToArray();
+
+                                string relativePath = entry.Key?.TrimStart('~') ?? entry.Key ?? string.Empty;
+                                if (string.IsNullOrWhiteSpace(relativePath))
+                                    continue;
+
+                                string destinationPath = Path.GetFullPath(Path.Combine(gameData.Path, relativePath));
+                                string destinationRoot = Path.GetFullPath(gameData.Path)
+                                    .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                                    + Path.DirectorySeparatorChar;
+
+                                if (!destinationPath.StartsWith(destinationRoot, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    LoggerHelper.LogWarning($"跳过不安全的压缩包条目：{entry.Key}");
+                                    continue;
+                                }
+
+                                string? destinationParent = Path.GetDirectoryName(destinationPath);
+                                if (!string.IsNullOrWhiteSpace(destinationParent))
+                                {
+                                    Directory.CreateDirectory(destinationParent);
+                                }
+
+                                await File.WriteAllBytesAsync(destinationPath, entryData);
+                                subProcessed += entry.Size;
+
+                                // 更新子任务进度
+                                int subPercent = fileSize > 0 ? (int)((subProcessed * 100) / fileSize) : 0;
+                                if (subPercent - subLastPercent >= 1)
+                                {
+                                    subLastPercent = subPercent;
+                                    progressViewModel.AddLog($"  解压 {fileName}：{subPercent}%");
+                                }
+                            }
+
+                            File.Delete(file);
+                            progressViewModel.AddLog($"完成：{fileName}");
+                        }
+                    }
+
+                    progressViewModel.OnExtractionCompleted();
+                    AddLog("解压全部完成！");
+                }
+                catch (Exception ex)
+                {
+                    progressViewModel.OnExtractionFailed(ex.Message);
+                    LoggerHelper.LogError($"解压失败：{ex.Message}");
+                }
+            }
+
+            // 检查是否已取消
+            if (progressViewModel.IsCancelled)
+            {
+                progressViewModel.AddLog("用户已取消解压，正在清理...");
+                CleanupExtractedFiles(gameData.Path);
+                progressViewModel.StatusMessage = "已取消";
+                return;
+            }
+
+            // 执行解压
+            await ExtractWithProgress();
+
+            // 如果被取消了，清理文件
+            if (progressViewModel.IsCancelled)
+            {
+                progressViewModel.AddLog("用户已取消解压，正在清理...");
+                CleanupExtractedFiles(gameData.Path);
+                progressViewModel.StatusMessage = "已取消";
+                return;
+            }
 
             // 检查解压后的文件中是否有以~开头的zip文件，并再次解压
             var extractedFiles = Directory.GetFiles(gameData.Path, "*.zip", SearchOption.AllDirectories);
@@ -300,6 +486,14 @@ namespace ATC4_HQ.ViewModels
                     await Task.Run(() => ExtractArchiveToDirectory(file, gameData.Path, trimLeadingTilde: true));
                     File.Delete(file); // 解压完成后删除这个临时的zip文件
                 }
+            }
+
+            if (progressViewModel.IsCancelled)
+            {
+                progressViewModel.AddLog("用户已取消，停止后续操作...");
+                CleanupExtractedFiles(gameData.Path);
+                progressViewModel.StatusMessage = "已取消";
+                return;
             }
 
             // 写入游戏数据到 GameData.ini
@@ -320,6 +514,11 @@ namespace ATC4_HQ.ViewModels
             SaveGamesList();
 
             LoggerHelper.LogInformation($"游戏安装成功：{gameData.Name} -> {gameData.Path} 喵");
+            
+            // 通过事件通知 View 层关闭窗口
+            progressViewModel.StatusMessage = "安装完成！";
+            progressViewModel.OnExtractionCompleted();
+            CloseProgressWindowRequested?.Invoke(this, EventArgs.Empty);
             
             // 安装完成后清除右边区域的内容
             ClearSubPage();
@@ -388,6 +587,30 @@ namespace ATC4_HQ.ViewModels
                 using var destinationStream = File.Create(destinationPath);
                 entryStream.CopyTo(destinationStream);
             }
+        }
+
+        /// <summary>
+        /// 清理解压失败或取消后残留的文件
+        /// </summary>
+        private static void CleanupExtractedFiles(string directory)
+        {
+            try
+            {
+                if (Directory.Exists(directory))
+                {
+                    LoggerHelper.LogInformation($"清理目录：{directory}");
+                    Directory.Delete(directory, recursive: true);
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggerHelper.LogError($"清理文件失败：{ex.Message}");
+            }
+        }
+
+        private void AddLog(string message)
+        {
+            LoggerHelper.LogInformation(message);
         }
         
         /// <summary>
@@ -505,6 +728,21 @@ namespace ATC4_HQ.ViewModels
             CurrentVersion = currentVersion;
             LatestVersion = latestVersion;
             ReleasesPageUrl = releasesPageUrl;
+        }
+    }
+
+    /// <summary>
+    /// 显示进度窗口事件参数
+    /// </summary>
+    public sealed class ShowProgressWindowEventArgs : EventArgs
+    {
+        public ExtractProgressViewModel ProgressViewModel { get; }
+        public GameModel GameData { get; }
+
+        public ShowProgressWindowEventArgs(ExtractProgressViewModel progressViewModel, GameModel gameData)
+        {
+            ProgressViewModel = progressViewModel;
+            GameData = gameData;
         }
     }
 }

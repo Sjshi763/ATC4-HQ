@@ -226,6 +226,8 @@ namespace ATC4_HQ.Views
             {
                 viewModel.ShowOpenALInstallView += OnShowOpenALInstallView;
                 viewModel.UpdateAvailable += OnUpdateAvailable;
+                viewModel.ShowProgressWindowRequested += OnShowProgressWindowRequested;
+                viewModel.CloseProgressWindowRequested += OnCloseProgressWindowRequested;
             }
         }
 
@@ -401,6 +403,40 @@ namespace ATC4_HQ.Views
 
             dialogWindow.Content = stackPanel;
             return await dialogWindow.ShowDialog<bool>(parentWindow);
+        }
+        
+        /// <summary>
+        /// 处理显示进度窗口请求事件
+        /// </summary>
+        private async void OnShowProgressWindowRequested(object? sender, ShowProgressWindowEventArgs e)
+        {
+            LoggerHelper.LogInformation("收到显示进度窗口请求");
+            
+            // 创建进度窗口
+            var progressWindow = new ExtractProgressWindow(e.ProgressViewModel);
+            
+            // 窗口关闭时检查是否被取消
+            progressWindow.Closed += (s, args) =>
+            {
+                if (e.ProgressViewModel.IsCancelled)
+                {
+                    LoggerHelper.LogInformation("用户取消了解压操作");
+                }
+            };
+            
+            // 显示为模态窗口（阻塞主窗口）
+            await progressWindow.ShowDialog(this);
+            
+            LoggerHelper.LogInformation("进度窗口已关闭");
+        }
+
+        /// <summary>
+        /// 处理关闭进度窗口请求事件
+        /// </summary>
+        private void OnCloseProgressWindowRequested(object? sender, EventArgs e)
+        {
+            LoggerHelper.LogInformation("收到关闭进度窗口请求");
+            // 窗口会自动关闭，因为这是模态窗口
         }
         
         /// <summary>
