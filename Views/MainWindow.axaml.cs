@@ -177,7 +177,6 @@ namespace ATC4_HQ.Views
                 ini.SetSetting("main", "Version", GlobalPaths.Version);
                 ini.Save(GlobalPaths.InitiatorProfileName);
             }
-            GlobalPaths.GamePath = ini.GetSetting("main", "GamePath", string.Empty);
 
             if (DataContext is MainWindowViewModel viewModel)
             {

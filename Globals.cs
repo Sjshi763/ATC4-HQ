@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Win32;
+using ATC4_HQ.Models;
+
+// 这个文件只保存在全局需要用到的常量和路径
 
 namespace master
 {
@@ -12,8 +15,8 @@ namespace master
             public static string Version = GetAppVersion();
             public static string? FirstRun;
             public static string Keys = "0x5A";
-            public static string? GamePath;
-            public static string? GameName;
+            public static List<GameModel> Games = new List<GameModel>();
+            public static GameModel? CurrentGame;
             public static string LogPath = AppPaths.LogDirectory;
             public static string Atc4ArchiveBaseName = "ATC4";
             public static class AccentColor

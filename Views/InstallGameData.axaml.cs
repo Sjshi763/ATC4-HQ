@@ -21,7 +21,8 @@ namespace ATC4_HQ.Views
             if (DataContext is InstallGameDataViewModel viewModel)
             {
                 viewModel.RequestOpenFilePicker += OnRequestOpenFilePicker;
-                viewModel.RequestSaveFileDialog += OnRequestSaveFileDialog; // 添加保存文件对话框事件处理
+                viewModel.RequestOpenFolderPicker += OnRequestOpenFolderPicker;
+                viewModel.RequestSaveFileDialog += OnRequestSaveFileDialog;
                 viewModel.InstallGameDataCompleted += OnInstallGameDataCompleted;
                 viewModel.ClearSubPageRequested += OnClearSubPageRequested;
             }
@@ -32,7 +33,8 @@ namespace ATC4_HQ.Views
             if (DataContext is InstallGameDataViewModel viewModel)
             {
                 viewModel.RequestOpenFilePicker -= OnRequestOpenFilePicker;
-                viewModel.RequestSaveFileDialog -= OnRequestSaveFileDialog; // 取消订阅保存文件对话框事件
+                viewModel.RequestOpenFolderPicker -= OnRequestOpenFolderPicker;
+                viewModel.RequestSaveFileDialog -= OnRequestSaveFileDialog;
                 viewModel.InstallGameDataCompleted -= OnInstallGameDataCompleted;
                 viewModel.ClearSubPageRequested -= OnClearSubPageRequested;
             }
@@ -44,6 +46,15 @@ namespace ATC4_HQ.Views
             {
                 string? driveLetter = await OpenFolderDialog();
                 viewModel.GamePath = driveLetter ?? "未选择任何文件夹";
+            }
+        }
+
+        private async void OnRequestOpenFolderPicker(object? sender, EventArgs e)
+        {
+            if (DataContext is InstallGameDataViewModel viewModel)
+            {
+                string? installPath = await OpenInstallFolderDialog();
+                viewModel.InstallPath = installPath ?? string.Empty;
             }
         }
 
@@ -117,6 +128,42 @@ namespace ATC4_HQ.Views
                 else
                 {
                     LoggerHelper.LogInformation("未选择任何文件夹"); // Console 错误会解决
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        public async Task<string?> OpenInstallFolderDialog()
+        {
+            var topLevel = TopLevel.GetTopLevel(this);
+
+            if (topLevel?.StorageProvider is { } storageProvider)
+            {
+                var folders = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+                {
+                    Title = "请选择游戏安装路径",
+                    AllowMultiple = false
+                });
+
+                if (folders.Count >= 1)
+                {
+                    var selectedFolderUri = folders[0].Path;
+                    try
+                    {
+                        var selectedPath = selectedFolderUri.LocalPath;
+                        LoggerHelper.LogInformation($"已选择安装路径: {selectedPath}");
+                        return selectedPath;
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        LoggerHelper.LogError("选定的位置不是本地文件路径。");
+                        return null;
+                    }
+                }
+                else
+                {
+                    LoggerHelper.LogInformation("未选择安装路径");
                     return null;
                 }
             }

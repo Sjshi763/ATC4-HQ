@@ -14,5 +14,8 @@ namespace ATC4_HQ.Models // 确保这个命名空间是正确的
 
         [JsonPropertyName("Path")]
         public string Path { get; set; } = string.Empty; // 游戏安装路径
+
+        [JsonPropertyName("ArchivePath")]
+        public string ArchivePath { get; set; } = string.Empty; // 压缩包路径
     }
 }

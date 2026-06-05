@@ -20,7 +20,10 @@ namespace ATC4_HQ.ViewModels
         private string _gameName = "未命名游戏"; // ⭐️ 新增：绑定到游戏名称输入框
 
         [ObservableProperty]
-        private string _gamePath = "未选择任何文件夹"; // 绑定到 TextBox
+        private string _gamePath = "未选择任何文件夹"; // 压缩包文件夹路径
+
+        [ObservableProperty]
+        private string _installPath = string.Empty; // 游戏安装路径
 
         [ObservableProperty]
         private string? _dialogResultData; // ⭐️ 修改：用于存储最终要返回的 JSON 字符串数据
@@ -46,17 +49,20 @@ namespace ATC4_HQ.ViewModels
 
         // 用于触发 View 执行文件选择操作的事件
         public event EventHandler? RequestOpenFilePicker; // ⭐️ 标记为可为 null 的事件，解决警告
+        public event EventHandler? RequestOpenFolderPicker; // ⭐️ 新增：用于请求打开文件夹选择器的事件
         public event EventHandler<SaveFileDialogEventArgs>? RequestSaveFileDialog; // ⭐️ 新增：用于请求保存文件对话框的事件
         public event EventHandler<InstallGameDataCompletedEventArgs>? InstallGameDataCompleted; // ⭐️ 新增：安装游戏数据完成事件
         public event EventHandler? ClearSubPageRequested; // ⭐️ 新增：请求清除右边区域的事件
 
 
         public ICommand FindFileCommand { get; }
+        public ICommand BrowseInstallPathCommand { get; }
         public ICommand SaveCommand { get; }
 
         public InstallGameDataViewModel()
         {
             FindFileCommand = new RelayCommand(OnFindFile);
+            BrowseInstallPathCommand = new RelayCommand(OnBrowseInstallPath);
             SaveCommand = new RelayCommand(OnSave);
         }
 
@@ -69,6 +75,13 @@ namespace ATC4_HQ.ViewModels
             // ViewModel 触发事件，告知 View 去执行文件选择器
             RequestOpenFilePicker?.Invoke(this, EventArgs.Empty);
             // View 会处理 RequestOpenFilePicker 事件，然后将选定的路径赋值给 GamePath 属性
+        }
+
+        private void OnBrowseInstallPath()
+        {
+            // ViewModel 触发事件，告知 View 去执行文件夹选择器
+            RequestOpenFolderPicker?.Invoke(this, EventArgs.Empty);
+            // View 会处理 RequestOpenFolderPicker 事件，然后将选定的路径赋值给 InstallPath 属性
         }
 
         partial void OnGamePathChanged(string value)
@@ -125,7 +138,7 @@ namespace ATC4_HQ.ViewModels
 
         private void OnSave()
         {
-            LoggerHelper.LogInformation($"[用户点击安装] 准备安装游戏: {GameName}, 路径: {GamePath} 喵");
+            LoggerHelper.LogInformation($"[用户点击安装] 准备安装游戏: {GameName} 喵");
 
             // ⭐️ 新增：对 GameName 的验证
             if (string.IsNullOrWhiteSpace(GameName) || GameName == "取个名字方便找到它")
@@ -134,8 +147,15 @@ namespace ATC4_HQ.ViewModels
                 return;
             }
 
-            // 在这里可以添加验证逻辑，确保 GamePath 是有效的
+            // 验证压缩包路径
             if (string.IsNullOrWhiteSpace(GamePath) || GamePath == "未选择任何文件夹")
+            {
+                LoggerHelper.LogError("[安装失败] 未选择有效的压缩包文件夹 喵");
+                return;
+            }
+
+            // 验证安装路径
+            if (string.IsNullOrWhiteSpace(InstallPath))
             {
                 LoggerHelper.LogError("[安装失败] 未选择有效的游戏安装路径 喵");
                 return;
@@ -158,10 +178,11 @@ namespace ATC4_HQ.ViewModels
             var gameData = new GameModel 
             {
                 Name = GameName,
-                Path = GamePath
+                Path = InstallPath,
+                ArchivePath = GamePath
             };
 
-            LoggerHelper.LogInformation($"[安装成功] 已成功记录安装信息：{GameName} -> {GamePath} 喵");
+            LoggerHelper.LogInformation($"[安装成功] 已成功记录安装信息：{GameName} -> {InstallPath} (压缩包: {GamePath}) 喵");
 
             // 触发完成事件
             InstallGameDataCompleted?.Invoke(this, new InstallGameDataCompletedEventArgs(true, gameData));

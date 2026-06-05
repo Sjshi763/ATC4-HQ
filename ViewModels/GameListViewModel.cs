@@ -50,29 +50,21 @@ public partial class GameListViewModel : ViewModelBase
 
     public GameListViewModel()
     {
-        //从配置文件找要显示的东西
-        IniFile ini = new IniFile();
-        if (File.Exists(GlobalPaths.InitiatorProfileName))
-        {
-            ini.Load(GlobalPaths.InitiatorProfileName);
-        }
         var games = new ObservableCollection<GameInfo>();
         
-        //读取游戏目录配置
-        foreach (var setting in ini.GetSectionSettings("GameDirectories"))
+        //从全局游戏列表加载
+        foreach (var game in GlobalPaths.Games)
         {
-            var path = setting.Value;
-            if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+            if (!string.IsNullOrEmpty(game.Path) && Directory.Exists(game.Path))
             {
-                var gameName = Path.GetFileName(path);
-                games.Add(new GameInfo { Name = gameName, Path = path });
+                games.Add(new GameInfo { Name = game.Name, Path = game.Path });
             }
         }
         
-        //如果没有找到游戏目录，添加默认项
+        //如果没有找到游戏，添加提示项
         if (games.Count == 0)
         {
-            games.Add(new GameInfo { Name = "默认游戏", Path = GlobalPaths.GamePath ?? "" });
+            games.Add(new GameInfo { Name = "暂无游戏，请先安装", Path = "" });
         }
                 
         //显示的内容
