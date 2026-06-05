@@ -26,7 +26,9 @@ public class AllGameListViewModel : ObservableObject
     public AllGameListViewModel()
     {
         //从配置文件找要显示的东西
-        var gameDataIniPath = GlobalPaths.GamePath + @"\GameData.ini";
+        string? gamePath = GlobalPaths.CurrentGame?.Path;
+        var gameDataIniPath = string.IsNullOrEmpty(gamePath) ? string.Empty : Path.Combine(gamePath, "GameData.ini");
+        
         IniFile ini = new IniFile();
         if (File.Exists(gameDataIniPath))
         {

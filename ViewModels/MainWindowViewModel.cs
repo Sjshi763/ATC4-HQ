@@ -74,6 +74,9 @@ namespace ATC4_HQ.ViewModels
             NavigateCommand = new RelayCommand<string>(OnNavigate);
             GoBackCommand = new RelayCommand(OnGoBack, () => CanGoBack);
             
+            // 加载游戏列表
+            LoadGamesList();
+            
             // 初始化默认页面
             OnStartGame();
         }
@@ -259,21 +262,30 @@ namespace ATC4_HQ.ViewModels
         // 处理游戏安装和解压的通用方法，现在接收 GameModel 对象
         public async Task HandleInstallGameAndUnzipAsync(GameModel gameData) // ⭐️ 确保方法是 public 且接收 GameModel
         {
-            if (string.IsNullOrWhiteSpace(gameData.Path) || !Directory.Exists(gameData.Path))
+            if (string.IsNullOrWhiteSpace(gameData.ArchivePath) || !Directory.Exists(gameData.ArchivePath))
             {
-                LoggerHelper.LogError($"错误：安装包文件夹不存在：{gameData.Path}");
+                LoggerHelper.LogError($"错误：压缩包文件夹不存在：{gameData.ArchivePath}");
                 return;
             }
 
-            var missingParts = GetMissingArchiveParts(gameData.Path);
+            if (string.IsNullOrWhiteSpace(gameData.Path))
+            {
+                LoggerHelper.LogError($"错误：安装路径为空");
+                return;
+            }
+
+            var missingParts = GetMissingArchiveParts(gameData.ArchivePath);
             if (missingParts.Count > 0)
             {
-                LoggerHelper.LogError($"错误：安装包文件夹不完整，缺少：{string.Join("、", missingParts)}");
+                LoggerHelper.LogError($"错误：压缩包文件夹不完整，缺少：{string.Join("、", missingParts)}");
                 return;
             }
 
-            var zipPath = Path.Combine(gameData.Path, $"{GlobalPaths.Atc4ArchiveBaseName}.zip");
+            var zipPath = Path.Combine(gameData.ArchivePath, $"{GlobalPaths.Atc4ArchiveBaseName}.zip");
             LoggerHelper.LogInformation($"开始分卷解压文件：{zipPath} 到目录：{gameData.Path}");
+
+            // 创建安装目录
+            Directory.CreateDirectory(gameData.Path);
 
             await Task.Run(() => ExtractArchiveToDirectory(zipPath, gameData.Path));
             LoggerHelper.LogInformation("ATC4 分卷压缩包解压完成。");
@@ -290,24 +302,24 @@ namespace ATC4_HQ.ViewModels
                 }
             }
 
-            GlobalPaths.GamePath = gameData.Path; // 更新全局路径
-            IniFile ini = new IniFile();
-            if (File.Exists(GlobalPaths.InitiatorProfileName))
-            {
-                ini.Load(GlobalPaths.InitiatorProfileName);
-            }
-            ini.SetSetting("main", "GamePath", GlobalPaths.GamePath ?? string.Empty);
-            ini.Save(GlobalPaths.InitiatorProfileName);
-
-            GlobalPaths.GameName = gameData.Name;
-            var gameDataIniPath = Path.Combine(GlobalPaths.GamePath ?? gameData.Path, "GameData.ini");
-            ini = new IniFile();
+            // 写入游戏数据到 GameData.ini
+            var gameDataIniPath = Path.Combine(gameData.Path, "GameData.ini");
+            var ini = new IniFile();
             if (File.Exists(gameDataIniPath))
             {
                 ini.Load(gameDataIniPath);
             }
-            ini.SetSetting("GameSettings", "GameName", GlobalPaths.GameName ?? string.Empty);
+            ini.SetSetting("GameSettings", "GameName", gameData.Name);
             ini.Save(gameDataIniPath);
+
+            // 添加游戏到全局列表
+            GlobalPaths.Games.Add(gameData);
+            GlobalPaths.CurrentGame = gameData;
+
+            // 保存游戏列表到配置文件
+            SaveGamesList();
+
+            LoggerHelper.LogInformation($"游戏安装成功：{gameData.Name} -> {gameData.Path} 喵");
             
             // 安装完成后清除右边区域的内容
             ClearSubPage();
@@ -385,6 +397,100 @@ namespace ATC4_HQ.ViewModels
         {
             CurrentSubPage = null;
             LoggerHelper.LogInformation("已清除右边区域的内容。");
+        }
+
+        /// <summary>
+        /// 从配置文件加载游戏列表
+        /// </summary>
+        private void LoadGamesList()
+        {
+            GlobalPaths.Games.Clear();
+            
+            var ini = new IniFile();
+            if (File.Exists(GlobalPaths.InitiatorProfileName))
+            {
+                try
+                {
+                    ini.Load(GlobalPaths.InitiatorProfileName);
+                    
+                    // 读取游戏数量
+                    int gameCount = 0;
+                    if (int.TryParse(ini.GetSetting("Games", "Count", "0"), out int count))
+                    {
+                        gameCount = count;
+                    }
+                    
+                    // 读取每个游戏
+                    for (int i = 0; i < gameCount; i++)
+                    {
+                        string section = $"Game{i}";
+                        string name = ini.GetSetting(section, "Name", string.Empty);
+                        string path = ini.GetSetting(section, "Path", string.Empty);
+                        string archivePath = ini.GetSetting(section, "ArchivePath", string.Empty);
+                        
+                        if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(path))
+                        {
+                            GlobalPaths.Games.Add(new GameModel
+                            {
+                                Name = name,
+                                Path = path,
+                                ArchivePath = archivePath
+                            });
+                        }
+                    }
+                    
+                    // 设置当前游戏为第一个
+                    if (GlobalPaths.Games.Count > 0)
+                    {
+                        GlobalPaths.CurrentGame = GlobalPaths.Games[0];
+                    }
+                    
+                    LoggerHelper.LogInformation($"已加载 {GlobalPaths.Games.Count} 个游戏配置 喵");
+                }
+                catch (Exception ex)
+                {
+                    LoggerHelper.LogError($"加载游戏列表失败：{ex.Message} 喵");
+                }
+            }
+            else
+            {
+                LoggerHelper.LogInformation("配置文件不存在，游戏列表为空 喵");
+            }
+        }
+
+        /// <summary>
+        /// 保存游戏列表到配置文件
+        /// </summary>
+        private void SaveGamesList()
+        {
+            try
+            {
+                var ini = new IniFile();
+                if (File.Exists(GlobalPaths.InitiatorProfileName))
+                {
+                    ini.Load(GlobalPaths.InitiatorProfileName);
+                }
+                
+                // 保存游戏数量
+                ini.SetSetting("Games", "Count", GlobalPaths.Games.Count.ToString());
+                
+                // 保存每个游戏
+                for (int i = 0; i < GlobalPaths.Games.Count; i++)
+                {
+                    string section = $"Game{i}";
+                    var game = GlobalPaths.Games[i];
+                    ini.SetSetting(section, "Name", game.Name);
+                    ini.SetSetting(section, "Path", game.Path);
+                    ini.SetSetting(section, "ArchivePath", game.ArchivePath);
+                }
+                
+                ini.Save(GlobalPaths.InitiatorProfileName);
+                LoggerHelper.LogInformation($"已保存 {GlobalPaths.Games.Count} 个游戏配置 喵");
+            }
+            catch (Exception ex)
+            {
+                LoggerHelper.LogError($"保存游戏列表失败：{ex.Message} 喵");
+            }
         }
     }
 
