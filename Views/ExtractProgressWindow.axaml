@@ -1,0 +1,73 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:ATC4_HQ.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="400"
+        x:Class="ATC4_HQ.Views.ExtractProgressWindow"
+        x:DataType="vm:ExtractProgressViewModel"
+        Title="正在解压..."
+        Width="500" Height="400"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ShowInTaskbar="False">
+    
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 状态消息 -->
+        <TextBlock Grid.Row="0" 
+                   Text="{Binding StatusMessage}" 
+                   FontSize="16" 
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,10"/>
+
+        <!-- 进度条 -->
+        <ProgressBar Grid.Row="1" 
+                     Value="{Binding Progress}" 
+                     Maximum="100"
+                     Height="25"
+                     Margin="0,0,0,5"/>
+
+        <!-- 步骤状态显示 -->
+        <TextBlock Grid.Row="2" 
+                   Text="{Binding StepDetail}" 
+                   HorizontalAlignment="Center"
+                   FontSize="14"
+                   Margin="0,0,0,15"/>
+
+        <!-- 日志列表 -->
+        <Border Grid.Row="3" 
+                BorderBrush="Gray" 
+                BorderThickness="1" 
+                CornerRadius="3"
+                Padding="5">
+            <ListBox ItemsSource="{Binding LogMessages}"
+                     FontFamily="Consolas, monospace"
+                     FontSize="11"
+                     Background="Transparent">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" TextWrapping="Wrap"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+
+        <!-- 取消按钮 -->
+        <Button Grid.Row="4" 
+                Content="取消"
+                Command="{Binding CancelCommand}"
+                IsEnabled="{Binding CanCancel}"
+                HorizontalAlignment="Right"
+                Width="100"
+                Height="35"
+                Margin="0,15,0,0"/>
+    </Grid>
+</Window>

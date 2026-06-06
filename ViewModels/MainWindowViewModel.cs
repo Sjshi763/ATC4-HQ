@@ -12,7 +12,10 @@ using System.IO; // 用于检查文件是否存在
 using System.Collections.Generic; // 用于Stack
 using System.Net.Http;
 using System.Text.Json;
+using System.IO.Compression;
 using Avalonia.Media; // 引入 IBrush
+using Avalonia.Controls; // 用于 Window 弹窗
+using ATC4_HQ.Views; // 引入 ExtractProgressWindow
 
 namespace ATC4_HQ.ViewModels
 {
@@ -59,6 +62,12 @@ namespace ATC4_HQ.ViewModels
         
         // 事件：当检测到有新版本时触发（由 View 层决定是否弹窗与后续操作）
         public event EventHandler<UpdateAvailableEventArgs>? UpdateAvailable;
+        
+        // 事件：当需要显示进度窗口时触发，参数为 ExtractProgressViewModel
+        public event EventHandler<ShowProgressWindowEventArgs>? ShowProgressWindowRequested;
+        
+        // 事件：当需要关闭进度窗口时触发
+        public event EventHandler? CloseProgressWindowRequested;
         
         public ICommand StartGameCommand { get; }
         public ICommand InstallGameCommand { get; } // 用于 ViewModel 内部逻辑或未来绑定
@@ -270,7 +279,7 @@ namespace ATC4_HQ.ViewModels
 
             if (string.IsNullOrWhiteSpace(gameData.Path))
             {
-                LoggerHelper.LogError($"错误：安装路径为空");
+                LoggerHelper.LogError("错误：安装路径为空");
                 return;
             }
 
@@ -284,45 +293,272 @@ namespace ATC4_HQ.ViewModels
             var zipPath = Path.Combine(gameData.ArchivePath, $"{GlobalPaths.Atc4ArchiveBaseName}.zip");
             LoggerHelper.LogInformation($"开始分卷解压文件：{zipPath} 到目录：{gameData.Path}");
 
-            // 创建安装目录
-            Directory.CreateDirectory(gameData.Path);
+            var progressViewModel = new ExtractProgressViewModel();
+            ShowProgressWindowRequested?.Invoke(this, new ShowProgressWindowEventArgs(progressViewModel, gameData));
 
-            await Task.Run(() => ExtractArchiveToDirectory(zipPath, gameData.Path));
-            LoggerHelper.LogInformation("ATC4 分卷压缩包解压完成。");
+            var nestedArchiveEntries = new List<string>();
+            var nestedArchiveFileCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            int mainArchiveFileCount = 0;
 
-            // 检查解压后的文件中是否有以~开头的zip文件，并再次解压
-            var extractedFiles = Directory.GetFiles(gameData.Path, "*.zip", SearchOption.AllDirectories);
-            foreach (var file in extractedFiles)
+            static int CountFilesInArchive(IArchive archive)
             {
-                var fileName = Path.GetFileName(file);
-                if (fileName.StartsWith("~", StringComparison.Ordinal))
+                int count = 0;
+                foreach (var archiveEntry in archive.Entries)
                 {
-                    await Task.Run(() => ExtractArchiveToDirectory(file, gameData.Path, trimLeadingTilde: true));
-                    File.Delete(file); // 解压完成后删除这个临时的zip文件
+                    if (!archiveEntry.IsDirectory)
+                    {
+                        count++;
+                    }
+                }
+
+                return count;
+            }
+
+            static bool IsNestedZipEntry(string? entryKey)
+            {
+                if (string.IsNullOrWhiteSpace(entryKey))
+                {
+                    return false;
+                }
+
+                var fileName = Path.GetFileName(entryKey);
+                return fileName.StartsWith("~", StringComparison.Ordinal) &&
+                       fileName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase);
+            }
+
+            static string GetSafeDestinationPath(string rootPath, string? entryKey)
+            {
+                string relativePath = entryKey?.TrimStart('~') ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(relativePath))
+                {
+                    throw new InvalidOperationException("压缩包条目路径为空。");
+                }
+
+                string destinationPath = Path.GetFullPath(Path.Combine(rootPath, relativePath));
+                string destinationRoot = Path.GetFullPath(rootPath)
+                    .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                    + Path.DirectorySeparatorChar;
+
+                if (!destinationPath.StartsWith(destinationRoot, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException($"检测到不安全的压缩包条目：{entryKey}");
+                }
+
+                return destinationPath;
+            }
+
+            void EnsureNotCancelled()
+            {
+                if (progressViewModel.IsCancelled)
+                {
+                    throw new OperationCanceledException("用户取消了解压操作");
                 }
             }
 
-            // 写入游戏数据到 GameData.ini
-            var gameDataIniPath = Path.Combine(gameData.Path, "GameData.ini");
-            var ini = new IniFile();
-            if (File.Exists(gameDataIniPath))
+            try
             {
-                ini.Load(gameDataIniPath);
+                progressViewModel.AddLog("开始扫描压缩包步骤...");
+                progressViewModel.UpdateStepProgress(0, 1, "正在扫描安装步骤...");
+
+                using (var archiveForScanning = ArchiveFactory.OpenArchive(zipPath))
+                {
+                    foreach (var entry in archiveForScanning.Entries)
+                    {
+                        if (entry.IsDirectory)
+                        {
+                            continue;
+                        }
+
+                        mainArchiveFileCount++;
+
+                        if (!IsNestedZipEntry(entry.Key))
+                        {
+                            continue;
+                        }
+
+                        using var entryStream = entry.OpenEntryStream();
+                        using var memoryStream = new MemoryStream();
+                        await entryStream.CopyToAsync(memoryStream);
+                        memoryStream.Position = 0;
+
+                        using var nestedZipArchive = new ZipArchive(memoryStream, ZipArchiveMode.Read, leaveOpen: false);
+                        int nestedFileCount = 0;
+                        foreach (var nestedEntry in nestedZipArchive.Entries)
+                        {
+                            if (!string.IsNullOrWhiteSpace(nestedEntry.Name))
+                            {
+                                nestedFileCount++;
+                            }
+                        }
+
+                        nestedArchiveEntries.Add(entry.Key ?? string.Empty);
+                        nestedArchiveFileCounts[entry.Key ?? string.Empty] = nestedFileCount;
+                    }
+                }
+
+                int nestedArchiveFileStepCount = 0;
+                foreach (var nestedFileCount in nestedArchiveFileCounts.Values)
+                {
+                    nestedArchiveFileStepCount += nestedFileCount;
+                }
+
+                int totalSteps =
+                    1 + // 创建安装目录
+                    1 + // 扫描主压缩包
+                    mainArchiveFileCount +
+                    1 + // 扫描子压缩包
+                    nestedArchiveEntries.Count +
+                    nestedArchiveFileStepCount +
+                    1 + // 写入 GameData.ini
+                    1 + // 更新游戏列表
+                    1 + // 保存配置
+                    1;  // 完成安装
+
+                int completedSteps = 0;
+
+                void AdvanceStep(string message, string? logMessage = null)
+                {
+                    completedSteps++;
+                    progressViewModel.UpdateStepProgress(completedSteps, totalSteps, message);
+                    if (!string.IsNullOrWhiteSpace(logMessage))
+                    {
+                        progressViewModel.AddLog(logMessage);
+                    }
+                }
+
+                void MarkCurrentState(string message, string? logMessage = null)
+                {
+                    progressViewModel.UpdateStepProgress(completedSteps, totalSteps, message);
+                    if (!string.IsNullOrWhiteSpace(logMessage))
+                    {
+                        progressViewModel.AddLog(logMessage);
+                    }
+                }
+
+                EnsureNotCancelled();
+                Directory.CreateDirectory(gameData.Path);
+                AdvanceStep("正在创建安装目录...", $"已创建安装目录：{gameData.Path}");
+
+                EnsureNotCancelled();
+                AdvanceStep("主压缩包扫描完成", $"主压缩包包含 {mainArchiveFileCount} 个文件");
+
+                EnsureNotCancelled();
+                AdvanceStep("子压缩包扫描完成", $"发现 {nestedArchiveEntries.Count} 个待二次解压的 ZIP 文件");
+
+                using (var archive = ArchiveFactory.OpenArchive(zipPath))
+                {
+                    foreach (var entry in archive.Entries)
+                    {
+                        if (entry.IsDirectory)
+                        {
+                            continue;
+                        }
+
+                        EnsureNotCancelled();
+
+                        using var entryStream = entry.OpenEntryStream();
+                        using var memoryStream = new MemoryStream();
+                        await entryStream.CopyToAsync(memoryStream);
+                        byte[] entryData = memoryStream.ToArray();
+
+                        string destinationPath = GetSafeDestinationPath(gameData.Path, entry.Key);
+                        string? destinationParent = Path.GetDirectoryName(destinationPath);
+                        if (!string.IsNullOrWhiteSpace(destinationParent))
+                        {
+                            Directory.CreateDirectory(destinationParent);
+                        }
+
+                        await File.WriteAllBytesAsync(destinationPath, entryData);
+                        string fileName = Path.GetFileName(destinationPath);
+
+                        AdvanceStep($"正在处理主包文件：{fileName}", $"已写入主包文件：{fileName}");
+                    }
+                }
+
+                var extractedZipFiles = Directory.GetFiles(gameData.Path, "*.zip", SearchOption.AllDirectories);
+                foreach (var file in extractedZipFiles)
+                {
+                    var fileName = Path.GetFileName(file);
+                    if (!fileName.StartsWith("~", StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    EnsureNotCancelled();
+                    AdvanceStep($"正在解压子压缩包：{fileName}", $"开始处理子压缩包：{fileName}");
+
+                    using var subArchive = ArchiveFactory.OpenArchive(file);
+                    foreach (var entry in subArchive.Entries)
+                    {
+                        if (entry.IsDirectory)
+                        {
+                            continue;
+                        }
+
+                        EnsureNotCancelled();
+
+                        using var entryStream = entry.OpenEntryStream();
+                        using var memoryStream = new MemoryStream();
+                        await entryStream.CopyToAsync(memoryStream);
+                        byte[] entryData = memoryStream.ToArray();
+
+                        string destinationPath = GetSafeDestinationPath(gameData.Path, entry.Key);
+                        string? destinationParent = Path.GetDirectoryName(destinationPath);
+                        if (!string.IsNullOrWhiteSpace(destinationParent))
+                        {
+                            Directory.CreateDirectory(destinationParent);
+                        }
+
+                        await File.WriteAllBytesAsync(destinationPath, entryData);
+                        string nestedFileName = Path.GetFileName(destinationPath);
+
+                        AdvanceStep($"正在处理子包文件：{nestedFileName}", $"已写入子包文件：{nestedFileName}");
+                    }
+
+                    File.Delete(file);
+                    MarkCurrentState($"已完成子压缩包：{fileName}", $"已删除临时子压缩包：{fileName}");
+                }
+
+                EnsureNotCancelled();
+                var gameDataIniPath = Path.Combine(gameData.Path, "GameData.ini");
+                var ini = new IniFile();
+                if (File.Exists(gameDataIniPath))
+                {
+                    ini.Load(gameDataIniPath);
+                }
+
+                ini.SetSetting("GameSettings", "GameName", gameData.Name);
+                ini.Save(gameDataIniPath);
+                AdvanceStep("正在写入游戏配置...", "已写入 GameData.ini");
+
+                EnsureNotCancelled();
+                GlobalPaths.Games.Add(gameData);
+                GlobalPaths.CurrentGame = gameData;
+                AdvanceStep("正在更新游戏列表...", $"已添加游戏到内存列表：{gameData.Name}");
+
+                EnsureNotCancelled();
+                SaveGamesList();
+                AdvanceStep("正在保存启动器配置...", "已保存游戏列表配置");
+
+                LoggerHelper.LogInformation($"游戏安装成功：{gameData.Name} -> {gameData.Path} 喵");
+                AdvanceStep("安装完成，正在收尾...", "解压与安装步骤全部完成");
+
+                progressViewModel.OnExtractionCompleted();
+                CloseProgressWindowRequested?.Invoke(this, EventArgs.Empty);
+                ClearSubPage();
             }
-            ini.SetSetting("GameSettings", "GameName", gameData.Name);
-            ini.Save(gameDataIniPath);
-
-            // 添加游戏到全局列表
-            GlobalPaths.Games.Add(gameData);
-            GlobalPaths.CurrentGame = gameData;
-
-            // 保存游戏列表到配置文件
-            SaveGamesList();
-
-            LoggerHelper.LogInformation($"游戏安装成功：{gameData.Name} -> {gameData.Path} 喵");
-            
-            // 安装完成后清除右边区域的内容
-            ClearSubPage();
+            catch (OperationCanceledException)
+            {
+                progressViewModel.AddLog("用户已取消解压，正在清理...");
+                CleanupExtractedFiles(gameData.Path);
+                progressViewModel.StatusMessage = "已取消";
+                progressViewModel.StepDetail = "安装已取消";
+            }
+            catch (Exception ex)
+            {
+                progressViewModel.OnExtractionFailed(ex.Message);
+                LoggerHelper.LogError($"解压失败：{ex.Message}");
+            }
         }
 
         private static List<string> GetMissingArchiveParts(string folderPath)
@@ -388,6 +624,30 @@ namespace ATC4_HQ.ViewModels
                 using var destinationStream = File.Create(destinationPath);
                 entryStream.CopyTo(destinationStream);
             }
+        }
+
+        /// <summary>
+        /// 清理解压失败或取消后残留的文件
+        /// </summary>
+        private static void CleanupExtractedFiles(string directory)
+        {
+            try
+            {
+                if (Directory.Exists(directory))
+                {
+                    LoggerHelper.LogInformation($"清理目录：{directory}");
+                    Directory.Delete(directory, recursive: true);
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggerHelper.LogError($"清理文件失败：{ex.Message}");
+            }
+        }
+
+        private void AddLog(string message)
+        {
+            LoggerHelper.LogInformation(message);
         }
         
         /// <summary>
@@ -505,6 +765,21 @@ namespace ATC4_HQ.ViewModels
             CurrentVersion = currentVersion;
             LatestVersion = latestVersion;
             ReleasesPageUrl = releasesPageUrl;
+        }
+    }
+
+    /// <summary>
+    /// 显示进度窗口事件参数
+    /// </summary>
+    public sealed class ShowProgressWindowEventArgs : EventArgs
+    {
+        public ExtractProgressViewModel ProgressViewModel { get; }
+        public GameModel GameData { get; }
+
+        public ShowProgressWindowEventArgs(ExtractProgressViewModel progressViewModel, GameModel gameData)
+        {
+            ProgressViewModel = progressViewModel;
+            GameData = gameData;
         }
     }
 }
