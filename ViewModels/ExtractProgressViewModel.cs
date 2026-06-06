@@ -24,6 +24,14 @@ namespace ATC4_HQ.ViewModels
         [ObservableProperty]
         private bool isCancelled;
 
+        private string _stepDetail = "等待开始...";
+
+        public string StepDetail
+        {
+            get => _stepDetail;
+            set => SetProperty(ref _stepDetail, value);
+        }
+
         public ObservableCollection<string> LogMessages { get; } = new ObservableCollection<string>();
 
         public CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
@@ -37,11 +45,21 @@ namespace ATC4_HQ.ViewModels
 
         public void UpdateProgress(double newProgress, string? message = null)
         {
-            Progress = newProgress;
+            Progress = Math.Clamp(newProgress, 0.0, 100.0);
             if (!string.IsNullOrEmpty(message))
             {
                 StatusMessage = message;
             }
+        }
+
+        public void UpdateStepProgress(int completedSteps, int totalSteps, string message)
+        {
+            int safeTotalSteps = Math.Max(totalSteps, 1);
+            int safeCompletedSteps = Math.Clamp(completedSteps, 0, safeTotalSteps);
+
+            Progress = (safeCompletedSteps * 100.0) / safeTotalSteps;
+            StatusMessage = message;
+            StepDetail = $"步骤 {safeCompletedSteps}/{safeTotalSteps}";
         }
 
         public void AddLog(string message)
@@ -67,6 +85,7 @@ namespace ATC4_HQ.ViewModels
             IsCompleted = true;
             CanCancel = false;
             StatusMessage = "解压完成！";
+            StepDetail = "全部步骤完成";
             Progress = 100.0;
             AddLog("解压操作已完成");
             Completed?.Invoke(this, EventArgs.Empty);
@@ -76,6 +95,7 @@ namespace ATC4_HQ.ViewModels
         {
             IsCompleted = true;
             CanCancel = false;
+            StepDetail = "执行失败";
             StatusMessage = $"解压失败：{error}";
             AddLog($"错误：{error}");
         }
