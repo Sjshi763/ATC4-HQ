@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace ATC4_HQ
+namespace ATC4_HQ.ViewModels
 {
     public static class LoggerHelper
     {
@@ -12,7 +12,7 @@ namespace ATC4_HQ
         }
 
         public static ILogger Logger => _logger;
-        
+
         public static void LogInformation(string message) => _logger.LogInformation(message);
         public static void LogWarning(string message) => _logger.LogWarning(message);
         public static void LogError(string message) => _logger.LogError(message);

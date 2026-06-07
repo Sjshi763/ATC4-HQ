@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace ATC4_HQ
+namespace ATC4_HQ.ViewModels
 {
     /// <summary>
     /// Provides DPAPI-based protection for configuration values.
@@ -32,9 +32,9 @@ namespace ATC4_HQ
         /// Attempts to protect a plain-text configuration value without surfacing expected crypto failures as exceptions.
         /// </summary>
         /// <param name="plainText">The value to protect.</param>
-        /// <param name="protectedText">The protected value encoded as Base64 text, or <c>null</c> when protection fails.</param>
+        /// <param name="protectedText">The protected value encoded as Base64 text, or &lt;c&gt;null&lt;/c&gt; when protection fails.</param>
         /// <param name="entropy">Optional additional entropy used by DPAPI.</param>
-        /// <returns><c>true</c> when protection succeeds; otherwise, <c>false</c>.</returns>
+        /// <returns>&lt;c&gt;true&lt;/c&gt; when protection succeeds; otherwise, &lt;c&gt;false&lt;/c&gt;.</returns>
         public static bool TryProtect(string? plainText, [NotNullWhen(true)] out string? protectedText, string? entropy = null)
         {
             protectedText = null;
@@ -77,9 +77,9 @@ namespace ATC4_HQ
         /// Attempts to unprotect a Base64-encoded configuration value without surfacing expected parsing or crypto failures as exceptions.
         /// </summary>
         /// <param name="protectedText">The Base64-encoded protected value.</param>
-        /// <param name="plainText">The unprotected plain-text value, or <c>null</c> when unprotection fails.</param>
+        /// <param name="plainText">The unprotected plain-text value, or &lt;c&gt;null&lt;/c&gt; when unprotection fails.</param>
         /// <param name="entropy">Optional additional entropy used by DPAPI.</param>
-        /// <returns><c>true</c> when unprotection succeeds; otherwise, <c>false</c>.</returns>
+        /// <returns>&lt;c&gt;true&lt;/c&gt; when unprotection succeeds; otherwise, &lt;c&gt;false&lt;/c&gt;.</returns>
         public static bool TryUnprotect(string? protectedText, [NotNullWhen(true)] out string? plainText, string? entropy = null)
         {
             plainText = null;

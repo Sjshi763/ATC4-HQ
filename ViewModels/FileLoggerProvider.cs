@@ -1,9 +1,8 @@
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
-using System.Threading;
 
-namespace ATC4_HQ
+namespace ATC4_HQ.ViewModels
 {
     public class FileLoggerProvider : ILoggerProvider
     {
@@ -15,8 +14,7 @@ namespace ATC4_HQ
         {
             _logPath = logPath;
             _minLevel = minLevel;
-            
-            // 确保日志目录存在
+
             if (!Directory.Exists(_logPath))
             {
                 Directory.CreateDirectory(_logPath);
@@ -30,7 +28,6 @@ namespace ATC4_HQ
 
         public void Dispose()
         {
-            // 清理资源
         }
     }
 
@@ -49,9 +46,9 @@ namespace ATC4_HQ
             _lock = lockObj;
         }
 
-        public IDisposable BeginScope<TState>(TState state)
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull
         {
-            return null; // 不支持作用域
+            return null;
         }
 
         public bool IsEnabled(LogLevel logLevel)
@@ -59,7 +56,7 @@ namespace ATC4_HQ
             return logLevel >= _minLevel;
         }
 
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
             if (!IsEnabled(logLevel))
             {
@@ -68,14 +65,14 @@ namespace ATC4_HQ
 
             var message = formatter(state, exception);
             var logEntry = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [{logLevel}] {_categoryName}: {message}";
-            
+
             if (exception != null)
             {
                 logEntry += Environment.NewLine + exception.ToString();
             }
 
             var logFile = Path.Combine(_logPath, $"log_{DateTime.Now:yyyy-MM-dd}.txt");
-            
+
             lock (_lock)
             {
                 try
@@ -84,7 +81,6 @@ namespace ATC4_HQ
                 }
                 catch
                 {
-                    // 忽略文件写入错误
                 }
             }
         }

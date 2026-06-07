@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Win32;
-using ATC4_HQ.Models;
+using ATC4_HQ.ViewModels;
 
 // 这个文件只保存在全局需要用到的常量和路径
 

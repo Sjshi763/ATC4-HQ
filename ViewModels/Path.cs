@@ -1,32 +1,19 @@
 using System;
 using System.IO;
 
-namespace master.Globals
+namespace ATC4_HQ.ViewModels
 {
     /// <summary>
     /// Provides a single place to resolve application-owned writable paths.
-    ///
-    /// Portable/debug runs keep common files next to the application (./). MSI-style
-    /// installs are commonly placed under Program Files where normal users cannot
-    /// write, so common files are redirected to %APPDATA%\ATC4-HQ.
     /// </summary>
     public static class AppPaths
     {
         private const string AppFolderName = "ATC4-HQ";
 
-        /// <summary>
-        /// Directory used for logs, configuration and other application-owned files.
-        /// </summary>
         public static string CommonDirectory { get; } = ResolveCommonDirectory();
 
-        /// <summary>
-        /// Full path to the primary ini profile.
-        /// </summary>
         public static string InitiatorProfilePath => System.IO.Path.Combine(CommonDirectory, "ATC4-HQ.ini");
 
-        /// <summary>
-        /// Full path to the log directory.
-        /// </summary>
         public static string LogDirectory => System.IO.Path.Combine(CommonDirectory, "logs");
 
         private static string ResolveCommonDirectory()

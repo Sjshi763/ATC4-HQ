@@ -6,7 +6,6 @@ using System.Windows.Input;
 using System.Net.Http; // ⭐️ 新增：用于网络请求
 using System.Threading.Tasks; // ⭐️ 新增：用于异步编程
 using ATC4_HQ.ViewModels; // 添加引用以使用DriveTypeService
-using ATC4_HQ.Models; // 引入 GameModel 的命名空间
 using System.Collections.Generic; // 用于List
 using System.Linq; // 用于LINQ查询
 using System.IO;
