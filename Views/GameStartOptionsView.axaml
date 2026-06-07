@@ -5,11 +5,12 @@
              x:DataType="vm:GameStartOptionsViewModel">
     
     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="18">
-        <TextBlock Text="请选择游戏启动选项喵！"
-                   FontSize="24"
-                   FontWeight="Bold"
-                   Margin="0,0,0,16"
-                   HorizontalAlignment="Center"/>
+        <Image Source="/Assets/ATC4.ico"
+               Width="96"
+               Height="96"
+               Margin="0,0,0,12"
+               HorizontalAlignment="Center"
+               RenderOptions.BitmapInterpolationMode="HighQuality"/>
 
         <Button Command="{Binding Button1Command}"
                 Width="260"
@@ -34,7 +35,19 @@
             </StackPanel>
         </Button>
 
-        <Button Content="列出全部游戏" Click="Button2" Width="200" Height="50"/>
-        <Button Content="启动选择游戏" Command="{Binding Button3Command}" Width="200" Height="50"/>
+        <Button Command="{Binding SelectGameCommand}"
+                Width="260"
+                Height="48"
+                Padding="16,6"
+                Background="{Binding AccentLightBrush}"
+                BorderBrush="{Binding AccentBrush}"
+                BorderThickness="1.5"
+                CornerRadius="12">
+            <TextBlock Text="选择游戏"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       HorizontalAlignment="Center"
+                       Foreground="#111111"/>
+        </Button>
     </StackPanel>
 </UserControl>
