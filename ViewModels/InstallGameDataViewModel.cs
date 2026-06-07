@@ -44,8 +44,6 @@ namespace ATC4_HQ.ViewModels
 
         public string RequiredArchivePartsText => string.Join("、", GlobalPaths.RequiredAtc4ArchiveParts);
 
-        private string? _tempDownloadPath; // 用于存储下载过程中的临时文件路径
-
         // 用于触发 View 执行文件选择操作的事件
         public event EventHandler? RequestOpenFilePicker; // ⭐️ 标记为可为 null 的事件，解决警告
         public event EventHandler? RequestOpenFolderPicker; // ⭐️ 新增：用于请求打开文件夹选择器的事件
@@ -189,20 +187,6 @@ namespace ATC4_HQ.ViewModels
 
         private void OnCancel()
         {
-            // 删除临时下载文件
-            try
-            {
-                if (!string.IsNullOrEmpty(_tempDownloadPath) && System.IO.File.Exists(_tempDownloadPath))
-                {
-                    System.IO.File.Delete(_tempDownloadPath);
-                    LoggerHelper.LogInformation("[取消] 已删除临时下载文件");
-                }
-            }
-            catch (Exception ex)
-            {
-                LoggerHelper.LogError($"[取消错误] 删除临时文件失败: {ex.Message}");
-            }
-
             // 触发清除右边区域的事件
             ClearSubPageRequested?.Invoke(this, EventArgs.Empty);
             

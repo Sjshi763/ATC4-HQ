@@ -4,7 +4,7 @@ namespace ATC4_HQ.ViewModels
 {
     public static class LoggerHelper
     {
-        private static ILogger _logger;
+        private static ILogger _logger = Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance;
 
         public static void Initialize(ILogger logger)
         {

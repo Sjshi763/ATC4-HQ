@@ -55,9 +55,6 @@ namespace ATC4_HQ.ViewModels
         // 导航历史记录
         private Stack<ViewModelBase> _navigationHistory = new Stack<ViewModelBase>();
         
-        // 事件：当需要显示OPENAL未安装警告时触发
-        public event EventHandler? OpenALNotInstalled;
-        
         // 事件：当需要显示OPENAL安装界面时触发
         public event EventHandler? ShowOpenALInstallView;
         
@@ -300,20 +297,6 @@ namespace ATC4_HQ.ViewModels
             var nestedArchiveEntries = new List<string>();
             var nestedArchiveFileCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
             int mainArchiveFileCount = 0;
-
-            static int CountFilesInArchive(IArchive archive)
-            {
-                int count = 0;
-                foreach (var archiveEntry in archive.Entries)
-                {
-                    if (!archiveEntry.IsDirectory)
-                    {
-                        count++;
-                    }
-                }
-
-                return count;
-            }
 
             static bool IsNestedZipEntry(string? entryKey)
             {
@@ -776,9 +759,9 @@ namespace ATC4_HQ.ViewModels
                     for (int i = 0; i < gameCount; i++)
                     {
                         string section = $"Game{i}";
-                        string name = ini.GetSetting(section, "Name", string.Empty);
-                        string path = ini.GetSetting(section, "Path", string.Empty);
-                        string archivePath = ini.GetSetting(section, "ArchivePath", string.Empty);
+                        string name = ini.GetSetting(section, "Name", string.Empty) ?? string.Empty;
+                        string path = ini.GetSetting(section, "Path", string.Empty) ?? string.Empty;
+                        string archivePath = ini.GetSetting(section, "ArchivePath", string.Empty) ?? string.Empty;
                         
                         if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(path))
                         {

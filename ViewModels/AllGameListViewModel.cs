@@ -8,7 +8,7 @@ namespace ATC4_HQ.ViewModels;
 
 public class AllGameListViewModel : ObservableObject
 {
-    private ObservableCollection<string>? _AllGames;
+    private ObservableCollection<string> _AllGames = new();
     private string? _selectedGame;
 
     public ObservableCollection<string> AllGames

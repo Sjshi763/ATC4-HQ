@@ -11,7 +11,7 @@ namespace ATC4_HQ.ViewModels;
 public partial class SettingViewModel : ViewModelBase
 {
     [ObservableProperty]
-    private MainWindowViewModel _mainWindowViewModel;
+    private MainWindowViewModel? _mainWindowViewModel;
 
     public ICommand OpenLogCommand => new RelayCommand(OpenLogDirectory);
     public ICommand OpenConfigDirectoryCommand => new RelayCommand(OpenConfigDirectory);

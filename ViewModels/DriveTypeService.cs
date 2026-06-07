@@ -15,20 +15,28 @@ namespace ATC4_HQ.ViewModels
 
             try
             {
-                DriveInfo drive = new DriveInfo(Path.GetPathRoot(path));
+                string? driveRoot = Path.GetPathRoot(path);
+                if (string.IsNullOrWhiteSpace(driveRoot))
+                    return false;
+
+                DriveInfo drive = new DriveInfo(driveRoot);
                 if (!drive.IsReady) return false;
 
                 using (ManagementObject disk = new ManagementObject(
                     $"Win32_LogicalDisk.DeviceID=\"{drive.Name.TrimEnd('\\')}\""))
                 {
                     disk.Get();
-                    string diskDriveId = disk["DeviceID"].ToString();
+                    string? diskDriveId = disk["DeviceID"]?.ToString();
+                    if (string.IsNullOrWhiteSpace(diskDriveId))
+                        return false;
 
                     using (ManagementObject partition = new ManagementObject(
                         $"Win32_LogicalDiskToPartition.Antecedent=\"{diskDriveId}\""))
                     {
                         partition.Get();
-                        string partitionDeviceId = partition["Dependent"].ToString();
+                        string? partitionDeviceId = partition["Dependent"]?.ToString();
+                        if (string.IsNullOrWhiteSpace(partitionDeviceId))
+                            return false;
 
                         using (ManagementObject physicalDisk = new ManagementObject(
                             $"Win32_DiskDrive.DeviceID=\"{partitionDeviceId}\""))

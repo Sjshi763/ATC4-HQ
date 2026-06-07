@@ -95,9 +95,7 @@ namespace ATC4_HQ.Views
                 LoggerHelper.LogInformation("安装游戏按钮被点击了，准备打开对话框。");
 
                 var dialogWindow = new InstallGameDataDialogWindow();
-                // 修复 CS8604 警告：确保 owner 是可空类型或显式转换
-                Window? ownerWindow = TopLevel.GetTopLevel(this) as Window;
-                bool? dialogResult = await dialogWindow.ShowDialog<bool?>(ownerWindow);
+                bool? dialogResult = await dialogWindow.ShowDialog<bool?>(this);
 
                 // 现在获取的是 DialogResultData (JSON 字符串)
                 if (dialogResult == true && dialogWindow.DataContext is InstallGameDataViewModel dialogViewModel)
