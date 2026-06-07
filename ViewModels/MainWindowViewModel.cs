@@ -16,6 +16,8 @@ using System.IO.Compression;
 using Avalonia.Media; // 引入 IBrush
 using Avalonia.Controls; // 用于 Window 弹窗
 using ATC4_HQ.Views; // 引入 ExtractProgressWindow
+using Microsoft.Win32;
+using System.Runtime.InteropServices;
 
 namespace ATC4_HQ.ViewModels
 {
@@ -409,9 +411,10 @@ namespace ATC4_HQ.ViewModels
                     1 + // 扫描子压缩包
                     nestedArchiveEntries.Count +
                     nestedArchiveFileStepCount +
-                    1 + // 写入 GameData.ini
-                    1 + // 更新游戏列表
-                    1 + // 保存配置
+                     1 + // 安装原装日文字体
+                     1 + // 写入 GameData.ini
+                     1 + // 更新游戏列表
+                     1 + // 保存配置
                     1;  // 完成安装
 
                 int completedSteps = 0;
@@ -520,6 +523,10 @@ namespace ATC4_HQ.ViewModels
                 }
 
                 EnsureNotCancelled();
+                InstallAtc4JapaneseFonts(gameData.Path, progressViewModel);
+                AdvanceStep("正在安装原装日文字体...", "已完成原装日文字体安装步骤");
+
+                EnsureNotCancelled();
                 var gameDataIniPath = Path.Combine(gameData.Path, "GameData.ini");
                 var ini = new IniFile();
                 if (File.Exists(gameDataIniPath))
@@ -560,6 +567,92 @@ namespace ATC4_HQ.ViewModels
                 LoggerHelper.LogError($"解压失败：{ex.Message}");
             }
         }
+
+        private static void InstallAtc4JapaneseFonts(string installPath, ExtractProgressViewModel progressViewModel)
+        {
+            try
+            {
+                var fontDirectory = Path.Combine(installPath, "ATC4BKK", "COMMON", "FONT");
+                if (!Directory.Exists(fontDirectory))
+                {
+                    progressViewModel.AddLog($"未找到原装日文字体目录：{fontDirectory}");
+                    LoggerHelper.LogWarning($"未找到原装日文字体目录：{fontDirectory}");
+                    return;
+                }
+
+                var fontFiles = Directory.GetFiles(fontDirectory, "*.ttf", SearchOption.TopDirectoryOnly);
+                if (fontFiles.Length == 0)
+                {
+                    progressViewModel.AddLog($"原装日文字体目录中未找到 TTF 字体：{fontDirectory}");
+                    LoggerHelper.LogWarning($"原装日文字体目录中未找到 TTF 字体：{fontDirectory}");
+                    return;
+                }
+
+                var userFontsDirectory = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "Microsoft",
+                    "Windows",
+                    "Fonts");
+                Directory.CreateDirectory(userFontsDirectory);
+
+                using var fontsRegistryKey = Registry.CurrentUser.CreateSubKey(
+                    @"Software\Microsoft\Windows NT\CurrentVersion\Fonts");
+
+                foreach (var sourceFontPath in fontFiles)
+                {
+                    try
+                    {
+                        var fontFileName = Path.GetFileName(sourceFontPath);
+                        var targetFontPath = Path.Combine(userFontsDirectory, fontFileName);
+
+                        File.Copy(sourceFontPath, targetFontPath, overwrite: true);
+
+                        var registryValueName = $"{Path.GetFileNameWithoutExtension(fontFileName)} (TrueType)";
+                        fontsRegistryKey?.SetValue(registryValueName, targetFontPath, RegistryValueKind.String);
+
+                        AddFontResource(targetFontPath);
+                        progressViewModel.AddLog($"已安装原装日文字体：{fontFileName}");
+                        LoggerHelper.LogInformation($"已安装原装日文字体：{fontFileName}");
+                    }
+                    catch (Exception ex)
+                    {
+                        progressViewModel.AddLog($"安装字体失败：{Path.GetFileName(sourceFontPath)}，原因：{ex.Message}");
+                        LoggerHelper.LogWarning($"安装字体失败：{sourceFontPath}，原因：{ex.Message}");
+                    }
+                }
+
+                SendMessageTimeout(
+                    HWND_BROADCAST,
+                    WM_FONTCHANGE,
+                    UIntPtr.Zero,
+                    IntPtr.Zero,
+                    SMTO_ABORTIFHUNG,
+                    1000,
+                    out _);
+            }
+            catch (Exception ex)
+            {
+                progressViewModel.AddLog($"安装原装日文字体步骤失败：{ex.Message}");
+                LoggerHelper.LogWarning($"安装原装日文字体步骤失败：{ex.Message}");
+            }
+        }
+
+        [DllImport("gdi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern int AddFontResource(string lpszFilename);
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern IntPtr SendMessageTimeout(
+            IntPtr hWnd,
+            uint msg,
+            UIntPtr wParam,
+            IntPtr lParam,
+            uint fuFlags,
+            uint uTimeout,
+            out UIntPtr lpdwResult);
+
+        private static readonly IntPtr HWND_BROADCAST = new IntPtr(0xffff);
+        private const uint WM_FONTCHANGE = 0x001D;
+        private const uint SMTO_ABORTIFHUNG = 0x0002;
 
         private static List<string> GetMissingArchiveParts(string folderPath)
         {
