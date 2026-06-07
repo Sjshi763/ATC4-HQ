@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Windows.Input;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.Input;
@@ -33,8 +35,55 @@ public class GameStartOptionsViewModel : ViewModelBase
 
     private void OnLaunchLastGame()
     {
-        LoggerHelper.LogInformation("Game Start Options: 第一个按钮被点击了！尝试启动上一次游戏。");
-            
+        LoggerHelper.LogInformation("Game Start Options: 尝试启动上一次游戏。");
+
+        var game = GlobalPaths.CurrentGame;
+        if (game == null || string.IsNullOrWhiteSpace(game.Path))
+        {
+            LoggerHelper.LogWarning("未选择游戏，无法启动。");
+            return;
+        }
+
+        var gameDirectory = Path.Combine(game.Path, "ATC4BKK");
+        var executablePath = Path.Combine(gameDirectory, "AXA.exe");
+        var titleArgument = Path.Combine("TITLE", "ATC4TITLE.axa");
+        var titlePath = Path.Combine(gameDirectory, titleArgument);
+
+        if (!Directory.Exists(gameDirectory))
+        {
+            LoggerHelper.LogError($"游戏目录不存在：{gameDirectory}");
+            return;
+        }
+
+        if (!File.Exists(executablePath))
+        {
+            LoggerHelper.LogError($"启动程序不存在：{executablePath}");
+            return;
+        }
+
+        if (!File.Exists(titlePath))
+        {
+            LoggerHelper.LogError($"标题文件不存在：{titlePath}");
+            return;
+        }
+
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = executablePath,
+            Arguments = @"TITLE\ATC4TITLE.axa",
+            WorkingDirectory = gameDirectory,
+            UseShellExecute = true
+        };
+
+        try
+        {
+            Process.Start(startInfo);
+            LoggerHelper.LogInformation($"已启动游戏：{executablePath} TITLE\\ATC4TITLE.axa");
+        }
+        catch (Exception ex)
+        {
+            LoggerHelper.LogError($"启动游戏失败：{ex.Message}");
+        }
     }
 
     private void OnSelectGame()
