@@ -1,6 +1,8 @@
 using System;
 using System.Windows.Input;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.Input;
+using master.Globals;
 using Microsoft.Extensions.Logging;
 
 namespace ATC4_HQ.ViewModels;
@@ -8,6 +10,15 @@ namespace ATC4_HQ.ViewModels;
 public class GameStartOptionsViewModel : ViewModelBase
 {
     private readonly MainWindowViewModel _mainWindowViewModel;
+
+    public string CurrentGameVersionText =>
+        string.IsNullOrWhiteSpace(GlobalPaths.CurrentGame?.Name)
+            ? "未选择游戏版本"
+            : GlobalPaths.CurrentGame.Name;
+
+    public IBrush AccentBrush => _mainWindowViewModel.AccentBrush;
+
+    public IBrush AccentLightBrush => _mainWindowViewModel.AccentLightBrush;
 
     public ICommand Button1Command {  get; } // 启动上一次游戏
     public ICommand Button3Command {  get; } // 启动选择游戏
