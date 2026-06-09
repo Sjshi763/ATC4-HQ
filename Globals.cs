@@ -13,8 +13,6 @@ namespace master
         {
             public static string InitiatorProfileName = AppPaths.InitiatorProfilePath;
             public static string Version = GetAppVersion();
-            public static string? FirstRun;
-            public static string Keys = "0x5A";
             public static List<GameModel> Games = new List<GameModel>();
             public static GameModel? CurrentGame;
             public static string LogPath = AppPaths.LogDirectory;

@@ -185,29 +185,10 @@ namespace ATC4_HQ.Views
 
         private void PrimaryProfile()
         {
-            // 获取时间
             LoggerHelper.LogInformation("配置文件不存在，正在创建初始配置文件...");
-            DateTimeOffset now = DateTimeOffset.UtcNow;
-            LoggerHelper.LogDebug($"当前时间（UTC）：{now}");
-            string generalShort = now.ToString("g");
-            LoggerHelper.LogDebug($"当前时间：{generalShort}");
-
-            // 获取加密时间
-            if (!ConfigProtector.TryProtect(generalShort, out string? encryptedText, GlobalPaths.Keys))
-            {
-                LoggerHelper.LogError("加密初始配置时间失败，已取消创建初始配置文件。");
-                return;
-            }
-
-            LoggerHelper.LogDebug($"加密后的时间：{encryptedText}");
-
-            //返回值
-            GlobalPaths.FirstRun = encryptedText;
-
             LoggerHelper.LogInformation("创建初始配置文件...");
             IniFile ini = new IniFile();
             ini.SetSetting("main", "Version", GlobalPaths.Version);
-            ini.SetSetting("main", "FirstRun", GlobalPaths.FirstRun ?? string.Empty);
             LoggerHelper.LogInformation("初始配置文件已创建。");
             ini.Save(GlobalPaths.InitiatorProfileName);
         }
