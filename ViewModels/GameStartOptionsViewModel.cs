@@ -77,8 +77,20 @@ public class GameStartOptionsViewModel : ViewModelBase
 
         try
         {
-            Process.Start(startInfo);
+            var process = Process.Start(startInfo);
+            if (process == null)
+            {
+                LoggerHelper.LogError("启动游戏失败：进程为null");
+                return;
+            }
+
             LoggerHelper.LogInformation($"已启动游戏：{executablePath} TITLE\\ATC4TITLE.axa");
+
+            if (GlobalPaths.CloseLauncherOnGameStart)
+            {
+                LoggerHelper.LogInformation("启动游戏后关闭启动器设置已启用，正在关闭主窗口。");
+                _mainWindowViewModel.RequestClose();
+            }
         }
         catch (Exception ex)
         {

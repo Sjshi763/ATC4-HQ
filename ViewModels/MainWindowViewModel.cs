@@ -66,6 +66,9 @@ namespace ATC4_HQ.ViewModels
         
         // 事件：当需要关闭进度窗口时触发
         public event EventHandler? CloseProgressWindowRequested;
+
+        // 事件：当需要关闭主窗口时触发
+        public event EventHandler? CloseRequested;
         
         public ICommand StartGameCommand { get; }
         public ICommand InstallGameCommand { get; } // 用于 ViewModel 内部逻辑或未来绑定
@@ -81,6 +84,8 @@ namespace ATC4_HQ.ViewModels
             NavigateCommand = new RelayCommand<string>(OnNavigate);
             GoBackCommand = new RelayCommand(OnGoBack, () => CanGoBack);
             
+            LoadLauncherSettings();
+
             // 加载游戏列表
             LoadGamesList();
             
@@ -135,6 +140,11 @@ namespace ATC4_HQ.ViewModels
             {
                 LoggerHelper.LogWarning($"检查更新时发生异常：{ex.Message}");
             }
+        }
+
+        public void RequestClose()
+        {
+            CloseRequested?.Invoke(this, EventArgs.Empty);
         }
 
         private void OnStartGame()
@@ -790,6 +800,31 @@ namespace ATC4_HQ.ViewModels
             else
             {
                 LoggerHelper.LogInformation("配置文件不存在，游戏列表为空 喵");
+            }
+        }
+
+        private void LoadLauncherSettings()
+        {
+            var ini = new IniFile();
+            if (!File.Exists(GlobalPaths.InitiatorProfileName))
+            {
+                GlobalPaths.CloseLauncherOnGameStart = false;
+                return;
+            }
+
+            try
+            {
+                ini.Load(GlobalPaths.InitiatorProfileName);
+                GlobalPaths.CloseLauncherOnGameStart = bool.TryParse(
+                    ini.GetSetting("main", "CloseLauncherOnGameStart", "False"),
+                    out var closeLauncherOnGameStart) && closeLauncherOnGameStart;
+
+                LoggerHelper.LogInformation($"已加载启动游戏后关闭启动器设置：{GlobalPaths.CloseLauncherOnGameStart}");
+            }
+            catch (Exception ex)
+            {
+                GlobalPaths.CloseLauncherOnGameStart = false;
+                LoggerHelper.LogError($"加载启动器设置失败：{ex.Message}");
             }
         }
 

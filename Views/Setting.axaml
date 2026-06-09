@@ -8,7 +8,7 @@
              x:DataType="viewModels:SettingViewModel">
     <Grid Margin="5"
           ColumnDefinitions="120, 350, 50"
-          RowDefinitions="Auto,Auto,Auto"
+          RowDefinitions="Auto,Auto,Auto,Auto"
           HorizontalAlignment="Left">
         <Label Grid.Row="0" Grid.Column="0">日志</Label>
         <TextBlock Grid.Row="0" Grid.Column="1" Text="快速打开日志目录" VerticalAlignment="Center" />
@@ -21,5 +21,12 @@
         <Label Grid.Row="2" Grid.Column="0" Margin="0,6,0,0">游戏配置文件</Label>
         <TextBlock Grid.Row="2" Grid.Column="1" Text="快速打开当前游戏配置文件目录" VerticalAlignment="Center" Margin="0,6,0,0" />
         <Button Grid.Row="2" Grid.Column="2" Content="打开" Margin="5,6,0,0" Command="{Binding OpenGameConfigDirectoryCommand}"/>
+
+        <Label Grid.Row="3" Grid.Column="0" Margin="0,6,0,0">启动游戏后关闭</Label>
+        <TextBlock Grid.Row="3" Grid.Column="1" Text="游戏启动成功后自动关闭启动器" VerticalAlignment="Center" Margin="0,6,0,0" />
+        <CheckBox Grid.Row="3" Grid.Column="2"
+                  Margin="5,6,0,0"
+                  VerticalAlignment="Center"
+                  IsChecked="{Binding CloseLauncherOnGameStart}" />
     </Grid>
 </UserControl>

@@ -206,7 +206,13 @@ namespace ATC4_HQ.Views
                 viewModel.UpdateAvailable += OnUpdateAvailable;
                 viewModel.ShowProgressWindowRequested += OnShowProgressWindowRequested;
                 viewModel.CloseProgressWindowRequested += OnCloseProgressWindowRequested;
+                viewModel.CloseRequested += OnCloseRequested;
             }
+        }
+
+        private void OnCloseRequested(object? sender, EventArgs e)
+        {
+            Close();
         }
 
         private async void OnUpdateAvailable(object? sender, UpdateAvailableEventArgs e)
